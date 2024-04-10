@@ -26,7 +26,7 @@ code {
   font-size: 85%;
 }
 
-#app {
+#root {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,6 +70,14 @@ code {
   line-height: 24px;
   color: var(--ev-c-text-2);
   font-weight: 600;
+}
+
+.react {
+  background: -webkit-linear-gradient(315deg, #087ea4 55%, #7c93ee);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
 }
 
 .ts {
