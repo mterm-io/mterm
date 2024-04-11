@@ -34,7 +34,8 @@ const router = createBrowserRouter([
     children: [
       {
         path: 'settings/general',
-        element: <SettingsGeneral />
+        element: <SettingsGeneral />,
+        index: true
       },
       {
         path: 'settings/theme',
