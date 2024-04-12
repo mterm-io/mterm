@@ -1,11 +1,56 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu, Tray } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
-import Platform from './window/platform'
-import Runner from './window/runner'
 
-function createWindow(): void {
-  Runner()
-  Platform()
+import icon from '../../resources/icon.png?asset'
+
+import { PlatformWindow } from './window/windows/platform'
+import { RunnerWindow } from './window/windows/runner'
+
+const runner = new RunnerWindow(icon, {
+  width: 1800,
+  height: 600,
+  transparent: true,
+  frame: false
+})
+
+const platform = new PlatformWindow(icon, {
+  width: 600,
+  height: 600
+})
+
+async function createWindow(): Promise<void> {
+  await runner.init('', true)
+  await platform.init('settings')
+}
+
+function createTray(): void {
+  const tray = new Tray(icon)
+
+  if (process.platform === 'win32') {
+    tray.on('right-click', () => tray.popUpContextMenu())
+  }
+  const menu = Menu.buildFromTemplate([
+    {
+      label: 'Exit',
+      click(): void {
+        app.quit()
+      }
+    },
+    {
+      label: 'Settings',
+      click(): void {
+        runner.hide()
+        platform.open('settings')
+      }
+    },
+    {
+      label: 'Help',
+      click(): void {}
+    }
+  ])
+
+  tray.setToolTip('MTERM')
+  tray.setContextMenu(menu)
 }
 
 // This method will be called when Electron has finished
@@ -26,6 +71,7 @@ app.whenReady().then(() => {
   ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
+  createTray()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
