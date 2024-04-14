@@ -12,6 +12,7 @@ import Settings from './routes/settings/settings'
 import Store from './routes/store'
 import SettingsGeneral from './routes/settings/settings-general'
 import SettingsTheme from './routes/settings/settings-theme'
+import ErrorRuntimePage from './error-runtime'
 
 const router = createBrowserRouter([
   {
@@ -28,17 +29,21 @@ const router = createBrowserRouter([
     element: <Store />
   },
   {
+    path: '/error',
+    element: <ErrorRuntimePage />
+  },
+  {
     path: '/settings',
     element: <Settings />,
     errorElement: <ErrorPage />,
     children: [
       {
-        path: 'settings/general',
+        path: 'general',
         element: <SettingsGeneral />,
         index: true
       },
       {
-        path: 'settings/theme',
+        path: 'theme',
         element: <SettingsTheme />
       }
     ]

@@ -1,5 +1,6 @@
 import { useRouteError } from 'react-router-dom'
 import { ReactElement } from 'react'
+
 const hasStatusText = (value: unknown): value is { statusText: string } => {
   return typeof value === 'object' && value !== null && 'statusText' in value
 }
@@ -8,7 +9,6 @@ const hasErrorMessage = (value: unknown): value is { errorMessage: string } => {
 }
 export default function ErrorPage(): ReactElement {
   const error = useRouteError()
-
   console.error(error)
 
   const errorMessage: string = hasStatusText(error)

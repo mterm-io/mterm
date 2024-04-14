@@ -23,12 +23,17 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
-    "electron-updater": "^6.1.7"
+    "electron-updater": "^6.1.7",
+    "fs-extra": "^11.2.0",
+    "lodash": "^4.17.21",
+    "stack-trace": "^1.0.0-pre2"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
     "@electron-toolkit/eslint-config-ts": "^1.0.1",
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/lodash": "^4.17.0",
     "@types/node": "^18.19.9",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",

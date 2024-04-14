@@ -5,6 +5,11 @@ import icon from '../../resources/icon.png?asset'
 
 import { PlatformWindow } from './window/windows/platform'
 import { RunnerWindow } from './window/windows/runner'
+import { Workspace } from '../framework/workspace'
+
+import { DEFAULT_SETTINGS, DEFAULT_WORKSPACE } from '../constants'
+import { ErrorModal } from './window/windows/error-modal'
+import { MTermWindow } from './window/window'
 
 const runner = new RunnerWindow(icon, {
   width: 1800,
@@ -18,7 +23,18 @@ const platform = new PlatformWindow(icon, {
   height: 600
 })
 
-async function createWindow(): Promise<void> {
+const errorModal = new ErrorModal(icon, {
+  width: 600,
+  height: 600
+})
+
+const workspace = new Workspace(DEFAULT_WORKSPACE, DEFAULT_SETTINGS)
+
+async function createErrorWindow(): Promise<void> {
+  await errorModal.init('error')
+}
+
+async function createProgramWindows(): Promise<void> {
   await runner.init('', true)
   await platform.init('store')
 }
@@ -59,6 +75,12 @@ function createTray(): void {
         platform.open('store')
       }
     },
+    {
+      label: 'Workspace',
+      async click(): Promise<void> {
+        await shell.openPath(workspace.folder)
+      }
+    },
     { type: 'separator' },
     {
       label: 'Help',
@@ -93,7 +115,7 @@ function createTray(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -105,15 +127,42 @@ app.whenReady().then(() => {
   })
 
   // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.on('open.workspace', async () => {
+    await shell.openPath(workspace.folder)
+  })
 
-  createWindow()
+  ipcMain.on('system.exit', () => app.quit())
+
+  await createErrorWindow()
+
+  try {
+    await workspace.load()
+    /**
+     * Pass settings to windows
+     */
+    const windows: MTermWindow[] = [runner, platform, errorModal]
+
+    for (const window of windows) {
+      await window.onLoad(workspace.settings, window.options)
+    }
+
+    await createProgramWindows()
+  } catch (e) {
+    /**
+     * Something catastrophic happened. Show error window and stop this loading
+     */
+    console.error(e)
+
+    await errorModal.showError(e)
+    return
+  }
+
   createTray()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) createProgramWindows()
   })
 })
 

@@ -1,10 +1,11 @@
 import { BrowserWindow, BrowserWindowConstructorOptions, shell } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
+import { Settings } from '../../framework/settings'
 
-export class MTermWindow {
+export abstract class MTermWindow {
   private window?: BrowserWindow
-  private readonly options: BrowserWindowConstructorOptions
+  public options: BrowserWindowConstructorOptions
 
   constructor(icon: string, options: Partial<BrowserWindowConstructorOptions> = {}) {
     this.options = {
@@ -22,6 +23,11 @@ export class MTermWindow {
       }
     }
   }
+
+  abstract onLoad(
+    settings?: Settings,
+    options?: BrowserWindowConstructorOptions
+  ): Promise<void> | void
 
   show(): void {
     this.window?.show()
