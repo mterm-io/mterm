@@ -23,6 +23,11 @@ export class MTermWindow {
     }
   }
 
+  show(): void {
+    this.window?.show()
+    this.window?.focus()
+  }
+
   hide(): void {
     this.window?.hide()
   }

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, Tray } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu, shell, Tray } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 
 import icon from '../../resources/icon.png?asset'
@@ -20,7 +20,7 @@ const platform = new PlatformWindow(icon, {
 
 async function createWindow(): Promise<void> {
   await runner.init('', true)
-  await platform.init('settings')
+  await platform.init('store')
 }
 
 function createTray(): void {
@@ -31,21 +31,58 @@ function createTray(): void {
   }
   const menu = Menu.buildFromTemplate([
     {
+      label: 'Open Terminal',
+      click(): void {
+        runner.show()
+        runner.open('')
+      }
+    },
+    {
+      label: 'Hide Terminal',
+      click(): void {
+        runner.hide()
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Settings',
+      click(): void {
+        platform.hide()
+        runner.show()
+        runner.open('settings/general')
+      }
+    },
+    {
+      label: 'Secrets',
+      click(): void {
+        runner.hide()
+        platform.open('store')
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'Learn More',
+          click: async (): Promise<void> => {
+            await shell.openExternal('https://mterm.io?open=help.learn')
+          }
+        },
+        {
+          label: 'Documentation',
+          click: async (): Promise<void> => {
+            await shell.openExternal('https://mterm.io?open=help.docs')
+          }
+        }
+      ]
+    },
+    { type: 'separator' },
+    {
       label: 'Exit',
       click(): void {
         app.quit()
       }
-    },
-    {
-      label: 'Settings',
-      click(): void {
-        runner.hide()
-        platform.open('settings')
-      }
-    },
-    {
-      label: 'Help',
-      click(): void {}
     }
   ])
 
