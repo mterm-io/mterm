@@ -1,4 +1,4 @@
-import { MTermWindow } from '../window'
+import { MTermWindow } from '../mterm-window'
 
 const hasStatusText = (value: unknown): value is { statusText: string } => {
   return typeof value === 'object' && value !== null && 'statusText' in value

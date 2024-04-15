@@ -1,4 +1,4 @@
-import { MTermWindow } from '../window'
+import { MTermWindow } from '../mterm-window'
 
 export class PlatformWindow extends MTermWindow {
   onLoad(): void {

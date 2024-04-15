@@ -1,4 +1,4 @@
-import { MTermWindow } from '../window'
+import { MTermWindow } from '../mterm-window'
 import { Settings } from '../../../framework/settings'
 import { BrowserWindowConstructorOptions } from 'electron'
 

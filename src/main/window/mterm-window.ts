@@ -4,10 +4,16 @@ import { is } from '@electron-toolkit/utils'
 import { Settings } from '../../framework/settings'
 
 export abstract class MTermWindow {
-  private window?: BrowserWindow
+  public browserWindow?: BrowserWindow
   public options: BrowserWindowConstructorOptions
+  public path?: string = undefined
 
-  constructor(icon: string, options: Partial<BrowserWindowConstructorOptions> = {}) {
+  constructor(
+    icon: string,
+    options: Partial<BrowserWindowConstructorOptions> = {},
+    public defaultPath: string,
+    public defaultShow: boolean
+  ) {
     this.options = {
       width: 1800,
       height: 400,
@@ -30,26 +36,26 @@ export abstract class MTermWindow {
   ): Promise<void> | void
 
   show(): void {
-    this.window?.show()
-    this.window?.focus()
+    this.browserWindow?.show()
+    this.browserWindow?.focus()
   }
 
   hide(): void {
-    this.window?.hide()
+    this.browserWindow?.hide()
   }
 
-  init(path: string = '', show: boolean = false): Promise<void> {
+  init(path: string = this.defaultPath, show: boolean = this.defaultShow): Promise<void> {
     const window = new BrowserWindow(this.options)
 
-    this.window = window
+    this.browserWindow = window
 
     if (show) {
-      this.window.on('ready-to-show', () => {
+      this.browserWindow.on('ready-to-show', () => {
         window.show()
       })
     }
 
-    this.window.webContents.setWindowOpenHandler((details) => {
+    this.browserWindow.webContents.setWindowOpenHandler((details) => {
       shell.openExternal(details.url)
       return { action: 'deny' }
     })
@@ -58,17 +64,24 @@ export abstract class MTermWindow {
   }
 
   async open(path: string = '', show: boolean = true): Promise<void> {
+    const isAlreadyOnPath = this.path !== undefined && this.path === path
+
+    // don't reload the page
+    this.path = path
+
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.
-    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-      await this.window?.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/${path}`)
-    } else {
-      await this.window?.loadFile(`${join(__dirname, '../renderer/index.html')}/${path}`)
+    if (!isAlreadyOnPath) {
+      if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+        await this.browserWindow?.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/${path}`)
+      } else {
+        await this.browserWindow?.loadFile(`${join(__dirname, '../renderer/index.html')}/${path}`)
+      }
     }
 
     if (show) {
-      this.window?.show()
-      this.window?.focus()
+      this.browserWindow?.show()
+      this.browserWindow?.focus()
     }
   }
 }
