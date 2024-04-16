@@ -94,17 +94,30 @@ export class Workspace {
       }
     }
   }
-  async applySettings(): Promise<void> {
+  /**
+   * Applies the updated settings to all the windows in the workspace.
+   *
+   * @returns {Promise<void>} A promise that resolves when the settings have been applied.
+   */
+  async applySettings(ctor?: typeof MTermWindow): Promise<void> {
     for (const currentWindow of this.windows) {
+      if (ctor && ctor.prototype !== Object.getPrototypeOf(currentWindow)) {
+        // target only the window provided
+        // OR target all windows when not provided
+        continue
+      }
+
       const options = currentWindow.options
       const currentBrowserWindow = currentWindow.browserWindow
       if (currentBrowserWindow === undefined) {
         return
       }
 
+      // Get the current position and size of the browser window
       const [currentX, currentY] = currentBrowserWindow.getPosition()
       const [currentW, currentH] = currentBrowserWindow.getSize()
 
+      // Create an object to hold the pending changes to the window options
       const pending: Partial<BrowserWindowConstructorOptions> = {
         x: currentX,
         y: currentY,
@@ -112,34 +125,39 @@ export class Workspace {
         height: currentH
       }
 
-      const valuePairNames = ['x', 'y', 'width', 'height']
+      // Define the names of the window options that require recreation if changed
       const valueRecreateNames = ['frame', 'transparent']
+      // Define the names of the window options that should not apply right away (aka pairs e.g: width+height)
+      const valuePairNames = ['x', 'y', 'width', 'height']
 
-      let isRecreateRequired = false
-
+      // Create a proxy handler for the window options
       const handler: ProxyHandler<BrowserWindowConstructorOptions> = {
-        set(
-          target: BrowserWindowConstructorOptions,
-          prop: string | symbol,
-          newValue,
-          receiver
-        ): boolean {
+        set(target, prop, newValue, receiver) {
           const priorValue = receiver[prop]
           const isValueFromPair = valuePairNames.includes(prop.toString())
           const set = Reflect.set(target, prop, newValue, receiver)
 
+          // If the value hasn't changed, and it's not a value pair, return early
+          // If this is a value pair and the value hasn't changed, we might see the other value in
+          //   the pair change, for example when width is set to 100% of the screen but height
+          //   remains the same. continue always for pairs
           if (!isValueFromPair && priorValue === newValue) {
             return set
           }
 
+          // If the changed option requires recreation, set the flag on the receiver
+          // these properties can not be set on BrowserWindow, so window must be recreated
           if (valueRecreateNames.includes(prop.toString())) {
-            isRecreateRequired = true
+            receiver.isRecreateRequired = true
             return set
           }
 
+          // If it's a value pair, add the change to the pending object
           if (isValueFromPair) {
             pending[prop] = newValue
-          } else if (!isRecreateRequired) {
+          } else if (!receiver.isRecreateRequired && prop !== 'isRecreateRequired') {
+            // If recreation is not required and the property is not "isRecreateRequired",
+            // apply the change directly to the browser window
             setWindowValueFromPath(currentBrowserWindow, prop.toString(), newValue)
           }
 
@@ -147,15 +165,19 @@ export class Workspace {
         }
       }
 
+      // Create a proxy for the window options with the custom handler
       const proxy = new Proxy(options, handler)
+      proxy['isRecreateRequired'] = false
 
+      // Allow the current window to make changes before initialization
       await currentWindow.preInitChanges(this.settings, proxy)
 
-      if (isRecreateRequired) {
+      if (proxy['isRecreateRequired']) {
+        // If recreation is required, recreate the window and focus it
         await currentWindow.recreate(this)
-
         currentWindow.browserWindow?.focus()
       } else {
+        // If recreation is not required, apply the pending size and position changes
         currentBrowserWindow.setSize(pending.width ?? currentW, pending.height ?? currentH)
         currentBrowserWindow.setPosition(pending.x ?? currentX, pending.y ?? currentY)
       }

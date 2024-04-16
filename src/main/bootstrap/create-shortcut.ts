@@ -24,6 +24,6 @@ export function createShortcut(context: BootstrapContext): void {
       (isCommanderMode) => !isCommanderMode
     )
 
-    await context.workspace.applySettings()
+    await context.workspace.applySettings(RunnerWindow)
   })
 }
