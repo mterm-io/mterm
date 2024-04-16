@@ -22,7 +22,8 @@ export class Settings {
 
   get<T>(key: string, orElse: T): T {
     const value = getFromPath(this.properties, key)
-    if (!value) {
+
+    if (value === undefined) {
       return orElse
     }
 

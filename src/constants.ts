@@ -11,9 +11,9 @@ export const DEFAULT_SETTING_COMMANDER_MODE_BOUNDS = {
 
 export const DEFAULT_SETTING_RUNNER_BOUNDS = {
   screen: 'PRIMARY',
-  x: 0,
+  x: 'SCREEN:-.5',
   y: 'SCREEN:-.5',
-  w: 'SCREEN',
+  w: 720,
   h: 500
 }
 export const DEFAULT_SETTINGS = {

@@ -40,25 +40,3 @@ export function getDisplay(bounds: RunnerBounds): Display {
 
   return screen.getPrimaryDisplay()
 }
-
-export function getBounds(
-  bounds: RunnerBounds,
-  commanderMode: boolean,
-  commanderModeBounds: RunnerBounds
-): ComputedBounds {
-  const boundary = commanderMode ? commanderModeBounds : bounds
-  const display = getDisplay(boundary)
-
-  const x = getBoundaryValue(boundary.x, display.size.width, boundary.w)
-  const y = getBoundaryValue(boundary.y, display.size.height, boundary.h)
-
-  const w = getBoundaryValue(boundary.w, display.size.width, boundary.w)
-  const h = getBoundaryValue(boundary.h, display.size.height, boundary.h)
-
-  return {
-    x,
-    y,
-    w,
-    h
-  }
-}

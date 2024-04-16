@@ -1,28 +1,15 @@
 import { MTermWindow } from '../mterm-window'
 import { Settings } from '../../../framework/settings'
-import { BrowserWindow, BrowserWindowConstructorOptions, screen, Display } from 'electron'
+import { BrowserWindow, BrowserWindowConstructorOptions } from 'electron'
 import {
   DEFAULT_SETTING_COMMANDER_MODE_BOUNDS,
   DEFAULT_SETTING_IS_COMMANDER_MODE,
   DEFAULT_SETTING_RUNNER_BOUNDS
 } from '../../../constants'
-import { ComputedBounds, RunnerBounds } from '../../model'
-import { getBounds } from '../../util'
+import { RunnerBounds } from '../../model'
+import { getBoundaryValue, getDisplay } from '../../util'
 
 export class RunnerWindow extends MTermWindow {
-  static getDisplay(bounds: RunnerBounds): Display {
-    const boundsScreen = bounds.screen
-    if (typeof boundsScreen === 'string') {
-      return screen.getPrimaryDisplay()
-    }
-    const displays = screen.getAllDisplays()
-    if (boundsScreen > 0 && boundsScreen <= displays.length - 1) {
-      return displays[boundsScreen]
-    }
-
-    return screen.getPrimaryDisplay()
-  }
-
   preInitChanges(settings: Settings, options: BrowserWindowConstructorOptions): void {
     const bounds = settings.get<RunnerBounds>('runner.bounds', DEFAULT_SETTING_RUNNER_BOUNDS)
 
@@ -36,7 +23,16 @@ export class RunnerWindow extends MTermWindow {
       DEFAULT_SETTING_COMMANDER_MODE_BOUNDS
     )
 
-    const { x, y, w, h } = getBounds(bounds, isCommanderMode, commanderModeBounds)
+    console.log(isCommanderMode)
+
+    const boundary = isCommanderMode ? commanderModeBounds : bounds
+    const display = getDisplay(boundary)
+
+    const x = getBoundaryValue(boundary.x, display.size.width, boundary.w)
+    const y = getBoundaryValue(boundary.y, display.size.height, boundary.h)
+
+    const w = getBoundaryValue(boundary.w, display.size.width, boundary.w)
+    const h = getBoundaryValue(boundary.h, display.size.height, boundary.h)
 
     options.x = x
     options.y = y
