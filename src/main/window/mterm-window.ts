@@ -30,10 +30,12 @@ export abstract class MTermWindow {
     }
   }
 
-  abstract onLoad(
+  abstract preInitChanges(
     settings?: Settings,
     options?: BrowserWindowConstructorOptions
   ): Promise<void> | void
+
+  abstract postInitChanges(settings?: Settings, win?: BrowserWindow): Promise<void> | void
 
   show(): void {
     this.browserWindow?.show()

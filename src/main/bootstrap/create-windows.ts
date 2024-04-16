@@ -8,14 +8,17 @@ export async function createWindows(context: BootstrapContext): Promise<void> {
 
     context.workspace.addWindowToContext(window)
 
-    await window.onLoad(context.workspace.settings, window.options)
+    await window.preInitChanges(context.workspace.settings, window.options)
 
     await window.init()
+
+    await window.postInitChanges(context.workspace.settings, window.browserWindow)
 
     window.browserWindow?.on('close', function (evt) {
       if (!context.workspace.isAppQuiting) {
         evt.preventDefault()
       }
+      window.hide()
     })
   }
 }

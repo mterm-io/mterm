@@ -7,9 +7,9 @@ const hasErrorMessage = (value: unknown): value is { message: string } => {
   return typeof value === 'object' && value !== null && 'message' in value
 }
 export class ErrorModal extends MTermWindow {
-  onLoad(): void {
-    console.log('HELLO')
-  }
+  preInitChanges(): void {}
+
+  postInitChanges(): void {}
   async showError(error: unknown): Promise<void> {
     // const st = await import('stack-trace')
     // const trace = st.get()
