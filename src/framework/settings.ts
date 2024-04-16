@@ -1,5 +1,5 @@
 import { pathExists, readJSON, writeFile } from 'fs-extra'
-import { get as getFromPath } from 'lodash'
+import { clone, get as getFromPath } from 'lodash'
 
 export class Settings {
   private properties: object = {}
@@ -14,7 +14,7 @@ export class Settings {
 
       await writeFile(this.location, prettyJSON, 'utf-8')
 
-      this.properties = this.defaultSettings
+      this.properties = clone(this.defaultSettings)
     } else {
       this.properties = await readJSON(this.location)
     }
