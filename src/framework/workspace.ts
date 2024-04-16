@@ -19,7 +19,7 @@ export class Workspace {
     this.folder = this.folder.replace('~', homedir())
     this.folder = resolve(this.folder)
 
-    this.settings = new Settings(join(folder, 'settings.json'), defaultSettings)
+    this.settings = new Settings(join(this.folder, 'settings.json'), defaultSettings)
   }
 
   hasWindowReady(window: MTermWindow): boolean {
