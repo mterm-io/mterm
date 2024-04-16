@@ -24,6 +24,10 @@ export function createShortcut(context: BootstrapContext): void {
       (isCommanderMode) => !isCommanderMode
     )
 
+    // TODO: set commander pane to current display
+    // const winBounds = win.getBounds();
+    // const distScreen = screen.getDisplayNearestPoint({x: winBounds.x, y: winBounds.y})
+
     await context.workspace.applySettings(RunnerWindow)
   })
 }
