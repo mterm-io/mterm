@@ -32,8 +32,8 @@ export class RunnerWindow extends MTermWindow {
     const w = getBoundaryValue(boundary.w, display.size.width, boundary.w)
     const h = getBoundaryValue(boundary.h, display.size.height, boundary.h)
 
-    options.x = x
-    options.y = y
+    options.x = display.bounds.x + x
+    options.y = display.bounds.y + y
 
     options.width = w
     options.height = h

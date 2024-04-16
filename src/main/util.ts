@@ -35,7 +35,8 @@ export function getDisplay(bounds: RunnerBounds): Display {
     return screen.getPrimaryDisplay()
   }
   const displays = screen.getAllDisplays()
-  if (boundsScreen > 0 && boundsScreen <= displays.length - 1) {
+
+  if (boundsScreen >= 0 && boundsScreen <= displays.length - 1) {
     return displays[boundsScreen]
   }
 
