@@ -1,6 +1,7 @@
 import { toNumber } from 'lodash'
-import { ComputedBounds, RunnerBounds } from './model'
-import { Display, screen } from 'electron'
+import { RunnerBounds } from './model'
+import { BrowserWindow, Display, screen } from 'electron'
+
 export function getBoundaryValue(
   value: string | number,
   containerLength: number,
@@ -39,4 +40,32 @@ export function getDisplay(bounds: RunnerBounds): Display {
   }
 
   return screen.getPrimaryDisplay()
+}
+
+export function setWindowValueFromPath(window: BrowserWindow, prop: string, value): void {
+  switch (prop) {
+    case 'skipTaskbar':
+      window.setSkipTaskbar(value)
+      break
+    case 'titleBarOverlay':
+      window.setTitleBarOverlay(value)
+      break
+    case 'movable':
+      window.setMovable(value)
+      break
+    case 'alwaysOnTop':
+      window.setAlwaysOnTop(value)
+
+      if (value) {
+        window.show()
+        window.focus()
+      }
+      break
+    case 'maximizable':
+      window.setMaximizable(value)
+      break
+    default:
+      console.error('No handler for = ', prop)
+      break
+  }
 }

@@ -4,6 +4,8 @@ import { mkdirs, pathExists } from 'fs-extra'
 import { homedir } from 'node:os'
 import { MTermWindow } from '../main/window/mterm-window'
 import { remove } from 'lodash'
+import { BrowserWindowConstructorOptions } from 'electron'
+import { setWindowValueFromPath } from '../main/util'
 
 export class Workspace {
   public settings: Settings
@@ -77,6 +79,85 @@ export class Workspace {
     for (const currentWindow of this.windows) {
       if (ctor.prototype === Object.getPrototypeOf(currentWindow)) {
         currentWindow.hide()
+      }
+    }
+  }
+
+  toggle(ctor: typeof MTermWindow): void {
+    for (const currentWindow of this.windows) {
+      if (ctor.prototype === Object.getPrototypeOf(currentWindow)) {
+        if (currentWindow.browserWindow?.isVisible()) {
+          currentWindow.hide()
+        } else {
+          currentWindow.show()
+        }
+      }
+    }
+  }
+  async applySettings(): Promise<void> {
+    for (const currentWindow of this.windows) {
+      const options = currentWindow.options
+      const currentBrowserWindow = currentWindow.browserWindow
+      if (currentBrowserWindow === undefined) {
+        return
+      }
+
+      const [currentX, currentY] = currentBrowserWindow.getPosition()
+      const [currentW, currentH] = currentBrowserWindow.getSize()
+
+      const pending: Partial<BrowserWindowConstructorOptions> = {
+        x: currentX,
+        y: currentY,
+        width: currentW,
+        height: currentH
+      }
+
+      const valuePairNames = ['x', 'y', 'width', 'height']
+      const valueRecreateNames = ['frame', 'transparent']
+
+      let isRecreateRequired = false
+
+      const handler: ProxyHandler<BrowserWindowConstructorOptions> = {
+        set(
+          target: BrowserWindowConstructorOptions,
+          prop: string | symbol,
+          newValue,
+          receiver
+        ): boolean {
+          const priorValue = receiver[prop]
+          const isValueFromPair = valuePairNames.includes(prop.toString())
+          const set = Reflect.set(target, prop, newValue, receiver)
+
+          if (!isValueFromPair && priorValue === newValue) {
+            return set
+          }
+
+          if (valueRecreateNames.includes(prop.toString())) {
+            isRecreateRequired = true
+            return set
+          }
+
+          if (isValueFromPair) {
+            pending[prop] = newValue
+          } else if (!isRecreateRequired) {
+            setWindowValueFromPath(currentBrowserWindow, prop.toString(), newValue)
+          }
+
+          return set
+        }
+      }
+
+      const proxy = new Proxy(options, handler)
+
+      await currentWindow.preInitChanges(this.settings, proxy)
+
+      if (isRecreateRequired) {
+        await currentWindow.recreate(this)
+
+        currentWindow.browserWindow?.focus()
+      } else {
+        currentBrowserWindow.setSize(pending.width ?? currentW, pending.height ?? currentH)
+        currentBrowserWindow.setPosition(pending.x ?? currentX, pending.y ?? currentY)
       }
     }
   }

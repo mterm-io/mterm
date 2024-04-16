@@ -2,6 +2,8 @@ import { BrowserWindow, BrowserWindowConstructorOptions, shell } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import { Settings } from '../../framework/settings'
+import { attachBrowserWindowListeners } from '../bootstrap/create-windows'
+import { Workspace } from '../../framework/workspace'
 
 export abstract class MTermWindow {
   public browserWindow?: BrowserWindow
@@ -21,6 +23,7 @@ export abstract class MTermWindow {
       frame: true,
       show: false,
       autoHideMenuBar: true,
+      maximizable: true,
       icon,
       ...options,
       webPreferences: {
@@ -44,6 +47,14 @@ export abstract class MTermWindow {
 
   hide(): void {
     this.browserWindow?.hide()
+  }
+
+  async recreate(workspace: Workspace): Promise<void> {
+    this.path = undefined
+    this.browserWindow?.destroy()
+    await this.init()
+
+    attachBrowserWindowListeners(this, workspace)
   }
 
   init(path: string = this.defaultPath, show: boolean = this.defaultShow): Promise<void> {

@@ -23,8 +23,6 @@ export class RunnerWindow extends MTermWindow {
       DEFAULT_SETTING_COMMANDER_MODE_BOUNDS
     )
 
-    console.log(isCommanderMode)
-
     const boundary = isCommanderMode ? commanderModeBounds : bounds
     const display = getDisplay(boundary)
 
@@ -36,13 +34,17 @@ export class RunnerWindow extends MTermWindow {
 
     options.x = x
     options.y = y
+
     options.width = w
     options.height = h
 
     options.skipTaskbar = isCommanderMode
+    options.transparent = isCommanderMode
+    options.alwaysOnTop = isCommanderMode
+
     options.frame = !isCommanderMode
     options.movable = !isCommanderMode
-    options.alwaysOnTop = true
+    options.maximizable = !isCommanderMode
   }
 
   postInitChanges(settings: Settings, window: BrowserWindow): void {

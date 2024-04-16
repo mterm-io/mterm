@@ -5,6 +5,7 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createWindows } from './create-windows'
 import { ErrorModal } from '../window/windows/error-modal'
 import { createTray } from './create-tray'
+import { createShortcut } from './create-shortcut'
 
 export interface BootstrapContext {
   app: App
@@ -43,6 +44,8 @@ export async function boostrap(context: BootstrapContext): Promise<void> {
 
     await createWindows(context)
     await createTray(context)
+
+    createShortcut(context)
   } catch (e) {
     console.error(e)
 

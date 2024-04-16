@@ -1,12 +1,35 @@
 import { pathExists, readJSON, writeFile } from 'fs-extra'
-import { clone, get as getFromPath } from 'lodash'
+import { clone, get as getFromPath, merge, set as setFromPath } from 'lodash'
+
+export type SettingOverride<T> = ((priorValue: T) => T) | T
+function isSettingOverrideFunction<T>(value: SettingOverride<T>): boolean {
+  return typeof value === 'function'
+}
 
 export class Settings {
   private properties: object = {}
+  private overrides: object = {}
   constructor(
     private location: string,
     private defaultSettings: object
   ) {}
+
+  value<T>(path: string): T {
+    const props = merge({}, this.properties, this.overrides)
+    return getFromPath(props, path)
+  }
+  override<T>(path: string, value: SettingOverride<T>): void {
+    if (isSettingOverrideFunction(value)) {
+      const priorValue = this.value<T>(path)
+      const invokableFunction = value as (priorValue: T) => T
+
+      const override = invokableFunction(priorValue)
+
+      setFromPath(this.overrides, path, override)
+    } else {
+      setFromPath(this.overrides, path, value)
+    }
+  }
   async load(): Promise<void> {
     const isExist = await pathExists(this.location)
     if (!isExist) {
@@ -21,7 +44,7 @@ export class Settings {
   }
 
   get<T>(key: string, orElse: T): T {
-    const value = getFromPath(this.properties, key)
+    const value = this.value<T>(key)
 
     if (value === undefined) {
       return orElse
