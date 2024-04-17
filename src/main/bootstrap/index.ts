@@ -1,11 +1,12 @@
 import { MTermWindow } from '../window/mterm-window'
-import { App, BrowserWindow, ipcMain, shell } from 'electron'
+import { App, BrowserWindow } from 'electron'
 import { Workspace } from '../../framework/workspace'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createWindows } from './create-windows'
 import { ErrorModal } from '../window/windows/error-modal'
 import { createTray } from './create-tray'
 import { createShortcut } from './create-shortcut'
+import { attach } from '../../framework/events'
 
 export interface BootstrapContext {
   app: App
@@ -33,11 +34,7 @@ export async function boostrap(context: BootstrapContext): Promise<void> {
     }
   })
 
-  ipcMain.on('open.workspace', async () => {
-    await shell.openPath(workspace.folder)
-  })
-
-  ipcMain.on('system.exit', () => app.quit())
+  attach(context)
 
   try {
     await workspace.load()

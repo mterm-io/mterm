@@ -6,11 +6,14 @@ import { MTermWindow } from '../main/window/mterm-window'
 import { remove } from 'lodash'
 import { BrowserWindowConstructorOptions } from 'electron'
 import { setWindowValueFromPath } from '../main/util'
+import { Runtime } from './runtime'
 
 export class Workspace {
   public settings: Settings
   public isAppQuiting: boolean = false
   public windows: MTermWindow[] = []
+  public runtimes: Runtime[] = []
+  public runtimeIndex: number = 0
   constructor(
     public folder: string,
     defaultSettings: object
@@ -22,6 +25,10 @@ export class Workspace {
     this.folder = resolve(this.folder)
 
     this.settings = new Settings(join(this.folder, 'settings.json'), defaultSettings)
+  }
+
+  get runtime(): Runtime {
+    return this.runtimes[this.runtimeIndex]
   }
 
   hasWindowReady(window: MTermWindow): boolean {
@@ -45,6 +52,14 @@ export class Workspace {
     }
 
     await this.settings.load()
+
+    /**
+     * Load an initial index
+     */
+    if (this.runtimes.length === 0) {
+      this.runtimes.push(new Runtime())
+      this.runtimeIndex = 0
+    }
 
     return this
   }
