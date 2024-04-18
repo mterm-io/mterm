@@ -60,6 +60,10 @@ export default function Runner(): ReactElement {
     })
   }
 
+  const onHistoryItemClicked = (historyIndex: number): void => {
+    setHistoryIndex(historyIndex)
+  }
+
   const handleKeyDown = (e): void => {
     if (e.key === 'Enter') {
       execute().catch((error) => console.error(error))
@@ -76,8 +80,6 @@ export default function Runner(): ReactElement {
         setHistoryIndex((historyIndex) => historyIndex - 1)
       }
     }
-
-    console.log(e)
   }
 
   useEffect(() => {
@@ -126,6 +128,7 @@ export default function Runner(): ReactElement {
               <div
                 key={index}
                 className={`runner-history-item ${historyIndex === index ? 'runner-history-selected' : undefined}`}
+                onClick={() => onHistoryItemClicked(index)}
               >
                 {command.prompt}
               </div>
