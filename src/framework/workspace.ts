@@ -68,12 +68,17 @@ export class Workspace {
       const defaultFolder = this.settings.get<string>('folder', DEFAULT_FOLDER)
 
       this.runtimes.push(new Runtime(defaultFolder))
-      this.runtimes.push(new Runtime(defaultFolder))
 
       this.runtimeIndex = 0
     }
 
     return this
+  }
+
+  addRuntime(): void {
+    const defaultFolder = this.settings.get<string>('folder', DEFAULT_FOLDER)
+
+    this.runtimes.push(new Runtime(defaultFolder))
   }
 
   addWindowToContext(window: MTermWindow): void {

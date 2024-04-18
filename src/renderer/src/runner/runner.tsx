@@ -59,6 +59,11 @@ export default function Runner(): ReactElement {
       ]
     })
   }
+  const onAddRuntimeClick = (): void => {
+    window.electron.ipcRenderer.invoke('runtimes.add').then((runtimes: Runtime[]) => {
+      setRuntimes(runtimes)
+    })
+  }
 
   const onHistoryItemClicked = (historyIndex: number): void => {
     setHistoryIndex(historyIndex)
@@ -103,7 +108,9 @@ export default function Runner(): ReactElement {
               <div>{runtime.appearance.title}</div>
             </div>
           ))}
-          <div className="runner-spacer">+</div>
+          <div className="runner-spacer" onClick={onAddRuntimeClick}>
+            +
+          </div>
         </div>
         <div className="runner-main">
           <div className="runner-input-container">

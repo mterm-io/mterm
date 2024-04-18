@@ -1,9 +1,21 @@
 import { ipcMain, shell } from 'electron'
 import { BootstrapContext } from '../main/bootstrap'
-import { Command, RuntimeModel } from './runtime'
+import { Command, Runtime, RuntimeModel } from './runtime'
 import short from 'short-uuid'
 
 export function attach({ app, workspace }: BootstrapContext): void {
+  const runtimeList = (): RuntimeModel[] => {
+    return workspace.runtimes.map((runtime, index) => {
+      return {
+        target: index === workspace.runtimeIndex,
+        ...runtime,
+        appearance: {
+          ...runtime.appearance,
+          title: runtime.appearance.title.replace('$idx', `${index}`)
+        }
+      }
+    })
+  }
   ipcMain.on('open.workspace', async () => {
     await shell.openPath(workspace.folder)
   })
@@ -17,6 +29,12 @@ export function attach({ app, workspace }: BootstrapContext): void {
   })
   ipcMain.on('runtime.index', (_, value: number) => {
     workspace.runtimeIndex = value
+  })
+
+  ipcMain.handle('runtimes.add', async (): Promise<RuntimeModel[]> => {
+    workspace.addRuntime()
+
+    return runtimeList()
   })
 
   ipcMain.handle('runtime.execute', async (): Promise<string> => {
@@ -47,16 +65,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
   })
 
   ipcMain.handle('runtimes', async (): Promise<RuntimeModel[]> => {
-    return workspace.runtimes.map((runtime, index) => {
-      return {
-        target: index === workspace.runtimeIndex,
-        ...runtime,
-        appearance: {
-          ...runtime.appearance,
-          title: runtime.appearance.title.replace('$idx', `${index}`)
-        }
-      }
-    })
+    return runtimeList()
   })
 
   ipcMain.handle('runtimeTarget', async (): Promise<number> => {
