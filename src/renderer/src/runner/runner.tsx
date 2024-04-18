@@ -3,33 +3,68 @@ import { Runtime } from './runtime'
 
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
+  const [result, setResult] = useState<string>('_')
+  const [historyIndex, setHistoryIndex] = useState<number>(-1)
   const runtimes = async (): Promise<void> => {
     const runtimesFetch: Runtime[] = await window.electron.ipcRenderer.invoke('runtimes')
 
     setRuntimes(runtimesFetch)
   }
-  const handlePromptChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    const value = event.target.value
-
+  const setPrompt = (prompt: string): void => {
     setRuntimes((runtimes) => {
       return [
         ...runtimes.map((runtime) => ({
           ...runtime,
-          prompt: runtime.target ? value : runtime.prompt
+          prompt: runtime.target ? prompt : runtime.prompt
         }))
       ]
     })
+  }
+
+  const runtime = runtimeList.find((runtime) => runtime.target)
+  const historicalExecution = historyIndex != -1 ? runtime?.history[historyIndex] : undefined
+
+  const execute = async (): Promise<void> => {
+    const execution = window.electron.ipcRenderer.invoke('runtime.execute')
+
+    setPrompt('')
+
+    const result: string = await execution
+
+    setResult(result)
+
+    await runtimes()
+  }
+  const handlePromptChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    const value = event.target.value
+    if (runtime?.prompt !== value && historyIndex !== -1) {
+      setHistoryIndex(-1)
+    }
+
+    setPrompt(value)
 
     window.electron.ipcRenderer.send('runtime.prompt', value)
   }
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e): void => {
     if (e.key === 'Enter') {
-      console.log('do validate')
+      execute().catch((error) => console.error(error))
     }
-  }
 
-  const runtime = runtimeList.find((runtime) => runtime.target)
+    if (e.code === 'ArrowDown') {
+      if (runtime && historyIndex < runtime.history.length - 1) {
+        setHistoryIndex((historyIndex) => historyIndex + 1)
+      }
+    }
+
+    if (e.code === 'ArrowUp') {
+      if (runtime && historyIndex > -1) {
+        setHistoryIndex((historyIndex) => historyIndex - 1)
+      }
+    }
+
+    console.log(e)
+  }
 
   useEffect(() => {
     runtimes().catch((error) => console.error(error))
@@ -53,19 +88,31 @@ export default function Runner(): ReactElement {
           ))}
           <div className="runner-spacer">+</div>
         </div>
-        <div className="runner-input-container">
-          <div className="runner-input">
-            <input
-              autoFocus
-              className="runner-input-field"
-              placeholder=">"
-              onChange={handlePromptChange}
-              onKeyDown={handleKeyDown}
-              value={runtime.prompt}
-            />
+        <div className="runner-main">
+          <div className="runner-input-container">
+            <div className="runner-input">
+              <input
+                autoFocus
+                className="runner-input-field"
+                placeholder=">"
+                onChange={handlePromptChange}
+                onKeyDown={handleKeyDown}
+                value={historicalExecution ? historicalExecution.prompt : runtime.prompt}
+              />
+            </div>
+          </div>
+          <div className="runner-result">
+            {historicalExecution ? historicalExecution.result : result}
           </div>
         </div>
         <div className="runner-context">
+          <div className="runner-history">
+            {runtime.history.map((command, index) => (
+              <div>
+                {historyIndex === index ? '**' : undefined} {command.prompt}
+              </div>
+            ))}
+          </div>
           <div className="runner-context-folder">{runtime.folder}</div>
         </div>
       </div>

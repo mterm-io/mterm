@@ -88,13 +88,29 @@ body {
 
 .runner-context {
   display: grid;
-  justify-items: right;
   align-items: center;
   cursor: pointer;
-  padding-right: 20px
+  padding-right: 20px;
+  padding-left: 20px;
+  grid-auto-flow: column;
+  font-size: 70%;
+  grid-template-columns: auto 60%;
+}
+
+.runner-main {
+  display: grid;
+  align-items: center;
+  cursor: pointer;
+  grid-auto-flow: column;
+  grid-template-columns: auto 60%;
 }
 
 .runner-context-folder {
   color: #59dcec;
-  font-size: 70%
+  text-align: right;
+}
+
+.runner-history {
+  overflow-y: auto;
+  max-height: 50px;
 }

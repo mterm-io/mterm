@@ -1,3 +1,8 @@
+export interface Command {
+  result: string
+  prompt: string
+  id: string
+}
 export interface Runtime {
   prompt: string
   target: boolean
@@ -6,4 +11,5 @@ export interface Runtime {
     title: string
     icon: string
   }
+  history: Command[]
 }
