@@ -3,7 +3,7 @@ import { Runtime } from './runtime'
 
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
-  const [result, setResult] = useState<string>('_')
+  const [, setResult] = useState<string>('_')
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
   const runtimes = async (): Promise<void> => {
     const runtimesFetch: Runtime[] = await window.electron.ipcRenderer.invoke('runtimes')
@@ -46,6 +46,19 @@ export default function Runner(): ReactElement {
     window.electron.ipcRenderer.send('runtime.prompt', value)
   }
 
+  const selectRuntime = (runtimeIndex: number): void => {
+    window.electron.ipcRenderer.send('runtime.index', runtimeIndex)
+
+    setRuntimes((runtimes) => {
+      return [
+        ...runtimes.map((runtime, index) => ({
+          ...runtime,
+          target: index === runtimeIndex
+        }))
+      ]
+    })
+  }
+
   const handleKeyDown = (e): void => {
     if (e.key === 'Enter') {
       execute().catch((error) => console.error(error))
@@ -81,6 +94,7 @@ export default function Runner(): ReactElement {
           {runtimeList.map((runtime, index: number) => (
             <div
               key={index}
+              onClick={() => selectRuntime(index)}
               className={`runner-tabs-title ${runtime.target ? 'runner-tabs-title-active' : undefined}`}
             >
               <div>{runtime.appearance.title}</div>
@@ -102,7 +116,7 @@ export default function Runner(): ReactElement {
             </div>
           </div>
           <div className="runner-result">
-            {historicalExecution ? historicalExecution.result : result}
+            {historicalExecution ? historicalExecution.result : runtime.result}
           </div>
         </div>
         <div className="runner-context">

@@ -4,6 +4,7 @@ export interface Command {
   id: string
 }
 export interface Runtime {
+  result: string
   prompt: string
   target: boolean
   folder: string

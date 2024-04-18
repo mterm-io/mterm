@@ -12,9 +12,16 @@ export function attach({ app, workspace }: BootstrapContext): void {
   ipcMain.on('runtime.prompt', (_, value: string) => {
     workspace.runtime.prompt = value
   })
+  ipcMain.on('runtime.result', (_, value: string) => {
+    workspace.runtime.result = value
+  })
+  ipcMain.on('runtime.index', (_, value: number) => {
+    workspace.runtimeIndex = value
+  })
 
   ipcMain.handle('runtime.execute', async (): Promise<string> => {
-    const prompt = workspace.runtime.prompt
+    const runtime = workspace.runtime
+    const prompt = runtime.prompt
     const id = short.generate()
 
     const command: Command = {
@@ -24,14 +31,15 @@ export function attach({ app, workspace }: BootstrapContext): void {
     }
 
     // clear current prompt
-    workspace.runtime.history.unshift(command)
-    workspace.runtime.prompt = ''
+    runtime.history.unshift(command)
+    runtime.prompt = ''
 
     return new Promise((resolve) => {
       setTimeout(() => {
         const result = `result of ${prompt}`
 
         command.result = result
+        runtime.result = result
 
         resolve(result)
       }, 1000)

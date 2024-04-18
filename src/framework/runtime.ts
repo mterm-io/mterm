@@ -7,6 +7,7 @@ export interface Command {
 }
 export interface RuntimeModel {
   prompt: string
+  result: string
   target: boolean
   folder: string
   history: Command[]
@@ -21,6 +22,7 @@ export class Runtime {
   }
   public history: Command[] = []
   public prompt: string = ''
+  public result: string = ''
   public appearance: {
     icon: string
     title: string
