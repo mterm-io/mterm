@@ -7,7 +7,16 @@ import { remove } from 'lodash'
 import { BrowserWindowConstructorOptions } from 'electron'
 import { setWindowValueFromPath } from '../main/util'
 import { Runtime } from './runtime'
+import { DEFAULT_FOLDER } from '../constants'
 
+export function resolveFolderPathForMTERM(folder: string): string {
+  folder = folder.replace('~', homedir())
+  folder = folder.replace('$CWD', process.cwd())
+
+  folder = resolve(folder)
+
+  return folder
+}
 export class Workspace {
   public settings: Settings
   public isAppQuiting: boolean = false
@@ -21,8 +30,7 @@ export class Workspace {
     /**
      * Cleanup and replace '~' with homedir location
      */
-    this.folder = this.folder.replace('~', homedir())
-    this.folder = resolve(this.folder)
+    this.folder = resolveFolderPathForMTERM(this.folder)
 
     this.settings = new Settings(join(this.folder, 'settings.json'), defaultSettings)
   }
@@ -57,8 +65,11 @@ export class Workspace {
      * Load an initial index
      */
     if (this.runtimes.length === 0) {
-      this.runtimes.push(new Runtime())
-      this.runtimes.push(new Runtime())
+      const defaultFolder = this.settings.get<string>('folder', DEFAULT_FOLDER)
+
+      this.runtimes.push(new Runtime(defaultFolder))
+      this.runtimes.push(new Runtime(defaultFolder))
+
       this.runtimeIndex = 0
     }
 

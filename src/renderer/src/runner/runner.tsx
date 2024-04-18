@@ -23,6 +23,12 @@ export default function Runner(): ReactElement {
     window.electron.ipcRenderer.send('runtime.prompt', value)
   }
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      console.log('do validate')
+    }
+  }
+
   const runtime = runtimeList.find((runtime) => runtime.target)
 
   useEffect(() => {
@@ -54,9 +60,13 @@ export default function Runner(): ReactElement {
               className="runner-input-field"
               placeholder=">"
               onChange={handlePromptChange}
+              onKeyDown={handleKeyDown}
               value={runtime.prompt}
             />
           </div>
+        </div>
+        <div className="runner-context">
+          <div className="runner-context-folder">{runtime.folder}</div>
         </div>
       </div>
     </>

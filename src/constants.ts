@@ -1,5 +1,6 @@
 export const DEFAULT_WORKSPACE = '~/mterm'
 
+export const DEFAULT_FOLDER = '$CWD'
 export const DEFAULT_SETTING_RUNNER_SHORTCUT = '`+CommandOrControl'
 export const DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT = '`+Shift+CommandOrControl'
 export const DEFAULT_SETTING_IS_COMMANDER_MODE = true

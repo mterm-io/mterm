@@ -47,7 +47,7 @@ body {
   height: 100%;
   width: 100%;
   display: grid;
-  grid-template-rows: 50px auto;
+  grid-template-rows: 50px auto 50px;
 }
 
 .runner-tabs {
@@ -84,4 +84,17 @@ body {
   justify-items: center;
   align-items: center;
   cursor: pointer;
+}
+
+.runner-context {
+  display: grid;
+  justify-items: right;
+  align-items: center;
+  cursor: pointer;
+  padding-right: 20px
+}
+
+.runner-context-folder {
+  color: #59dcec;
+  font-size: 70%
 }
