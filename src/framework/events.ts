@@ -1,6 +1,6 @@
 import { ipcMain, shell } from 'electron'
 import { BootstrapContext } from '../main/bootstrap'
-import { Command, Runtime, RuntimeModel } from './runtime'
+import { Command, RuntimeModel } from './runtime'
 import short from 'short-uuid'
 
 export function attach({ app, workspace }: BootstrapContext): void {

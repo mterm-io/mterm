@@ -1,6 +1,5 @@
-import { ReactElement, ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
 import { Runtime } from './runtime'
-import { i } from 'vite/dist/node/types.d-aGj9QkWt'
 
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
