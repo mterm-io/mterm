@@ -1,4 +1,4 @@
-import { ipcMain, shell, IpcMainEvent } from 'electron'
+import { ipcMain, shell } from 'electron'
 import { BootstrapContext } from '../main/bootstrap'
 import { RuntimeModel } from './runtime'
 
@@ -16,7 +16,11 @@ export function attach({ app, workspace }: BootstrapContext): void {
     return workspace.runtimes.map((runtime, index) => {
       return {
         target: index === workspace.runtimeIndex,
-        ...runtime
+        ...runtime,
+        appearance: {
+          ...runtime.appearance,
+          title: runtime.appearance.title.replace('$idx', `${index}`)
+        }
       }
     })
   })

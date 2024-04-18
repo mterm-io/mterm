@@ -1,2 +1,8 @@
 @import './base.css';
 
+@font-face {
+  font-family: 'Roboto Mono';
+  src: url('./font.ttf');
+}
+
+

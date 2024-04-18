@@ -58,6 +58,7 @@ export class Workspace {
      */
     if (this.runtimes.length === 0) {
       this.runtimes.push(new Runtime())
+      this.runtimes.push(new Runtime())
       this.runtimeIndex = 0
     }
 
