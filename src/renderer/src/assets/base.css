@@ -91,7 +91,6 @@ body {
   align-items: center;
   cursor: pointer;
   padding-right: 20px;
-  padding-left: 20px;
   grid-auto-flow: column;
   font-size: 70%;
   grid-template-columns: auto 60%;
@@ -130,6 +129,13 @@ body {
   background-clip: content-box;
   min-width: 32px;
   min-height: 32px;
+}
+.runner-history-item {
+  padding-left: 10px;
+  margin-left: 10px
+}
+.runner-history-selected {
+  border-left: 5px solid #294794;
 }
 .runner-history::-webkit-scrollbar-track {
   background-color: rgba(0,0,0,0);

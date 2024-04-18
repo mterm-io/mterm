@@ -1,5 +1,6 @@
 import { ReactElement, ChangeEvent, useEffect, useState } from 'react'
 import { Runtime } from './runtime'
+import { i } from 'vite/dist/node/types.d-aGj9QkWt'
 
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
@@ -122,8 +123,11 @@ export default function Runner(): ReactElement {
         <div className="runner-context">
           <div className="runner-history">
             {runtime.history.map((command, index) => (
-              <div>
-                {historyIndex === index ? '**' : undefined} {command.prompt}
+              <div
+                key={index}
+                className={`runner-history-item ${historyIndex === index ? 'runner-history-selected' : undefined}`}
+              >
+                {command.prompt}
               </div>
             ))}
           </div>
