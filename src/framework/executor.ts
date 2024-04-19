@@ -2,6 +2,7 @@ import { Command } from './runtime'
 import { Workspace } from './workspace'
 import { Runtime } from './runtime'
 import { RunnerWindow } from '../main/window/windows/runner'
+import { app } from 'electron'
 
 export async function execute(
   workspace: Workspace,
@@ -16,7 +17,11 @@ export async function execute(
 
       return ['- settings reloaded', '- theme reloaded', '- term reloaded'].join('<br />')
     case ':exit':
-      break
+      if (!workspace.removeRuntime(runtime)) {
+        app.quit()
+      }
+
+      return '..'
   }
 
   return 'ran'

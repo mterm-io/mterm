@@ -39,6 +39,27 @@ export class Workspace {
     return this.runtimes[this.runtimeIndex]
   }
 
+  removeRuntime(runtime: Runtime): boolean {
+    const index = this.runtimes.indexOf(runtime)
+    if (index !== -1) {
+      remove(this.runtimes, runtime)
+
+      if (this.runtimeIndex === index) {
+        this.runtimeIndex-- // this cycles the runner closing from right to left
+
+        if (this.runtimeIndex < 0) {
+          this.runtimeIndex = 0
+        }
+      }
+    }
+
+    if (this.runtimes.length === 0) {
+      return false
+    }
+
+    return true
+  }
+
   hasWindowReady(window: MTermWindow): boolean {
     for (const currentWindow of this.windows) {
       if (Object.getPrototypeOf(window) === Object.getPrototypeOf(currentWindow)) {
