@@ -3,6 +3,10 @@ import { BootstrapContext } from '../main/bootstrap'
 import { Command, RuntimeModel } from './runtime'
 import short from 'short-uuid'
 import { execute } from './executor'
+import createDOMPurify from 'dompurify'
+import { JSDOM } from 'jsdom'
+
+const DOMPurify = createDOMPurify(new JSDOM('').window)
 
 export function attach({ app, workspace }: BootstrapContext): void {
   const runtimeList = (): RuntimeModel[] => {
@@ -75,7 +79,9 @@ export function attach({ app, workspace }: BootstrapContext): void {
       throw `Command '${id}' in runtime '${runtimeTarget}' does not exist`
     }
 
-    command.result = await execute(workspace, runtimeTarget, command)
+    command.result = DOMPurify.sanitize(await execute(workspace, runtimeTarget, command))
+
+    return command
   })
 
   ipcMain.handle('runtimes', async (): Promise<RuntimeModel[]> => {

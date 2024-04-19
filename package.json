@@ -23,8 +23,10 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
+    "dompurify": "^3.1.0",
     "electron-updater": "^6.1.7",
     "fs-extra": "^11.2.0",
+    "jsdom": "^24.0.0",
     "lodash": "^4.17.21",
     "short-uuid": "^4.2.2",
     "stack-trace": "^1.0.0-pre2"
@@ -33,7 +35,9 @@
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
     "@electron-toolkit/eslint-config-ts": "^1.0.1",
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@types/dompurify": "^3.0.5",
     "@types/fs-extra": "^11.0.4",
+    "@types/jsdom": "^21.1.6",
     "@types/lodash": "^4.17.0",
     "@types/node": "^18.19.9",
     "@types/react": "^18.2.48",
