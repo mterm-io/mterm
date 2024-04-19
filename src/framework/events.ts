@@ -2,6 +2,7 @@ import { ipcMain, shell } from 'electron'
 import { BootstrapContext } from '../main/bootstrap'
 import { Command, RuntimeModel } from './runtime'
 import short from 'short-uuid'
+import { execute } from './executor'
 
 export function attach({ app, workspace }: BootstrapContext): void {
   const runtimeList = (): RuntimeModel[] => {
@@ -74,13 +75,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
       throw `Command '${id}' in runtime '${runtimeTarget}' does not exist`
     }
 
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        command.result = `result of ${command.id} = ${command.prompt}`
-
-        resolve(command)
-      }, 5000)
-    })
+    command.result = await execute(workspace, runtimeTarget, command)
   })
 
   ipcMain.handle('runtimes', async (): Promise<RuntimeModel[]> => {

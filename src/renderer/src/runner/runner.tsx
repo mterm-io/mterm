@@ -102,6 +102,7 @@ export default function Runner(): ReactElement {
     return <p>Loading</p>
   }
 
+  const result = historicalExecution ? historicalExecution.result : runtime.result
   return (
     <>
       <div className="runner-container">
@@ -132,9 +133,7 @@ export default function Runner(): ReactElement {
               />
             </div>
           </div>
-          <div className="runner-result">
-            {historicalExecution ? historicalExecution.result : runtime.result}
-          </div>
+          <div className="runner-result" dangerouslySetInnerHTML={{ __html: result }}></div>
         </div>
         <div className="runner-context">
           <div className="runner-history">

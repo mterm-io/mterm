@@ -91,6 +91,14 @@ export class Workspace {
     this.windows.push(window)
   }
 
+  async reload(ctor: typeof MTermWindow): Promise<void> {
+    for (const currentWindow of this.windows) {
+      if (ctor.prototype === Object.getPrototypeOf(currentWindow)) {
+        await currentWindow.recreate(this)
+      }
+    }
+  }
+
   show(ctor: typeof MTermWindow): void {
     for (const currentWindow of this.windows) {
       if (ctor.prototype === Object.getPrototypeOf(currentWindow)) {
