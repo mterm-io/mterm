@@ -6,11 +6,16 @@ import short from 'short-uuid'
 export function attach({ app, workspace }: BootstrapContext): void {
   const runtimeList = (): RuntimeModel[] => {
     return workspace.runtimes.map((runtime, index) => {
+      const isTarget = index === workspace.runtimeIndex
       return {
-        target: index === workspace.runtimeIndex,
+        target: isTarget,
+        result: runtime.commandFocus
+          ? runtime.history.find((cmd) => cmd.id === runtime.commandFocus)?.result || ''
+          : '',
         ...runtime,
         appearance: {
           ...runtime.appearance,
+
           title: runtime.appearance.title.replace('$idx', `${index}`)
         }
       }
@@ -24,9 +29,6 @@ export function attach({ app, workspace }: BootstrapContext): void {
   ipcMain.on('runtime.prompt', (_, value: string) => {
     workspace.runtime.prompt = value
   })
-  ipcMain.on('runtime.result', (_, value: string) => {
-    workspace.runtime.result = value
-  })
   ipcMain.on('runtime.index', (_, value: number) => {
     workspace.runtimeIndex = value
   })
@@ -37,30 +39,47 @@ export function attach({ app, workspace }: BootstrapContext): void {
     return runtimeList()
   })
 
-  ipcMain.handle('runtime.execute', async (): Promise<string> => {
-    const runtime = workspace.runtime
+  ipcMain.handle('runtime.prepareExecute', async (_, runtimeId): Promise<Command> => {
+    const runtime = workspace.runtimes.find((runtime) => runtimeId === runtime.id)
+    if (!runtime) {
+      throw `Runtime '${runtimeId}' does not exist`
+    }
+
     const prompt = runtime.prompt
     const id = short.generate()
 
     const command: Command = {
       id,
       prompt,
-      result: ''
+      result: '',
+      runtime: runtime.id
     }
 
     // clear current prompt
+    runtime.commandFocus = command.id
     runtime.history.unshift(command)
     runtime.prompt = ''
 
+    return command
+  })
+
+  ipcMain.handle('runtime.execute', async (_, { id, runtime }: Command): Promise<Command> => {
+    const runtimeTarget = workspace.runtimes.find((r) => r.id === runtime)
+    if (!runtimeTarget) {
+      throw `Runtime '${runtime}' does not exist`
+    }
+
+    const command = runtimeTarget.history.find((cmd) => cmd.id === id && cmd.runtime === runtime)
+    if (!command) {
+      throw `Command '${id}' in runtime '${runtimeTarget}' does not exist`
+    }
+
     return new Promise((resolve) => {
       setTimeout(() => {
-        const result = `result of ${prompt}`
+        command.result = `result of ${command.id} = ${command.prompt}`
 
-        command.result = result
-        runtime.result = result
-
-        resolve(result)
-      }, 1000)
+        resolve(command)
+      }, 5000)
     })
   })
 

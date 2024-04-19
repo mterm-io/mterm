@@ -1,14 +1,15 @@
 import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
-import { Runtime } from './runtime'
+import { Command, Runtime } from './runtime'
 
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
-  const [, setResult] = useState<string>('_')
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
   const runtimes = async (): Promise<void> => {
     const runtimesFetch: Runtime[] = await window.electron.ipcRenderer.invoke('runtimes')
 
     setRuntimes(runtimesFetch)
+
+    console.log(runtimesFetch)
   }
   const setPrompt = (prompt: string): void => {
     setRuntimes((runtimes) => {
@@ -24,21 +25,25 @@ export default function Runner(): ReactElement {
   const runtime = runtimeList.find((runtime) => runtime.target)
   const historicalExecution = historyIndex != -1 ? runtime?.history[historyIndex] : undefined
 
-  const execute = async (): Promise<void> => {
-    const execution = window.electron.ipcRenderer.invoke('runtime.execute')
+  const execute = async (runtime): Promise<void> => {
+    const command: Command = await window.electron.ipcRenderer.invoke(
+      'runtime.prepareExecute',
+      runtime.id
+    )
 
-    setPrompt('')
+    await runtimes()
 
-    const result: string = await execution
+    applyHistoryIndex(0)
 
-    setResult(result)
+    await window.electron.ipcRenderer.invoke('runtime.execute', command)
 
     await runtimes()
   }
   const handlePromptChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
-    if (runtime?.prompt !== value && historyIndex !== -1) {
-      setHistoryIndex(-1)
+    console.log(event)
+    if (historyIndex !== -1) {
+      applyHistoryIndex(-1)
     }
 
     setPrompt(value)
@@ -64,24 +69,27 @@ export default function Runner(): ReactElement {
     })
   }
 
+  const applyHistoryIndex = (index: number): void => {
+    setHistoryIndex(index)
+  }
+
   const onHistoryItemClicked = (historyIndex: number): void => {
-    setHistoryIndex(historyIndex)
+    applyHistoryIndex(historyIndex)
   }
 
   const handleKeyDown = (e): void => {
     if (e.key === 'Enter') {
-      execute().catch((error) => console.error(error))
+      execute(runtime).catch((error) => console.error(error))
     }
-
     if (e.code === 'ArrowDown') {
       if (runtime && historyIndex < runtime.history.length - 1) {
-        setHistoryIndex((historyIndex) => historyIndex + 1)
+        applyHistoryIndex(historyIndex + 1)
       }
     }
 
     if (e.code === 'ArrowUp') {
       if (runtime && historyIndex > -1) {
-        setHistoryIndex((historyIndex) => historyIndex - 1)
+        applyHistoryIndex(historyIndex - 1)
       }
     }
   }
