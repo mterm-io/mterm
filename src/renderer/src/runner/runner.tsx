@@ -4,13 +4,20 @@ import { Command, Runtime } from './runtime'
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
+  const [commanderMode, setCommanderMode] = useState<boolean>(false)
   const runtimes = async (): Promise<void> => {
+    const isCommanderMode = await window.electron.ipcRenderer.invoke('runner.isCommanderMode')
     const runtimesFetch: Runtime[] = await window.electron.ipcRenderer.invoke('runtimes')
 
     setRuntimes(runtimesFetch)
-
-    console.log(runtimesFetch)
+    setCommanderMode(isCommanderMode)
   }
+
+  window.electron.ipcRenderer.removeAllListeners('runtime.commandEvent')
+  window.electron.ipcRenderer.on('runtime.commandEvent', async () => {
+    await runtimes()
+  })
+
   const setPrompt = (prompt: string): void => {
     setRuntimes((runtimes) => {
       return [
@@ -28,12 +35,11 @@ export default function Runner(): ReactElement {
   const execute = async (runtime): Promise<void> => {
     const command: Command = await window.electron.ipcRenderer.invoke(
       'runtime.prepareExecute',
-      runtime.id
+      runtime.id,
+      historicalExecution ? historicalExecution.prompt : runtime.prompt
     )
 
     await runtimes()
-
-    applyHistoryIndex(0)
 
     await window.electron.ipcRenderer.invoke('runtime.execute', command)
 
@@ -103,9 +109,18 @@ export default function Runner(): ReactElement {
   }
 
   const result = historicalExecution ? historicalExecution.result : runtime.result
+  const resultText = result.stream
+    .map(
+      (record) =>
+        `<span class='stream-record ${record.error ? 'stream-record-error' : 'stream-record-success'}'>${record.text}</span>`
+    )
+    .join('')
+
   return (
     <>
-      <div className="runner-container">
+      <div
+        className={`runner-container ${commanderMode ? 'runner-container__commander_mode' : 'runner-container__normal_mode'}`}
+      >
         <div className="runner-tabs">
           {runtimeList.map((runtime, index: number) => (
             <div
@@ -133,7 +148,10 @@ export default function Runner(): ReactElement {
               />
             </div>
           </div>
-          <div className="runner-result" dangerouslySetInnerHTML={{ __html: result }}></div>
+          <div
+            className={`runner-result ${result.code !== 0 ? 'runner-result-error' : ''}`}
+            dangerouslySetInnerHTML={{ __html: resultText }}
+          ></div>
         </div>
         <div className="runner-context">
           <div className="runner-history">

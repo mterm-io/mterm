@@ -1,16 +1,26 @@
 import { resolveFolderPathForMTERM } from './workspace'
 import short from 'short-uuid'
 
+export interface ResultStream {
+  error: boolean
+  text: string
+}
+
+export interface Result {
+  code: number
+  stream: ResultStream[]
+}
 export interface Command {
   prompt: string
-  result: string
+  result: Result
   runtime: string
+  error: boolean
   id: string
 }
 export interface RuntimeModel {
   id: string
   prompt: string
-  result: string
+  result: Result
   target: boolean
   folder: string
   history: Command[]

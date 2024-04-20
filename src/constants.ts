@@ -1,5 +1,6 @@
 export const DEFAULT_WORKSPACE = '~/mterm'
 
+export const DEFAULT_PLATFORM = process.platform === 'win32' ? 'powershell' : 'sh'
 export const DEFAULT_FOLDER = '$CWD'
 export const DEFAULT_SETTING_RUNNER_SHORTCUT = '`+CommandOrControl'
 export const DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT = '`+Shift+CommandOrControl'
@@ -20,6 +21,7 @@ export const DEFAULT_SETTING_RUNNER_BOUNDS = {
   h: 500
 }
 export const DEFAULT_SETTINGS = {
+  platform: DEFAULT_PLATFORM,
   runner: {
     shortcut: DEFAULT_SETTING_RUNNER_SHORTCUT,
     bounds: DEFAULT_SETTING_RUNNER_BOUNDS,

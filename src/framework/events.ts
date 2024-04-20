@@ -1,22 +1,29 @@
 import { ipcMain, shell } from 'electron'
 import { BootstrapContext } from '../main/bootstrap'
-import { Command, RuntimeModel } from './runtime'
+import { Command, Result, ResultStream, RuntimeModel } from './runtime'
 import short from 'short-uuid'
 import { execute } from './executor'
 import createDOMPurify from 'dompurify'
 import { JSDOM } from 'jsdom'
+import { DEFAULT_PLATFORM, DEFAULT_SETTING_IS_COMMANDER_MODE } from '../constants'
 
 const DOMPurify = createDOMPurify(new JSDOM('').window)
-
 export function attach({ app, workspace }: BootstrapContext): void {
   const runtimeList = (): RuntimeModel[] => {
     return workspace.runtimes.map((runtime, index) => {
       const isTarget = index === workspace.runtimeIndex
+      const focus = runtime.history.find((cmd) => cmd.id === runtime.commandFocus)
+
+      const result = focus
+        ? focus.result
+        : {
+            code: 0,
+            stream: []
+          }
+
       return {
         target: isTarget,
-        result: runtime.commandFocus
-          ? runtime.history.find((cmd) => cmd.id === runtime.commandFocus)?.result || ''
-          : '',
+        result,
         ...runtime,
         appearance: {
           ...runtime.appearance,
@@ -26,6 +33,14 @@ export function attach({ app, workspace }: BootstrapContext): void {
       }
     })
   }
+
+  ipcMain.handle('runner.isCommanderMode', async (): Promise<boolean> => {
+    return workspace.settings.get<boolean>(
+      'runner.commanderMode',
+      DEFAULT_SETTING_IS_COMMANDER_MODE
+    )
+  })
+
   ipcMain.on('open.workspace', async () => {
     await shell.openPath(workspace.folder)
   })
@@ -44,19 +59,22 @@ export function attach({ app, workspace }: BootstrapContext): void {
     return runtimeList()
   })
 
-  ipcMain.handle('runtime.prepareExecute', async (_, runtimeId): Promise<Command> => {
+  ipcMain.handle('runtime.prepareExecute', async (_, runtimeId, prompt): Promise<Command> => {
     const runtime = workspace.runtimes.find((runtime) => runtimeId === runtime.id)
     if (!runtime) {
       throw `Runtime '${runtimeId}' does not exist`
     }
 
-    const prompt = runtime.prompt
     const id = short.generate()
 
     const command: Command = {
       id,
       prompt,
-      result: '',
+      error: false,
+      result: {
+        code: 0,
+        stream: []
+      },
       runtime: runtime.id
     }
 
@@ -79,7 +97,39 @@ export function attach({ app, workspace }: BootstrapContext): void {
       throw `Command '${id}' in runtime '${runtimeTarget}' does not exist`
     }
 
-    command.result = DOMPurify.sanitize(await execute(workspace, runtimeTarget, command))
+    const platform = workspace.settings.get<string>('platform', DEFAULT_PLATFORM)
+
+    const result: Result = command.result
+
+    try {
+      const out = (text: string, error: boolean = false): void => {
+        text = DOMPurify.sanitize(text)
+        text = text.replaceAll('\n', '<br />')
+
+        const streamEntry: ResultStream = {
+          text,
+          error
+        }
+
+        result.stream.push(streamEntry)
+
+        _.sender.send('runtime.commandEvent', streamEntry)
+      }
+
+      const finish = (code: number): void => {
+        result.code = code
+      }
+
+      await execute(platform, workspace, runtimeTarget, command, out, finish)
+    } catch (e) {
+      result.stream.push({
+        error: true,
+        text: `${e}`
+      })
+      result.code = 1
+    }
+
+    command.error = result.code !== 0
 
     return command
   })

@@ -75,6 +75,8 @@ body {
   background: transparent;
 }
 
+
+
 .runner-spacer {
   height: 50px;
   background: rgba(11, 125, 195, 0.13);
@@ -144,4 +146,13 @@ body {
 }
 .runner-history::-webkit-scrollbar-track {
   background-color: rgba(0,0,0,0);
+}
+
+.runner-result-error {
+  color: #ff6767
+}
+.runner-result {
+  overflow-y: auto;
+  font-size: 12px;
+  max-height: 300px;
 }

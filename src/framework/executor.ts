@@ -1,28 +1,65 @@
-import { Command } from './runtime'
+import { Command, Runtime } from './runtime'
 import { Workspace } from './workspace'
-import { Runtime } from './runtime'
 import { RunnerWindow } from '../main/window/windows/runner'
 import { app } from 'electron'
+import { spawn } from 'node:child_process'
 
 export async function execute(
+  platform: string,
   workspace: Workspace,
   runtime: Runtime,
-  command: Command
-): Promise<string> {
+  command: Command,
+  out: (text: string, error?: boolean) => void,
+  finish: (code: number) => void
+): Promise<void> {
   // check for system commands
   switch (command.prompt.trim()) {
     case ':reload':
       await workspace.load()
       await workspace.reload(RunnerWindow)
 
-      return ['- settings reloaded', '- theme reloaded', '- term reloaded'].join('<br />')
+      out(['- settings reloaded', '- theme reloaded', '- term reloaded'].join('<br />'))
+
+      return
     case ':exit':
       if (!workspace.removeRuntime(runtime)) {
         app.quit()
       }
 
-      return '..'
+      out('..')
+
+      return
+
+    case ':tab':
+      workspace.addRuntime()
+      workspace.runtimeIndex = workspace.runtimes.length - 1
+
+      out('->')
+
+      return
+
+    case ':test':
+      for (let i = 0; i < 10; i++) {
+        setTimeout(() => {
+          out(`cmd @ ${i}`)
+        }, i * 1000)
+      }
+
+      return
   }
 
-  return 'ran'
+  const args = command.prompt.split(' ')
+
+  const childSpawn = spawn(platform, args, {})
+
+  childSpawn.stdout.on('data', (data) => out(data))
+  childSpawn.stderr.on('data', (data) => out(data, true))
+
+  return new Promise((resolve) => {
+    childSpawn.on('close', (code) => {
+      finish(code || 0)
+
+      resolve()
+    })
+  })
 }
