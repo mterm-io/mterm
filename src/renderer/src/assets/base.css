@@ -101,9 +101,9 @@ body {
 .runner-main {
   display: grid;
   align-items: center;
-  cursor: pointer;
   grid-auto-flow: column;
   grid-template-columns: auto 50%;
+  overflow: hidden
 }
 
 .runner-context-folder {
@@ -152,7 +152,7 @@ body {
   color: #ff6767
 }
 .runner-result {
-  overflow-y: auto;
   font-size: 12px;
-  max-height: 300px;
+  height: 100%;
+  overflow: auto;
 }

@@ -153,10 +153,12 @@ export default function Runner(): ReactElement {
               />
             </div>
           </div>
-          <div
-            className={`runner-result ${result.code !== 0 ? 'runner-result-error' : ''}`}
-            dangerouslySetInnerHTML={{ __html: resultText }}
-          ></div>
+          <div className={`runner-result ${result.code !== 0 ? 'runner-result-error' : ''}`}>
+            <div
+              className="runner-result-content"
+              dangerouslySetInnerHTML={{ __html: resultText }}
+            ></div>
+          </div>
         </div>
         <div className="runner-context">
           <div className="runner-history">
