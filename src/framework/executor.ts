@@ -18,7 +18,7 @@ export async function execute(
       await workspace.load()
       await workspace.reload(RunnerWindow)
 
-      out(['- settings reloaded', '- theme reloaded', '- term reloaded'].join('<br />'))
+      out(['- settings reloaded', '- theme reloaded', '- term reloaded'].join('\n'))
 
       return
     case ':exit':
@@ -47,7 +47,7 @@ export async function execute(
       return new Promise((resolve) => {
         for (let i = 0; i < 10; i++) {
           setTimeout(() => {
-            out(`cmd @ ${i}`)
+            out(`cmd @ ${i}\n`)
             if (i == 9) {
               resolve()
             }
