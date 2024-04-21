@@ -1,8 +1,10 @@
 import { Command, Runtime } from './runtime'
-import { Workspace } from './workspace'
+import { resolveFolderPathForMTERM, Workspace } from './workspace'
 import { RunnerWindow } from '../main/window/windows/runner'
 import { app } from 'electron'
 import { spawn } from 'node:child_process'
+import { resolve } from 'path'
+import { pathExists } from 'fs-extra'
 
 export async function execute(
   platform: string,
@@ -12,8 +14,10 @@ export async function execute(
   out: (text: string, error?: boolean) => void,
   finish: (code: number) => void
 ): Promise<void> {
+  const [cmd, ...args] = command.prompt.split(' ')
+
   // check for system commands
-  switch (command.prompt.trim()) {
+  switch (cmd) {
     case ':reload':
       await workspace.load()
       await workspace.reload(RunnerWindow)
@@ -54,11 +58,32 @@ export async function execute(
           }, i * 1000)
         }
       })
+
+    case 'cd': {
+      const path: string = args[0] || '.'
+
+      let location = resolve(runtime.folder, path)
+      if (path.startsWith('~')) {
+        location = resolveFolderPathForMTERM(path)
+      }
+
+      const isLocationActive = await pathExists(location)
+
+      if (!isLocationActive) {
+        out(`Folder not found \n\n${location}`, true)
+        finish(1)
+        return
+      }
+
+      runtime.folder = location
+
+      return
+    }
   }
 
-  const args = command.prompt.split(' ')
-
-  const childSpawn = spawn(platform, args, {})
+  const childSpawn = spawn(platform, [cmd, ...args], {
+    cwd: runtime.folder
+  })
 
   childSpawn.stdout.on('data', (data) => out(data))
   childSpawn.stderr.on('data', (data) => out(data, true))

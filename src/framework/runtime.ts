@@ -1,5 +1,6 @@
 import { resolveFolderPathForMTERM } from './workspace'
 import short from 'short-uuid'
+import { ChildProcessWithoutNullStreams } from 'node:child_process'
 
 export interface ResultStream {
   error: boolean
@@ -24,6 +25,16 @@ export interface Command {
   complete: boolean
   error: boolean
   id: string
+  process?: ChildProcessWithoutNullStreams
+}
+
+export interface CommandViewModel {
+  prompt: string
+  result: Result
+  runtime: string
+  complete: boolean
+  error: boolean
+  id: string
 }
 export interface RuntimeModel {
   id: string
@@ -31,7 +42,7 @@ export interface RuntimeModel {
   result: Result
   target: boolean
   folder: string
-  history: Command[]
+  history: CommandViewModel[]
   commandFocus: string
   appearance: {
     icon: string

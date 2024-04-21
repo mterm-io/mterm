@@ -1,12 +1,21 @@
 import { ipcMain, shell } from 'electron'
 import { BootstrapContext } from '../main/bootstrap'
-import { Command, Result, ResultStream, ResultStreamEvent, RuntimeModel } from './runtime'
+import {
+  Command,
+  CommandViewModel,
+  Result,
+  ResultStream,
+  ResultStreamEvent,
+  RuntimeModel
+} from './runtime'
 import short from 'short-uuid'
 import { execute } from './executor'
 import createDOMPurify from 'dompurify'
 import { JSDOM } from 'jsdom'
 import { DEFAULT_PLATFORM, DEFAULT_SETTING_IS_COMMANDER_MODE } from '../constants'
+import Convert from 'ansi-to-html'
 
+const convert = new Convert()
 const DOMPurify = createDOMPurify(new JSDOM('').window)
 export function attach({ app, workspace }: BootstrapContext): void {
   const runtimeList = (): RuntimeModel[] => {
@@ -21,10 +30,18 @@ export function attach({ app, workspace }: BootstrapContext): void {
             stream: []
           }
 
+      const history: CommandViewModel[] = runtime.history.map((historyItem) => {
+        return {
+          ...historyItem,
+          process: undefined
+        }
+      })
+
       return {
         target: isTarget,
         result,
         ...runtime,
+        history,
         appearance: {
           ...runtime.appearance,
 
@@ -106,6 +123,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
       const out = (text: string, error: boolean = false): void => {
         const raw = text.toString()
 
+        text = convert.toHtml(raw)
         text = DOMPurify.sanitize(text)
         text = text.replaceAll('\n', '<br/>')
 
