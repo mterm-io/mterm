@@ -4,6 +4,9 @@ An electron terminal written with React and TypeScript.
 
 ![image](https://github.com/mterm-io/mterm/assets/7341502/27bcad62-6891-4b49-80b5-e5a17e0562ab)
 
+## Community
+Join us on discord [here](https://discord.gg/mterm)!
+
 ## Project Setup
 
 ### Install
