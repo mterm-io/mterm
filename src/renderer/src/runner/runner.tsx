@@ -1,5 +1,5 @@
 import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
-import { Command, Runtime } from './runtime'
+import { Command, ResultStreamEvent, Runtime } from './runtime'
 
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
@@ -14,10 +14,14 @@ export default function Runner(): ReactElement {
   }
 
   window.electron.ipcRenderer.removeAllListeners('runtime.commandEvent')
-  window.electron.ipcRenderer.on('runtime.commandEvent', async () => {
-    // costly TODO: only render changes (which are an argument here async (changes) => {
-    await reloadRuntimesFromBackend()
-  })
+  window.electron.ipcRenderer.on(
+    'runtime.commandEvent',
+    async (_, streamEntry: ResultStreamEvent) => {
+      console.log(streamEntry)
+
+      await reloadRuntimesFromBackend()
+    }
+  )
 
   const setPrompt = (prompt: string): void => {
     setRuntimes((runtimes) => {
