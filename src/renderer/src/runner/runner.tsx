@@ -115,15 +115,12 @@ export default function Runner(): ReactElement {
   }
 
   const result = historicalExecution ? historicalExecution.result : runtime.result
-  const resultText = result.stream
-    .map(
-      (record) =>
-        `<span class='stream-record ${record.error ? 'stream-record-error' : 'stream-record-success'}'>${record.text}</span>`
-    )
-    .join('')
+  const resultText = result.stream.map((record) => record.text).join('')
 
   let output = (
-    <div className="runner-result-content" dangerouslySetInnerHTML={{ __html: resultText }}></div>
+    <div className="runner-result-content">
+      <pre dangerouslySetInnerHTML={{ __html: resultText }}></pre>
+    </div>
   )
   if (rawMode) {
     const resultTextRaw = result.stream.map((record) => record.raw).join('')

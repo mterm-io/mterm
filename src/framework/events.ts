@@ -14,6 +14,7 @@ import createDOMPurify from 'dompurify'
 import { JSDOM } from 'jsdom'
 import { DEFAULT_PLATFORM, DEFAULT_SETTING_IS_COMMANDER_MODE } from '../constants'
 import Convert from 'ansi-to-html'
+import { ansiToPre, ansiToAnsi } from 'ansi-to-pre'
 
 const convert = new Convert()
 const DOMPurify = createDOMPurify(new JSDOM('').window)
@@ -123,9 +124,11 @@ export function attach({ app, workspace }: BootstrapContext): void {
       const out = (text: string, error: boolean = false): void => {
         const raw = text.toString()
 
+        console.log(raw)
+
+        // text = DOMPurify.sanitize(text)
         text = convert.toHtml(raw)
-        text = DOMPurify.sanitize(text)
-        text = text.replaceAll('\n', '<br/>')
+        // text = text.replaceAll('\n', '<br/>')
 
         const streamEntry: ResultStream = {
           text,

@@ -81,7 +81,15 @@ export async function execute(
     }
   }
 
-  const childSpawn = spawn(platform, [cmd, ...args], {
+  const [platformProgram, ...platformProgramArgs] = platform.split(' ')
+
+  const argsClean = platformProgramArgs.map(
+    (arg: string) => `${arg.replace('$ARGS', command.prompt)}`
+  )
+
+  // ptyProcess.console.log(platformProgram, argsClean)
+  //
+  const childSpawn = spawn(platformProgram, argsClean, {
     cwd: runtime.folder
   })
 
@@ -89,7 +97,7 @@ export async function execute(
   childSpawn.stderr.on('data', (data) => out(data, true))
 
   return new Promise((resolve) => {
-    childSpawn.on('close', (code) => {
+    childSpawn.on('exit', (code) => {
       finish(code || 0)
 
       resolve()
