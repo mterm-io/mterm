@@ -4,6 +4,7 @@ import short from 'short-uuid'
 export interface ResultStream {
   error: boolean
   text: string
+  raw: string
 }
 
 export interface Result {
@@ -20,6 +21,7 @@ export interface Command {
   prompt: string
   result: Result
   runtime: string
+  complete: boolean
   error: boolean
   id: string
 }

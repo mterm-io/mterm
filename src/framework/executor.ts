@@ -38,14 +38,22 @@ export async function execute(
 
       return
 
-    case ':test':
-      for (let i = 0; i < 10; i++) {
-        setTimeout(() => {
-          out(`cmd @ ${i}`)
-        }, i * 1000)
-      }
+    case ':history':
+      out(JSON.stringify(runtime.history, null, 2))
 
       return
+
+    case ':test':
+      return new Promise((resolve) => {
+        for (let i = 0; i < 10; i++) {
+          setTimeout(() => {
+            out(`cmd @ ${i}`)
+            if (i == 9) {
+              resolve()
+            }
+          }, i * 1000)
+        }
+      })
   }
 
   const args = command.prompt.split(' ')

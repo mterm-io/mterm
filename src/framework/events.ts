@@ -71,6 +71,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
       id,
       prompt,
       error: false,
+      complete: false,
       result: {
         code: 0,
         stream: []
@@ -103,12 +104,15 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
     try {
       const out = (text: string, error: boolean = false): void => {
+        const raw = text.toString()
+
         text = DOMPurify.sanitize(text)
-        text = text.replaceAll('\n', '<br />')
+        text = text.replaceAll('\n', '<br/>')
 
         const streamEntry: ResultStream = {
           text,
-          error
+          error,
+          raw
         }
 
         result.stream.push(streamEntry)
@@ -119,7 +123,9 @@ export function attach({ app, workspace }: BootstrapContext): void {
           command: id
         }
 
-        _.sender.send('runtime.commandEvent', streamEvent)
+        if (!_.sender.isDestroyed()) {
+          _.sender.send('runtime.commandEvent', streamEvent)
+        }
       }
 
       const finish = (code: number): void => {
@@ -130,11 +136,13 @@ export function attach({ app, workspace }: BootstrapContext): void {
     } catch (e) {
       result.stream.push({
         error: true,
-        text: `${e}`
+        text: `${e}`,
+        raw: `${e}`
       })
       result.code = 1
     }
 
+    command.complete = true
     command.error = result.code !== 0
 
     return command

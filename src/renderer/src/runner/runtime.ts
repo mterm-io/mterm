@@ -1,6 +1,7 @@
 export interface ResultStream {
   error: boolean
   text: string
+  raw: string
 }
 
 export interface Result {
@@ -16,6 +17,7 @@ export interface ResultStreamEvent {
 export interface Command {
   prompt: string
   result: Result
+  complete: boolean
   runtime: string
   error: boolean
   id: string

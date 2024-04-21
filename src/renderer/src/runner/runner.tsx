@@ -5,6 +5,7 @@ export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
+  const [rawMode, setRawMode] = useState<boolean>(false)
   const reloadRuntimesFromBackend = async (): Promise<void> => {
     const isCommanderMode = await window.electron.ipcRenderer.invoke('runner.isCommanderMode')
     const runtimesFetch: Runtime[] = await window.electron.ipcRenderer.invoke('runtimes')
@@ -121,6 +122,18 @@ export default function Runner(): ReactElement {
     )
     .join('')
 
+  let output = (
+    <div className="runner-result-content" dangerouslySetInnerHTML={{ __html: resultText }}></div>
+  )
+  if (rawMode) {
+    const resultTextRaw = result.stream.map((record) => record.raw).join('')
+    output = (
+      <div className="runner-result-content">
+        <pre>{resultTextRaw}</pre>
+      </div>
+    )
+  }
+
   return (
     <>
       <div
@@ -153,26 +166,35 @@ export default function Runner(): ReactElement {
               />
             </div>
           </div>
-          <div className={`runner-result ${result.code !== 0 ? 'runner-result-error' : ''}`}>
-            <div
-              className="runner-result-content"
-              dangerouslySetInnerHTML={{ __html: resultText }}
-            ></div>
-          </div>
+          <div className={`runner-result ${result.code !== 0 ? '' : ''}`}>{output}</div>
         </div>
         <div className="runner-context">
           <div className="runner-history">
             {runtime.history.map((command, index) => (
               <div
                 key={index}
-                className={`runner-history-item ${historyIndex === index ? 'runner-history-selected' : undefined}`}
+                className={`runner-history-item ${historyIndex === index ? 'runner-history-selected' : ''} ${
+                  command.complete ? 'runner-history-complete' : 'runner-history-running'
+                } ${command.error ? 'runner-history-error' : ''}`}
                 onClick={() => onHistoryItemClicked(index)}
               >
                 {command.prompt}
               </div>
             ))}
           </div>
-          <div className="runner-context-folder">{runtime.folder}</div>
+          <div className="runner-info">
+            <div
+              onClick={() => setRawMode((rawMode) => !rawMode)}
+              className={`toggle-button ${rawMode ? 'toggle-button-on' : ''}`}
+            >
+              <div className="toggle-button-slider">
+                <div className="toggle-button-spacer"></div>
+                <div className="toggle-button-circle"></div>
+              </div>
+              raw
+            </div>
+            <div className="runner-context-folder">{runtime.folder}</div>
+          </div>
         </div>
       </div>
     </>
