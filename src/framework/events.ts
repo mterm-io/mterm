@@ -1,6 +1,6 @@
 import { ipcMain, shell } from 'electron'
 import { BootstrapContext } from '../main/bootstrap'
-import { Command, Result, ResultStream, RuntimeModel } from './runtime'
+import { Command, Result, ResultStream, ResultStreamEvent, RuntimeModel } from './runtime'
 import short from 'short-uuid'
 import { execute } from './executor'
 import createDOMPurify from 'dompurify'
@@ -113,7 +113,13 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
         result.stream.push(streamEntry)
 
-        _.sender.send('runtime.commandEvent', streamEntry)
+        const streamEvent: ResultStreamEvent = {
+          entry: streamEntry,
+          runtime: runtime,
+          command: id
+        }
+
+        _.sender.send('runtime.commandEvent', streamEvent)
       }
 
       const finish = (code: number): void => {

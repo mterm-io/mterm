@@ -10,6 +10,12 @@ export interface Result {
   code: number
   stream: ResultStream[]
 }
+
+export interface ResultStreamEvent {
+  runtime: string
+  command: string
+  entry: ResultStream
+}
 export interface Command {
   prompt: string
   result: Result

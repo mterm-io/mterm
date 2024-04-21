@@ -5,7 +5,7 @@ export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
-  const runtimes = async (): Promise<void> => {
+  const reloadRuntimesFromBackend = async (): Promise<void> => {
     const isCommanderMode = await window.electron.ipcRenderer.invoke('runner.isCommanderMode')
     const runtimesFetch: Runtime[] = await window.electron.ipcRenderer.invoke('runtimes')
 
@@ -15,7 +15,8 @@ export default function Runner(): ReactElement {
 
   window.electron.ipcRenderer.removeAllListeners('runtime.commandEvent')
   window.electron.ipcRenderer.on('runtime.commandEvent', async () => {
-    await runtimes()
+    // costly TODO: only render changes (which are an argument here async (changes) => {
+    await reloadRuntimesFromBackend()
   })
 
   const setPrompt = (prompt: string): void => {
@@ -39,11 +40,11 @@ export default function Runner(): ReactElement {
       historicalExecution ? historicalExecution.prompt : runtime.prompt
     )
 
-    await runtimes()
+    await reloadRuntimesFromBackend()
 
     await window.electron.ipcRenderer.invoke('runtime.execute', command)
 
-    await runtimes()
+    await reloadRuntimesFromBackend()
   }
   const handlePromptChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
@@ -101,7 +102,7 @@ export default function Runner(): ReactElement {
   }
 
   useEffect(() => {
-    runtimes().catch((error) => console.error(error))
+    reloadRuntimesFromBackend().catch((error) => console.error(error))
   }, [])
 
   if (!runtime) {
