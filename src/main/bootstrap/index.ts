@@ -6,7 +6,7 @@ import { createWindows } from './create-windows'
 import { ErrorModal } from '../window/windows/error-modal'
 import { createTray } from './create-tray'
 import { createShortcut } from './create-shortcut'
-import { attach } from '../../framework/events'
+import { attach } from '../../framework/runtime-events'
 
 export interface BootstrapContext {
   app: App

@@ -9,7 +9,7 @@ import {
   RuntimeModel
 } from './runtime'
 import short from 'short-uuid'
-import { execute } from './executor'
+import { execute } from './runtime-executor'
 import createDOMPurify from 'dompurify'
 import { JSDOM } from 'jsdom'
 import { DEFAULT_PLATFORM, DEFAULT_SETTING_IS_COMMANDER_MODE } from '../constants'

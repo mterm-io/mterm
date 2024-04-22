@@ -53,11 +53,7 @@ export class Workspace {
       }
     }
 
-    if (this.runtimes.length === 0) {
-      return false
-    }
-
-    return true
+    return this.runtimes.length !== 0
   }
 
   hasWindowReady(window: MTermWindow): boolean {
