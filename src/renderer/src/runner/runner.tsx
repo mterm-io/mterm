@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
 import { Command, ResultStreamEvent, Runtime } from './runtime'
 
@@ -94,14 +95,14 @@ export default function Runner(): ReactElement {
       execute(runtime).catch((error) => console.error(error))
     }
     if (e.code === 'ArrowDown') {
-      if (runtime && historyIndex < runtime.history.length - 1) {
-        applyHistoryIndex(historyIndex + 1)
+      if (runtime && historyIndex > -1) {
+        applyHistoryIndex(historyIndex - 1)
       }
     }
 
     if (e.code === 'ArrowUp') {
-      if (runtime && historyIndex > -1) {
-        applyHistoryIndex(historyIndex - 1)
+      if (runtime && historyIndex < runtime.history.length - 1) {
+        applyHistoryIndex(historyIndex + 1)
       }
     }
   }
