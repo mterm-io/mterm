@@ -8,6 +8,7 @@ import { BrowserWindowConstructorOptions } from 'electron'
 import { setWindowValueFromPath } from '../main/util'
 import { Runtime } from './runtime'
 import { DEFAULT_FOLDER } from '../constants'
+import { Commands } from './commands'
 
 export function resolveFolderPathForMTERM(folder: string): string {
   folder = folder.replace('~', homedir())
@@ -19,6 +20,7 @@ export function resolveFolderPathForMTERM(folder: string): string {
 }
 export class Workspace {
   public settings: Settings
+  public commands: Commands
   public isAppQuiting: boolean = false
   public windows: MTermWindow[] = []
   public runtimes: Runtime[] = []
@@ -32,6 +34,7 @@ export class Workspace {
      */
     this.folder = resolveFolderPathForMTERM(this.folder)
 
+    this.commands = new Commands(join(this.folder), './resources/commands')
     this.settings = new Settings(join(this.folder, 'settings.json'), defaultSettings)
   }
 
@@ -77,6 +80,7 @@ export class Workspace {
     }
 
     await this.settings.load()
+    await this.commands.load()
 
     /**
      * Load an initial index

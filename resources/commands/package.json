@@ -1,0 +1,7 @@
+{
+  "name": "mterm.commands",
+  "main": "commands.ts",
+  "devDependencies": {
+    "@types/node": "^18.19.31"
+  }
+}

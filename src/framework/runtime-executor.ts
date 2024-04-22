@@ -81,6 +81,15 @@ export async function execute(
     }
   }
 
+  if (workspace.commands.lib[cmd]) {
+    const exec = workspace.commands.lib[cmd]
+
+    const result = await Promise.resolve(exec(...args))
+
+    out(`${result}`)
+    return
+  }
+
   const [platformProgram, ...platformProgramArgs] = platform.split(' ')
 
   const argsClean = platformProgramArgs.map(
