@@ -14,7 +14,6 @@ import createDOMPurify from 'dompurify'
 import { JSDOM } from 'jsdom'
 import { DEFAULT_PLATFORM, DEFAULT_SETTING_IS_COMMANDER_MODE } from '../constants'
 import Convert from 'ansi-to-html'
-import { ansiToPre, ansiToAnsi } from 'ansi-to-pre'
 
 const convert = new Convert()
 const DOMPurify = createDOMPurify(new JSDOM('').window)
@@ -148,7 +147,6 @@ export function attach({ app, workspace }: BootstrapContext): void {
           _.sender.send('runtime.commandEvent', streamEvent)
         }
       }
-
       const finish = (code: number): void => {
         result.code = code
       }
