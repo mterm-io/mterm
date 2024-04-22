@@ -1,0 +1,11 @@
+{
+  "files": ["./commands.ts"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "noImplicitAny": false,
+    "module": "esnext",
+    "target": "es5",
+    "allowJs": true,
+    "moduleResolution": "node"
+  }
+}
