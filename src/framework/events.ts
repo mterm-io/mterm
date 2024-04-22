@@ -123,11 +123,8 @@ export function attach({ app, workspace }: BootstrapContext): void {
       const out = (text: string, error: boolean = false): void => {
         const raw = text.toString()
 
-        console.log(raw)
-
-        // text = DOMPurify.sanitize(text)
-        text = convert.toHtml(raw)
-        // text = text.replaceAll('\n', '<br/>')
+        text = DOMPurify.sanitize(raw)
+        text = convert.toHtml(text)
 
         const streamEntry: ResultStream = {
           text,
