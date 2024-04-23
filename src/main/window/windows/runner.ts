@@ -1,5 +1,5 @@
 import { MTermWindow } from '../mterm-window'
-import { Settings } from '../../../framework/settings'
+import { Settings } from '../../framework/settings'
 import { BrowserWindow, BrowserWindowConstructorOptions } from 'electron'
 import {
   DEFAULT_SETTING_COMMANDER_MODE_BOUNDS,

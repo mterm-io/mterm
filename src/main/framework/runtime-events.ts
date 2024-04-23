@@ -1,5 +1,5 @@
 import { ipcMain, shell } from 'electron'
-import { BootstrapContext } from '../main/bootstrap'
+import { BootstrapContext } from '../bootstrap'
 import {
   Command,
   CommandViewModel,
@@ -12,7 +12,7 @@ import short from 'short-uuid'
 import { execute } from './runtime-executor'
 import createDOMPurify from 'dompurify'
 import { JSDOM } from 'jsdom'
-import { DEFAULT_PLATFORM, DEFAULT_SETTING_IS_COMMANDER_MODE } from '../constants'
+import { DEFAULT_PLATFORM, DEFAULT_SETTING_IS_COMMANDER_MODE } from '../../constants'
 import Convert from 'ansi-to-html'
 
 const convert = new Convert()

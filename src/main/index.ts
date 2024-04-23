@@ -4,7 +4,7 @@ import icon from '../../resources/icon.png?asset'
 
 import { PlatformWindow } from './window/windows/platform'
 import { RunnerWindow } from './window/windows/runner'
-import { Workspace } from '../framework/workspace'
+import { Workspace } from './framework/workspace'
 
 import { DEFAULT_SETTINGS, DEFAULT_WORKSPACE } from '../constants'
 import { ErrorModal } from './window/windows/error-modal'
