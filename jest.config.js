@@ -1,6 +1,3 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  preset: 'ts-jest',
-  runner: '@kayahr/jest-electron-runner',
-  testEnvironment: '@kayahr/jest-electron-runner/environment'
+  projects: ['<rootDir>/jest.main.config.js', '<rootDir>/jest.renderer.config.js']
 }
