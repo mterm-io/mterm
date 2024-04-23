@@ -39,12 +39,7 @@ function compile(scriptFile: string, scriptFileCompiled: string): Promise<void> 
           reject(err)
         } else {
           if (stats?.hasErrors()) {
-            const o = stats.toJson()
-
-            console.error(o.errors)
-            console.log(o.warnings)
-
-            reject(o.errors)
+            reject(stats.toJson().errors)
           } else {
             resolve()
           }
