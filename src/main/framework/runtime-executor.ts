@@ -13,7 +13,7 @@ export async function execute(
   command: Command,
   out: (text: string, error?: boolean) => void,
   finish: (code: number) => void
-): Promise<void> {
+): Promise<void | boolean> {
   const [cmd, ...args] = command.prompt.split(' ')
 
   // check for system commands
@@ -85,6 +85,11 @@ export async function execute(
     const exec = workspace.commands.lib[cmd]
 
     const result = await Promise.resolve(exec(...args))
+
+    if (!result) {
+      // nothing was replied with, assume this is a run that will happen in time
+      return false
+    }
 
     out(`${result}`)
     return

@@ -119,6 +119,8 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
     const result: Result = command.result
 
+    let finalize: boolean = true
+
     try {
       const out = (text: string, error: boolean = false): void => {
         const raw = text.toString()
@@ -148,7 +150,17 @@ export function attach({ app, workspace }: BootstrapContext): void {
         result.code = code
       }
 
-      await execute(platform, workspace, runtimeTarget, command, out, finish)
+      const finalizeConfirm = await execute(
+        platform,
+        workspace,
+        runtimeTarget,
+        command,
+        out,
+        finish
+      )
+      if (finalizeConfirm !== undefined && finalizeConfirm === false) {
+        finalize = false
+      }
     } catch (e) {
       result.stream.push({
         error: true,
@@ -158,8 +170,10 @@ export function attach({ app, workspace }: BootstrapContext): void {
       result.code = 1
     }
 
-    command.complete = true
-    command.error = result.code !== 0
+    if (finalize) {
+      command.complete = true
+      command.error = result.code !== 0
+    }
 
     return command
   })
