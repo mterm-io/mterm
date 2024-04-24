@@ -37,10 +37,11 @@ export class Commands {
     }
 
     const packageJson = await readJson(join(this.workingDirectory, 'package.json'))
+
     const commandFileLocation = join(this.workingDirectory, packageJson.main)
     const commands: Buffer = await readFile(commandFileLocation)
 
-    const tsConfig = await readJson(join(this.templateDirectory, 'tsconfig.json'))
+    const tsConfig = await readJson(join(this.workingDirectory, 'tsconfig.json'))
 
     tsConfig['compilerOptions'].typeRoots = [join(__dirname, '..', '..', 'node_modules', '@types')]
 
@@ -53,7 +54,7 @@ export class Commands {
     await writeJson(join(temp, 'tsconfig.json'), tsConfig, 'utf-8')
     await writeJson(join(temp, 'package.json'), packageJson, 'utf-8')
 
-    await compile(scriptFile, temp)
+    await compile(scriptFile, temp, join(this.workingDirectory, 'node_modules'))
 
     const jsFile: Buffer = await readFile(join(temp, 'commands.js'))
     runInNewContext(`${jsFile}`, this)

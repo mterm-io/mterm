@@ -40,6 +40,9 @@ export async function boostrap(context: BootstrapContext): Promise<void> {
     await workspace.load()
 
     await createWindows(context)
+
+    await workspace.commands.load()
+
     await createTray(context)
 
     createShortcut(context)

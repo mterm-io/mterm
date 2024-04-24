@@ -1,6 +1,10 @@
 import webpack from 'webpack'
 
-export async function compile(scriptFile: string, scriptFileCompiled: string): Promise<void> {
+export async function compile(
+  scriptFile: string,
+  folderTarget: string,
+  ...resolveModule: string[]
+): Promise<void> {
   return new Promise((resolve, reject) => {
     webpack(
       {
@@ -17,11 +21,12 @@ export async function compile(scriptFile: string, scriptFileCompiled: string): P
           ]
         },
         resolve: {
-          extensions: ['.tsx', '.ts', '.js']
+          extensions: ['.tsx', '.ts', '.js'],
+          modules: resolveModule
         },
         output: {
           filename: 'commands.js',
-          path: scriptFileCompiled,
+          path: folderTarget,
           library: {
             name: 'lib',
             type: 'assign-properties'
@@ -32,7 +37,12 @@ export async function compile(scriptFile: string, scriptFileCompiled: string): P
         if (err) {
           reject(err)
         } else if (stats?.hasErrors()) {
-          reject(stats.toJson().errors)
+          reject(
+            stats
+              .toJson()
+              .errors?.map((o) => o.details)
+              .reduce((errorText, errorEntry) => `${errorText}\n${errorEntry}`, '')
+          )
         } else {
           resolve()
         }

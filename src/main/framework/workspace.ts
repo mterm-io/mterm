@@ -80,7 +80,6 @@ export class Workspace {
     }
 
     await this.settings.load()
-    await this.commands.load()
 
     /**
      * Load an initial index
