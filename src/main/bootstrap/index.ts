@@ -1,12 +1,12 @@
 import { MTermWindow } from '../window/mterm-window'
 import { App, BrowserWindow } from 'electron'
-import { Workspace } from '../../framework/workspace'
+import { Workspace } from '../framework/workspace'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createWindows } from './create-windows'
 import { ErrorModal } from '../window/windows/error-modal'
 import { createTray } from './create-tray'
 import { createShortcut } from './create-shortcut'
-import { attach } from '../../framework/runtime-events'
+import { attach } from '../framework/runtime-events'
 
 export interface BootstrapContext {
   app: App

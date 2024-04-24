@@ -1,7 +1,7 @@
 import { BootstrapContext } from './index'
 import { DEFAULT_SETTING_IS_COMMANDER_MODE } from '../../constants'
 import { MTermWindow } from '../window/mterm-window'
-import { Workspace } from '../../framework/workspace'
+import { Workspace } from '../framework/workspace'
 
 export async function createWindows(context: BootstrapContext): Promise<void> {
   for (const window of context.windows) {

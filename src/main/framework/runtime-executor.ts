@@ -1,6 +1,6 @@
 import { Command, Runtime } from './runtime'
 import { resolveFolderPathForMTERM, Workspace } from './workspace'
-import { RunnerWindow } from '../main/window/windows/runner'
+import { RunnerWindow } from '../window/windows/runner'
 import { app } from 'electron'
 import { spawn } from 'node:child_process'
 import { resolve } from 'path'

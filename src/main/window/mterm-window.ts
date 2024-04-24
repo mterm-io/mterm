@@ -1,9 +1,9 @@
 import { BrowserWindow, BrowserWindowConstructorOptions, shell } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
-import { Settings } from '../../framework/settings'
+import { Settings } from '../framework/settings'
 import { attachBrowserWindowListeners } from '../bootstrap/create-windows'
-import { Workspace } from '../../framework/workspace'
+import { Workspace } from '../framework/workspace'
 
 export abstract class MTermWindow {
   public browserWindow?: BrowserWindow
