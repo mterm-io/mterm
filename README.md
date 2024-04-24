@@ -7,6 +7,9 @@ An electron terminal written with React and TypeScript.
 ## Community
 Join us on discord [here](https://discord.gg/mterm)!
 
+## Download
+> Coming soon, for now you must run install steps 
+
 ## Extend with commands
 
 Need your own command? MTERM includes `~/mterm/commands.ts` from your home directory - with any exported functions as available commands.
