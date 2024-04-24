@@ -4,7 +4,7 @@ import { RunnerWindow } from './window/windows/runner'
 import { Workspace } from './framework/workspace'
 import { DEFAULT_SETTINGS, DEFAULT_WORKSPACE } from '../constants'
 import { ErrorModal } from './window/windows/error-modal'
-import { boostrap, BootstrapContext } from './bootstrap'
+import { boostrap } from './bootstrap'
 
 jest.mock('electron', () => ({
   app: {

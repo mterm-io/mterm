@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    name: Test
+    name: build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -27,4 +27,4 @@ jobs:
     - name: Run test
       uses: borales/actions-yarn@v4
       with:
-        cmd: test
+        cmd: build
