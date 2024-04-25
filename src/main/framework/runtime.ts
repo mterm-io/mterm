@@ -1,4 +1,4 @@
-import { resolveFolderPathForMTERM } from './workspace'
+import { resolveFolderPathForMTERM, Workspace } from './workspace'
 import short from 'short-uuid'
 import { ChildProcessWithoutNullStreams } from 'node:child_process'
 
@@ -64,4 +64,13 @@ export class Runtime {
     icon: '',
     title: 'mterm [$idx]'
   }
+}
+
+export interface ExecuteContext {
+  platform: string
+  workspace: Workspace
+  runtime: Runtime
+  command: Command
+  out: (text: string, error?: boolean) => void
+  finish: (code: number) => void
 }

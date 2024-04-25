@@ -5,9 +5,11 @@ import short from 'short-uuid'
 import { runInNewContext } from 'node:vm'
 import * as tryRequire from 'try-require'
 import { compile } from '../vendor/webpack'
+import { ExecuteContext } from './runtime'
 
 export class Commands {
   public lib: object = {}
+  public state: Map<string, object> = new Map<string, object>()
 
   constructor(
     private workingDirectory: string,
@@ -16,6 +18,38 @@ export class Commands {
 
   require(path: string): unknown {
     return tryRequire.default(path)
+  }
+
+  setTimeout = global.setTimeout
+  console = global.console
+
+  has(key: string): boolean {
+    return !!this.lib[key]
+  }
+
+  async run(context: ExecuteContext, key: string, ...args: string[]): Promise<unknown> {
+    let state = this.state[key]
+    const cmd = this.lib[key]
+
+    if (!state) {
+      state = {}
+
+      this.state[key] = state
+    }
+
+    const scoped = {
+      ...state,
+      context
+    }
+
+    const exec = cmd.call(scoped, ...args)
+
+    this.state[key] = {
+      ...scoped,
+      context: undefined
+    }
+
+    return exec
   }
 
   async load(): Promise<void> {
@@ -57,6 +91,7 @@ export class Commands {
     await compile(scriptFile, temp, join(this.workingDirectory, 'node_modules'))
 
     const jsFile: Buffer = await readFile(join(temp, 'commands.js'))
+
     runInNewContext(`${jsFile}`, this)
   }
 }

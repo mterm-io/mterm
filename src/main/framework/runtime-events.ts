@@ -148,16 +148,19 @@ export function attach({ app, workspace }: BootstrapContext): void {
       }
       const finish = (code: number): void => {
         result.code = code
+
+        command.complete = true
+        command.error = result.code !== 0
       }
 
-      const finalizeConfirm = await execute(
+      const finalizeConfirm = await execute({
         platform,
         workspace,
-        runtimeTarget,
+        runtime: runtimeTarget,
         command,
         out,
         finish
-      )
+      })
       if (finalizeConfirm !== undefined && finalizeConfirm === false) {
         finalize = false
       }

@@ -1,19 +1,13 @@
-import { Command, Runtime } from './runtime'
-import { resolveFolderPathForMTERM, Workspace } from './workspace'
+import { ExecuteContext } from './runtime'
+import { resolveFolderPathForMTERM } from './workspace'
 import { RunnerWindow } from '../window/windows/runner'
 import { app } from 'electron'
 import { spawn } from 'node:child_process'
 import { resolve } from 'path'
 import { pathExists } from 'fs-extra'
 
-export async function execute(
-  platform: string,
-  workspace: Workspace,
-  runtime: Runtime,
-  command: Command,
-  out: (text: string, error?: boolean) => void,
-  finish: (code: number) => void
-): Promise<void | boolean> {
+export async function execute(context: ExecuteContext): Promise<void | boolean> {
+  const { platform, workspace, runtime, command, out, finish } = context
   const [cmd, ...args] = command.prompt.split(' ')
 
   // check for system commands
@@ -81,10 +75,8 @@ export async function execute(
     }
   }
 
-  if (workspace.commands.lib[cmd]) {
-    const exec = workspace.commands.lib[cmd]
-
-    const result = await Promise.resolve(exec(...args))
+  if (workspace.commands.has(cmd)) {
+    const result = await Promise.resolve(workspace.commands.run(context, cmd, ...args))
 
     if (!result) {
       // nothing was replied with, assume this is a run that will happen in time
