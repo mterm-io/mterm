@@ -15,6 +15,7 @@ export function createShortcut(context: BootstrapContext): void {
     'runner.commanderModeShortcut',
     DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT
   )
+
   globalShortcut.register(runnerHotkey, () => {
     context.workspace.toggle(RunnerWindow)
   })
