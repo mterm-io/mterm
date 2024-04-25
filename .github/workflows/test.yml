@@ -13,15 +13,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+
     - name: setup node
       uses: actions/setup-node@v3
       with:
         node-version: 20.0
-        cache: 'npm'
+
+    - name: yarn-cache-dir
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+
+    - name: yarn-cache
+      uses: actions/cache@v3
+      id: cache-yarn-cache
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - name: cache node_modules
+      id: cache-node-modules
+      uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-nodemodules-
+
     - name: Run install
       uses: borales/actions-yarn@v4
       with:
         cmd: install
+      if: |
+        steps.cache-yarn-cache.outputs.cache-hit != 'true' ||
+        steps.cache-node-modules.outputs.cache-hit != 'true'
     - name: lint
       uses: borales/actions-yarn@v4
       with:
