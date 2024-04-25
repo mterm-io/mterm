@@ -1,17 +1,27 @@
 import { ExecuteContext } from '../runtime'
-
+import { resolve } from 'path'
+import { resolveFolderPathForMTERM } from '../workspace'
+import { pathExists } from 'fs-extra'
 export default {
-  command: ':test',
+  command: 'cd',
   async task(context: ExecuteContext): Promise<void> {
-    return new Promise((resolve) => {
-      for (let i = 0; i < 10; i++) {
-        setTimeout(() => {
-          context.out(`cmd @ ${i}\n`)
-          if (i == 9) {
-            resolve()
-          }
-        }, i * 1000)
-      }
-    })
+    const [, ...args] = context.command.prompt.split(' ')
+
+    const path: string = args[0] || '.'
+
+    let location = resolve(context.runtime.folder, path)
+    if (path.startsWith('~')) {
+      location = resolveFolderPathForMTERM(path)
+    }
+
+    const isLocationActive = await pathExists(location)
+
+    if (!isLocationActive) {
+      context.out(`Folder not found \n\n${location}`, true)
+      context.finish(1)
+      return
+    }
+
+    context.runtime.folder = location
   }
 }
