@@ -17,9 +17,6 @@ const runner = new RunnerWindow(
   {
     width: 1800,
     height: 600,
-    transparent: true,
-    movable: false,
-    maximizable: false,
     enableLargerThanScreen: true,
     title: 'MTERM'
   },
