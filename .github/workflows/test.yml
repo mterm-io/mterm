@@ -1,17 +1,15 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: MTERM test
+name: MTERM
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
 jobs:
   build:
-    name: test
+    name: lint + test + build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -24,7 +22,15 @@ jobs:
       uses: borales/actions-yarn@v4
       with:
         cmd: install
-    - name: Run test
+    - name: lint
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: lint
+    - name: test
       uses: borales/actions-yarn@v4
       with:
         cmd: test
+    - name: build
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: build
