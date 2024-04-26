@@ -1,7 +1,9 @@
 export const DEFAULT_WORKSPACE = '~/mterm'
 
 export const DEFAULT_PLATFORM =
-  process.platform === 'win32' ? `pwsh -noprofile -command $ARGS` : 'sh $ARGS'
+  process.platform === 'win32'
+    ? `${process.env.SYSTEMROOT}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -noprofile -command $ARGS`
+    : 'sh $ARGS'
 export const DEFAULT_FOLDER = '$CWD'
 export const DEFAULT_SETTING_RUNNER_SHORTCUT = '`+CommandOrControl'
 export const DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT = '`+Shift+CommandOrControl'

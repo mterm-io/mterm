@@ -41,21 +41,21 @@ export async function boostrap(context: BootstrapContext): Promise<void> {
 
     await createWindows(context)
 
-    await workspace.commands.load()
-
     await createTray(context)
 
     createShortcut(context)
+
+    app.on('activate', async function () {
+      // On macOS it's common to re-create a window in the app when the
+      // dock icon is clicked and there are no other windows open.
+      if (BrowserWindow.getAllWindows().length === 0) await createWindows(context)
+    })
+
+    await workspace.commands.load()
   } catch (e) {
     console.error(e)
 
     await context.errorModal.showError(e)
     return
   }
-
-  app.on('activate', async function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) await createWindows(context)
-  })
 }

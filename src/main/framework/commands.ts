@@ -70,6 +70,9 @@ export class Commands {
       }
     }
 
+    const nodeTypesFileLocation = join(this.templateDirectory, 'node_types.ts')
+    const types: Buffer = await readFile(nodeTypesFileLocation)
+
     const packageJson = await readJson(join(this.workingDirectory, 'package.json'))
 
     const commandFileLocation = join(this.workingDirectory, packageJson.main)
@@ -77,16 +80,19 @@ export class Commands {
 
     const tsConfig = await readJson(join(this.workingDirectory, 'tsconfig.json'))
 
-    tsConfig['compilerOptions'].typeRoots = [join(__dirname, '..', '..', 'node_modules', '@types')]
-
     const id = short.generate()
     const temp = join(tmpdir(), `mterm-${id}`)
     await mkdirs(temp)
+
+    tsConfig['compilerOptions'].types = tsConfig['compilerOptions'].types || []
+    tsConfig['compilerOptions'].types.push(join(temp, 'node.d.ts'))
 
     const scriptFile = join(temp, packageJson.main)
     await writeFile(scriptFile, commands, 'utf-8')
     await writeJson(join(temp, 'tsconfig.json'), tsConfig, 'utf-8')
     await writeJson(join(temp, 'package.json'), packageJson, 'utf-8')
+
+    await writeFile(join(temp, 'node.d.ts'), types, 'utf-8')
 
     await compile(scriptFile, temp, join(this.workingDirectory, 'node_modules'))
 

@@ -44,7 +44,8 @@ export async function execute(context: ExecuteContext): Promise<void | boolean> 
   )
 
   const childSpawn = spawn(platformProgram, argsClean, {
-    cwd: runtime.folder
+    cwd: runtime.folder,
+    env: process.env
   })
 
   childSpawn.stdout.on('data', (data) => out(data))
