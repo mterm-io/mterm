@@ -7,8 +7,9 @@ import History from './system-commands/history'
 import Cd from './system-commands/cd'
 import Tab from './system-commands/tab'
 import Test from './system-commands/test'
+import Clear from './system-commands/clear'
 
-const systemCommands = [Reload, Exit, History, Cd, Tab, Test]
+const systemCommands = [Reload, Exit, History, Cd, Tab, Test, Clear]
 
 export async function execute(context: ExecuteContext): Promise<void | boolean> {
   const { platform, workspace, runtime, command, out, finish } = context
