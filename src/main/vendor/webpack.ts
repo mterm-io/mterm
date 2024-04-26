@@ -37,10 +37,11 @@ export async function compile(
         if (err) {
           reject(err)
         } else if (stats?.hasErrors()) {
+          console.error(stats.toJson())
           reject(
             stats
               .toJson()
-              .errors?.map((o) => o.details)
+              .errors?.map((o) => o.message)
               .reduce((errorText, errorEntry) => `${errorText}\n${errorEntry}`, '')
           )
         } else {

@@ -4,7 +4,7 @@ import { mkdirs, pathExists } from 'fs-extra'
 import { homedir } from 'node:os'
 import { MTermWindow } from '../window/mterm-window'
 import { remove } from 'lodash'
-import { BrowserWindowConstructorOptions } from 'electron'
+import { app, BrowserWindowConstructorOptions } from 'electron'
 import { setWindowValueFromPath } from '../util'
 import { Runtime } from './runtime'
 import { DEFAULT_FOLDER } from '../../constants'
@@ -34,7 +34,7 @@ export class Workspace {
      */
     this.folder = resolveFolderPathForMTERM(this.folder)
 
-    this.commands = new Commands(join(this.folder), './resources/commands')
+    this.commands = new Commands(join(this.folder), join(app.getAppPath(), './resources/commands'))
     this.settings = new Settings(join(this.folder, 'settings.json'), defaultSettings)
   }
 

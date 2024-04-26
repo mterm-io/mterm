@@ -14,7 +14,7 @@ export async function createTray(context: BootstrapContext): Promise<void> {
     {
       label: 'Open Terminal',
       click(): void {
-        context.workspace.show(RunnerWindow)
+        context.workspace.showAndHideOthers(RunnerWindow, '')
       }
     },
     {
@@ -71,4 +71,6 @@ export async function createTray(context: BootstrapContext): Promise<void> {
 
   tray.setToolTip('MTERM')
   tray.setContextMenu(menu)
+
+  console.log(tray)
 }

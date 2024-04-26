@@ -4,6 +4,8 @@ directories:
   buildResources: build
 files:
   - '!**/.vscode/*'
+  - '!**/.idea/*'
+  - '!**/.github/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
