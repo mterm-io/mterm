@@ -1,5 +1,5 @@
 import { ipcMain, shell } from 'electron'
-import { BootstrapContext } from '../main/bootstrap'
+import { BootstrapContext } from '../bootstrap'
 import {
   Command,
   CommandViewModel,
@@ -12,7 +12,7 @@ import short from 'short-uuid'
 import { execute } from './runtime-executor'
 import createDOMPurify from 'dompurify'
 import { JSDOM } from 'jsdom'
-import { DEFAULT_PLATFORM, DEFAULT_SETTING_IS_COMMANDER_MODE } from '../constants'
+import { DEFAULT_PLATFORM, DEFAULT_SETTING_IS_COMMANDER_MODE } from '../../constants'
 import Convert from 'ansi-to-html'
 
 const convert = new Convert()
@@ -119,6 +119,8 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
     const result: Result = command.result
 
+    let finalize: boolean = true
+
     try {
       const out = (text: string, error: boolean = false): void => {
         const raw = text.toString()
@@ -146,9 +148,22 @@ export function attach({ app, workspace }: BootstrapContext): void {
       }
       const finish = (code: number): void => {
         result.code = code
+
+        command.complete = true
+        command.error = result.code !== 0
       }
 
-      await execute(platform, workspace, runtimeTarget, command, out, finish)
+      const finalizeConfirm = await execute({
+        platform,
+        workspace,
+        runtime: runtimeTarget,
+        command,
+        out,
+        finish
+      })
+      if (finalizeConfirm !== undefined && finalizeConfirm === false) {
+        finalize = false
+      }
     } catch (e) {
       result.stream.push({
         error: true,
@@ -158,8 +173,10 @@ export function attach({ app, workspace }: BootstrapContext): void {
       result.code = 1
     }
 
-    command.complete = true
-    command.error = result.code !== 0
+    if (finalize) {
+      command.complete = true
+      command.error = result.code !== 0
+    }
 
     return command
   })

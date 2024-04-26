@@ -48,6 +48,7 @@ export default function Runner(): ReactElement {
 
     await reloadRuntimesFromBackend()
 
+    // renderer -> "backend"
     await window.electron.ipcRenderer.invoke('runtime.execute', command)
 
     await reloadRuntimesFromBackend()

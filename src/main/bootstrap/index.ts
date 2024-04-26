@@ -1,12 +1,12 @@
 import { MTermWindow } from '../window/mterm-window'
 import { App, BrowserWindow } from 'electron'
-import { Workspace } from '../../framework/workspace'
+import { Workspace } from '../framework/workspace'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createWindows } from './create-windows'
 import { ErrorModal } from '../window/windows/error-modal'
 import { createTray } from './create-tray'
 import { createShortcut } from './create-shortcut'
-import { attach } from '../../framework/runtime-events'
+import { attach } from '../framework/runtime-events'
 
 export interface BootstrapContext {
   app: App
@@ -40,19 +40,22 @@ export async function boostrap(context: BootstrapContext): Promise<void> {
     await workspace.load()
 
     await createWindows(context)
+
     await createTray(context)
 
     createShortcut(context)
+
+    app.on('activate', async function () {
+      // On macOS it's common to re-create a window in the app when the
+      // dock icon is clicked and there are no other windows open.
+      if (BrowserWindow.getAllWindows().length === 0) await createWindows(context)
+    })
+
+    await workspace.commands.load()
   } catch (e) {
     console.error(e)
 
     await context.errorModal.showError(e)
     return
   }
-
-  app.on('activate', async function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) await createWindows(context)
-  })
 }
