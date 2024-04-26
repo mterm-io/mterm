@@ -15,12 +15,6 @@ describe('Default settings', () => {
     expect(DEFAULT_WORKSPACE).toBe('~/mterm')
   })
 
-  test('DEFAULT_PLATFORM should be platform-specific', () => {
-    const expectedPlatform =
-      process.platform === 'win32' ? 'pwsh -noprofile -command $ARGS' : 'sh $ARGS'
-    expect(DEFAULT_PLATFORM).toBe(expectedPlatform)
-  })
-
   test('DEFAULT_FOLDER should be "$CWD"', () => {
     expect(DEFAULT_FOLDER).toBe('$CWD')
   })

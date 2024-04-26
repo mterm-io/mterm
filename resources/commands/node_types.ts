@@ -239,10 +239,13 @@ declare module 'os' {
   type SignalConstants = {
     [key in NodeJS.Signals]: number
   }
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace constants {
     const UV_UDP_REUSEADDR: number
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace signals {}
     const signals: SignalConstants
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace errno {
       const E2BIG: number
       const EACCES: number
@@ -382,6 +385,7 @@ declare module 'os' {
       const WSA_E_CANCELLED: number
       const WSAEREFUSED: number
     }
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace priority {
       const PRIORITY_LOW: number
       const PRIORITY_BELOW_NORMAL: number
