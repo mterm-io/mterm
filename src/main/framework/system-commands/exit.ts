@@ -12,6 +12,6 @@ async function exit(context: ExecuteContext): Promise<void> {
 }
 
 export default {
-  command: ':reload',
+  command: ':exit',
   task: exit
 }

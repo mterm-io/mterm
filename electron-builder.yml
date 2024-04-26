@@ -15,6 +15,9 @@ asarUnpack:
   - resources/**
 win:
   executableName: mterm
+extraFiles:
+  - from: "./node_modules"
+    to: "node_modules"
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

@@ -15,7 +15,7 @@ export async function compile(
           rules: [
             {
               test: /\.tsx?$/,
-              use: 'ts-loader',
+              use: './node_modules/ts-loader',
               exclude: /node_modules/
             }
           ]
