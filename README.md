@@ -45,6 +45,10 @@ export async function query(): Promise<{
 }
 ```
 
+![image](https://github.com/mterm-io/mterm/assets/7341502/df8e74d4-896c-4964-861d-bad3ced17c80)
+
+> Note the return type is optional, just added above to highlight the typescript engine provided 
+
 ### Project Setup
 
 ### Install
