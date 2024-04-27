@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.17-beta](https://github.com/mterm-io/mterm/compare/v1.0.16-beta...v1.0.17-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* move release check to ready block ([5a6ee7c](https://github.com/mterm-io/mterm/commit/5a6ee7cf8a57492ed86d42ed46857a26d9c941c6))
+* remove discord message, find solution later ([9d19308](https://github.com/mterm-io/mterm/commit/9d19308068256c9bdaae5277674ff1f0a9b56131))
+
 ## [1.0.16-beta](https://github.com/mterm-io/mterm/compare/v1.0.15-beta...v1.0.16-beta) (2024-04-27)
 
 
