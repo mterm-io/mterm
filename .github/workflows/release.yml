@@ -38,7 +38,7 @@ jobs:
       - name: build
         uses: borales/actions-yarn@v4
         env:
-          GH: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
+          GH_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
         with:
           cmd: build:win
       - name: Upload Release Artifact
@@ -60,7 +60,7 @@ jobs:
       - name: build
         uses: borales/actions-yarn@v4
         env:
-          GH: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
+          GH_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
         with:
           cmd: build:linux
       - name: Upload Release Artifact
@@ -85,7 +85,7 @@ jobs:
         with:
           cmd: build:mac
         env:
-          GH: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
+          GH_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
           CSC_LINK: ${{ secrets.MAC_CSC }}
       - name: Upload Release Artifact
         env:
