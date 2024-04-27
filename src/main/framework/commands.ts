@@ -22,6 +22,7 @@ export class Commands {
 
   setTimeout = global.setTimeout
   console = global.console
+  fetch = global.fetch
 
   has(key: string): boolean {
     return !!this.lib[key]

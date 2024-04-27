@@ -30,11 +30,15 @@ export async function execute(context: ExecuteContext): Promise<void | boolean> 
 
   // check for user commands
   if (workspace.commands.has(cmd)) {
-    const result = await Promise.resolve(workspace.commands.run(context, cmd, ...args))
+    let result = await Promise.resolve(workspace.commands.run(context, cmd, ...args))
 
     if (!result) {
       // nothing was replied with, assume this is a run that will happen in time
       return false
+    }
+
+    if (typeof result === 'object') {
+      result = JSON.stringify(result, null, 2)
     }
 
     out(`${result}`)

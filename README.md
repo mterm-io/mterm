@@ -30,6 +30,20 @@ Now run `hello X` from mterm -
 
 > In this case, no argument was provided so the `os.userInfo().username` was the fallback. `Hello, DR` is the result!
 
+Try fetching data!
+
+```typescript
+export async function query(): Promise<{
+  userId: number
+  id: number
+  title: string
+  completed: boolean
+}> {
+  const response = await fetch('https://jsonplaceholder.typicode.com/todos/1')
+
+  return await response.json()
+}
+```
 
 ### Project Setup
 
