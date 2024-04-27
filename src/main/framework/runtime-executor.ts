@@ -8,17 +8,20 @@ import Cd from './system-commands/cd'
 import Tab from './system-commands/tab'
 import Test from './system-commands/test'
 import Clear from './system-commands/clear'
-import cls from './system-commands/cls'
+import Version from './system-commands/version'
 
-const systemCommands = [Reload, Exit, History, Cd, Tab, Test, Clear, cls]
-
+const systemCommands: Array<{
+  command: string
+  alias?: string[]
+  task: (context: ExecuteContext) => Promise<void> | void
+}> = [Reload, Exit, History, Cd, Tab, Test, Clear, Version]
 export async function execute(context: ExecuteContext): Promise<void | boolean> {
   const { platform, workspace, runtime, command, out, finish } = context
   const [cmd, ...args] = command.prompt.split(' ')
 
   // check for system commands
   for (const systemCommand of systemCommands) {
-    if (systemCommand.command === cmd) {
+    if (systemCommand.command === cmd || systemCommand?.alias?.includes(cmd)) {
       await systemCommand.task(context)
 
       return
