@@ -3,7 +3,7 @@
   "version": "1.0.10-beta",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
-  "author": "example.com",
+  "author": "mterm.io",
   "homepage": "https://electron-vite.org",
   "repository": "https://github.com/mterm-io/mterm.git",
   "scripts": {
