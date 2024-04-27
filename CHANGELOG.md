@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.6-beta](https://github.com/mterm-io/mterm/compare/v1.0.5-beta...v1.0.6-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* windows need 256x icon size ([9499f6d](https://github.com/mterm-io/mterm/commit/9499f6d961c65ea490ffbaa69d4ed3c21eb616e8))
+
 ## [1.0.5-beta](https://github.com/mterm-io/mterm/compare/v1.0.4-beta...v1.0.5-beta) (2024-04-27)
 
 
