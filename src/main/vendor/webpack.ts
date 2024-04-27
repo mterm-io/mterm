@@ -6,6 +6,8 @@ export async function compile(
   ...resolveModule: string[]
 ): Promise<void> {
   return new Promise((resolve, reject) => {
+    const linux = process.platform === 'linux'
+
     webpack(
       {
         dependencies: [],
@@ -15,7 +17,7 @@ export async function compile(
           rules: [
             {
               test: /\.tsx?$/,
-              use: './node_modules/ts-loader',
+              use: linux ? '/opt/mterm/node_modules/ts-loader' : './node_modules/ts-loader',
               exclude: /node_modules/
             }
           ]
