@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.16-beta](https://github.com/mterm-io/mterm/compare/v1.0.15-beta...v1.0.16-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* discord bot ([f0ec2dc](https://github.com/mterm-io/mterm/commit/f0ec2dce9a51a1904bf3e07b01fd8ca372138bc5))
+
 ## [1.0.15-beta](https://github.com/mterm-io/mterm/compare/v1.0.14-beta...v1.0.15-beta) (2024-04-27)
 
 
