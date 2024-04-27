@@ -32,10 +32,6 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v3
-      - name: Dump runner context
-        env:
-          RUNNER_TARGET: mterm-${{ needs.release-please.outputs.major}}.${{ needs.release-please.outputs.minor}}.${{ needs.release-please.outputs.patch}}-beta-setup.exe
-        run: echo "$RUNNER_TARGET"
       - name: install
         uses: borales/actions-yarn@v4
         with:
@@ -47,5 +43,26 @@ jobs:
       - name: Upload Release Artifact
         env:
           GITHUB_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
-        run: gh release upload ${{ needs.release-please.outputs.release_tag }} ./dist/mterm-${{ needs.release-please.outputs.major}}.${{ needs.release-please.outputs.minor}}.${{ needs.release-please.outputs.patch}}-beta-setup.exe
+        run: gh release upload ${{ needs.release-please.outputs.release_tag }} ./dist/mterm-${{ needs.release-please.outputs.major}}.${{ needs.release-please.outputs.minor}}.${{ needs.release-please.outputs.patch}}${{ vars.RELEASE_LABEL }}-setup.exe
+
+  okay-release-linux:
+    needs: release-please
+    if: needs.release-please.outputs.release_created
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+      - name: install
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install
+      - name: build
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build:linux
+      - name: Upload Release Artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
+        # mterm_1.0.6-beta_amd64.deb
+        run: gh release upload ${{ needs.release-please.outputs.release_tag }} ./dist/mterm_${{ needs.release-please.outputs.major}}.${{ needs.release-please.outputs.minor}}.${{ needs.release-please.outputs.patch}}${{ vars.RELEASE_LABEL }}_amd64.deb
 
