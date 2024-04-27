@@ -12,6 +12,12 @@ name: release-please
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created:  ${{ steps.release.outputs.release_created }}
+      release_tag:  ${{ steps.release.outputs.tag_name }}
+      major:  ${{ steps.release.outputs.major }}
+      minor:  ${{ steps.release.outputs.minor }}
+      patch:  ${{ steps.release.outputs.patch }}
     steps:
       - uses: google-github-actions/release-please-action@v4
         id: release
@@ -40,4 +46,4 @@ jobs:
       - name: Upload Release Artifact
         env:
           GITHUB_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
-        run: gh release upload ${{ needs.release-please.outputs.tag_name }} ./dist/${{ needs.release-please.outputs.major}}-${{ needs.release-please.outputs.minor}}-${{ needs.release-please.outputs.patch}}-beta-setup.exe
+        run: gh release upload ${{ needs.release-please.outputs.release_tag }} ./dist/${{ needs.release-please.outputs.major}}-${{ needs.release-please.outputs.minor}}-${{ needs.release-please.outputs.patch}}-beta-setup.exe
