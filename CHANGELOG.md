@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.11-beta](https://github.com/mterm-io/mterm/compare/v1.0.10-beta...v1.0.11-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* fix author ([b1b96f2](https://github.com/mterm-io/mterm/commit/b1b96f244433359d845f63b731af949c7ce9fe03))
+
 ## [1.0.10-beta](https://github.com/mterm-io/mterm/compare/v1.0.9-beta...v1.0.10-beta) (2024-04-27)
 
 
