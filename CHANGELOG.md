@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.9-beta](https://github.com/mterm-io/mterm/compare/v1.0.8-beta...v1.0.9-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* for mac build, add universal target ([8630246](https://github.com/mterm-io/mterm/commit/863024637af04b4bc23996e954d18907ab9ca964))
+
 ## [1.0.8-beta](https://github.com/mterm-io/mterm/compare/v1.0.7-beta...v1.0.8-beta) (2024-04-27)
 
 
