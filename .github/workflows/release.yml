@@ -86,7 +86,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Notify Discord
-        uses: sillyangel/releases-to-discord@v1.0.0
+        uses: sillyangel/releases-to-discord@v1
         with:
           webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
           color: "3945071"
