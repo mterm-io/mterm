@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Dump runner context
         env:
-          RUNNER_TARGET: ${{ needs.release-please.outputs.major}}-${{ needs.release-please.outputs.minor}}-${{ needs.release-please.outputs.patch}}-beta-setup.exe
+          RUNNER_TARGET: mterm-${{ needs.release-please.outputs.major}}.${{ needs.release-please.outputs.minor}}.${{ needs.release-please.outputs.patch}}-beta-setup.exe
         run: echo "$RUNNER_TARGET"
       - name: install
         uses: borales/actions-yarn@v4
@@ -47,5 +47,5 @@ jobs:
       - name: Upload Release Artifact
         env:
           GITHUB_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
-        run: gh release upload ${{ needs.release-please.outputs.release_tag }} ./dist/${{ needs.release-please.outputs.major}}-${{ needs.release-please.outputs.minor}}-${{ needs.release-please.outputs.patch}}-beta-setup.exe
-    
+        run: gh release upload ${{ needs.release-please.outputs.release_tag }} ./dist/mterm-${{ needs.release-please.outputs.major}}.${{ needs.release-please.outputs.minor}}.${{ needs.release-please.outputs.patch}}-beta-setup.exe
+
