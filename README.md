@@ -1,14 +1,17 @@
-# mterm
 
-An electron terminal written with React and TypeScript.
+<h1 align="right">mterm</h1>
+<h5 align="right">An electron terminal written with React and TypeScript.</h5>
+<p align="right">
+  <img alt="slate@taff" width="100px" src="resources/icon.png">
+</p>
+<h5 align="right">Join us on discord @ <a href=https://discord.gg/mterm">discord.gg/mterm</a></h5>
 
-![image](https://github.com/mterm-io/mterm/assets/7341502/27bcad62-6891-4b49-80b5-e5a17e0562ab)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mterm-io_mterm&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=mterm-io_mterm)
+[![release](https://github.com/mterm-io/mterm/actions/workflows/release.yml/badge.svg)](https://github.com/mterm-io/mterm/actions/workflows/release.yml)
 
-## Community
+> This documentation is a work in progress!
 
-Join us on discord [here](https://discord.gg/mterm)!
-
-## Extend with commands
+### Commands
 
 Need your own command? MTERM includes `~/mterm/commands.ts` from your home directory - with any exported functions as available commands.
 
@@ -28,7 +31,7 @@ Now run `hello X` from mterm -
 > In this case, no argument was provided so the `os.userInfo().username` was the fallback. `Hello, DR` is the result!
 
 
-## Project Setup
+### Project Setup
 
 ### Install
 
