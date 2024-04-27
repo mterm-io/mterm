@@ -7,8 +7,7 @@ permissions:
   contents: write
   pull-requests: write
 
-name: release-please
-
+name: release
 jobs:
   release-please:
     runs-on: ubuntu-latest
@@ -38,6 +37,8 @@ jobs:
           cmd: install
       - name: build
         uses: borales/actions-yarn@v4
+        env:
+          GH: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
         with:
           cmd: build:win
       - name: Upload Release Artifact
@@ -58,6 +59,8 @@ jobs:
           cmd: install
       - name: build
         uses: borales/actions-yarn@v4
+        env:
+          GH: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
         with:
           cmd: build:linux
       - name: Upload Release Artifact
@@ -82,6 +85,7 @@ jobs:
         with:
           cmd: build:mac
         env:
+          GH: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
           CSC_LINK: ${{ secrets.MAC_CSC }}
       - name: Upload Release Artifact
         env:
@@ -89,3 +93,20 @@ jobs:
         # mterm_1.0.6-beta_amd64.deb
         run: gh release upload ${{ needs.release-please.outputs.release_tag }} ./dist/mterm-${{ needs.release-please.outputs.major}}.${{ needs.release-please.outputs.minor}}.${{ needs.release-please.outputs.patch}}${{ vars.RELEASE_LABEL }}.dmg
 
+  discord-message:
+    runs-on: ubuntu-latest
+    needs: [release-please, okay-release-windows, okay-release-mac, okay-release-linux]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Notify Discord
+        uses: SethCohen/github-releases-to-discord@v1.13.1
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          color: "3945071"
+          username: "MTERM"
+          avatar_url: "https://cdn.discordapp.com/avatars/1231588950125183077/b4758eee539540263682fe3f1e93251e.png"
+          content: "||@notify:release||"
+          footer_title: "Changelog"
+          footer_icon_url: "https://cdn.discordapp.com/avatars/487431320314576937/bd64361e4ba6313d561d54e78c9e7171.png"
+          footer_timestamp: true
