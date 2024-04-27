@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4-beta](https://github.com/mterm-io/mterm/compare/v1.0.3-beta...v1.0.4-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* yikes, fix build target ([283f47e](https://github.com/mterm-io/mterm/commit/283f47e9bffd0b523c7efd18e76edb87e742ff4f))
+
 ## [1.0.3-beta](https://github.com/mterm-io/mterm/compare/v1.0.2-beta...v1.0.3-beta) (2024-04-27)
 
 
