@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.5-beta](https://github.com/mterm-io/mterm/compare/v1.0.4-beta...v1.0.5-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* png icon fix ([a1a2f18](https://github.com/mterm-io/mterm/commit/a1a2f182ecadd9150baef5caae65c153640d1af3))
+* proper icons ([7fb563e](https://github.com/mterm-io/mterm/commit/7fb563ec9588d8ca37a5a41a36402c3a96c81982))
+
 ## [1.0.4-beta](https://github.com/mterm-io/mterm/compare/v1.0.3-beta...v1.0.4-beta) (2024-04-27)
 
 
