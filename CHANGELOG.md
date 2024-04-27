@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.15-beta](https://github.com/mterm-io/mterm/compare/v1.0.14-beta...v1.0.15-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* add version command to system cmd ([3b36c59](https://github.com/mterm-io/mterm/commit/3b36c5922517ba1d8a7a12fbf01556c962acaf6d))
+* discord message on finish ([657e306](https://github.com/mterm-io/mterm/commit/657e306d1b1ab402aaab9677f5f9e2f59fd22699))
+* remove release artifact ([21da47f](https://github.com/mterm-io/mterm/commit/21da47ff795d5de6be2252f560df684e5e83156b))
+
 ## [1.0.14-beta](https://github.com/mterm-io/mterm/compare/v1.0.13-beta...v1.0.14-beta) (2024-04-27)
 
 
