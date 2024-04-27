@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.8-beta](https://github.com/mterm-io/mterm/compare/v1.0.7-beta...v1.0.8-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* add mac release ([bbe6a76](https://github.com/mterm-io/mterm/commit/bbe6a7621f5e339695ba2733a9e2022881f0867b))
+
 ## [1.0.7-beta](https://github.com/mterm-io/mterm/compare/v1.0.6-beta...v1.0.7-beta) (2024-04-27)
 
 
