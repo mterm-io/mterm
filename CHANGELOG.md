@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.14-beta](https://github.com/mterm-io/mterm/compare/v1.0.13-beta...v1.0.14-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* switch release channel ([085ca35](https://github.com/mterm-io/mterm/commit/085ca359369556aea2466226f4001b635ad8c721))
+
 ## [1.0.13-beta](https://github.com/mterm-io/mterm/compare/v1.0.12-beta...v1.0.13-beta) (2024-04-27)
 
 
