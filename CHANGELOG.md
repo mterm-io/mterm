@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.7-beta](https://github.com/mterm-io/mterm/compare/v1.0.6-beta...v1.0.7-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* linux build in workflow with release ([11cd3ab](https://github.com/mterm-io/mterm/commit/11cd3abfffb8779a33878dc92c0ba41b2ab2a613))
+* linux build to use ts-loader in opt ([b569754](https://github.com/mterm-io/mterm/commit/b5697547a6e4f99e97887387d1a20c0e695b9efb))
+* linux/mac exec ([12c34e1](https://github.com/mterm-io/mterm/commit/12c34e14cf52627be32fc1a2091047f068fef475))
+
 ## [1.0.6-beta](https://github.com/mterm-io/mterm/compare/v1.0.5-beta...v1.0.6-beta) (2024-04-27)
 
 
