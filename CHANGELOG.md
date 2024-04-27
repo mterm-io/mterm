@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.10-beta](https://github.com/mterm-io/mterm/compare/v1.0.9-beta...v1.0.10-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* add update check to bootstrap ([6832a5c](https://github.com/mterm-io/mterm/commit/6832a5c2f301519de6561324611fbb0b2776d716))
+* remove mac target universal ([a8a901d](https://github.com/mterm-io/mterm/commit/a8a901d4e511b5b09a8dc6d67f7189205a83e1e5))
+* update auto updater dev provider ([eb3a4f9](https://github.com/mterm-io/mterm/commit/eb3a4f9566c33f75a66315dc58058005d30850d8))
+* use gihub provider flow for auto updater ([1fb3157](https://github.com/mterm-io/mterm/commit/1fb31572713fc74263c18964fb11ec8ad5aa50e8))
+
 ## [1.0.9-beta](https://github.com/mterm-io/mterm/compare/v1.0.8-beta...v1.0.9-beta) (2024-04-27)
 
 
