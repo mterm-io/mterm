@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2-beta](https://github.com/mterm-io/mterm/compare/v1.0.1-beta...v1.0.2-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* add error logger to log utility ([7c116d0](https://github.com/mterm-io/mterm/commit/7c116d01f22b02efa6ecf3245ab48ce68a7cf12d))
+
 ## [1.0.1-beta](https://github.com/mterm-io/mterm/compare/1.0.0-beta...v1.0.1-beta) (2024-04-27)
 
 
