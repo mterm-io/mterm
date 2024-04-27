@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.12-beta](https://github.com/mterm-io/mterm/compare/v1.0.11-beta...v1.0.12-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* notify discord ([1e19f33](https://github.com/mterm-io/mterm/commit/1e19f335b28519649ebff7f6a71e24ee18583df5))
+
 ## [1.0.11-beta](https://github.com/mterm-io/mterm/compare/v1.0.10-beta...v1.0.11-beta) (2024-04-27)
 
 
