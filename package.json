@@ -1,6 +1,6 @@
 {
   "name": "mterm",
-  "version": "1.0.8-beta",
+  "version": "1.0.9-beta",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
   "author": "example.com",
