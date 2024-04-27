@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.19-beta](https://github.com/mterm-io/mterm/compare/v1.0.18-beta...v1.0.19-beta) (2024-04-27)
+
+
+### Bug Fixes
+
+* add image to readme for query ([25e3af3](https://github.com/mterm-io/mterm/commit/25e3af30de91e04a6aa0112250513758aa5a6c1a))
+* support for fetch in commands ([46b9b5b](https://github.com/mterm-io/mterm/commit/46b9b5b87cf036bd3ddcaeb5f8abc163dffd5d6f))
+
 ## [1.0.18-beta](https://github.com/mterm-io/mterm/compare/v1.0.17-beta...v1.0.18-beta) (2024-04-27)
 
 
