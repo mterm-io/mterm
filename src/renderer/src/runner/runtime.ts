@@ -27,6 +27,7 @@ export interface Runtime {
   result: Result
   prompt: string
   target: boolean
+  profile: string
   folder: string
   appearance: {
     title: string

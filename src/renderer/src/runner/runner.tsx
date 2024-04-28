@@ -43,7 +43,8 @@ export default function Runner(): ReactElement {
     const command: Command = await window.electron.ipcRenderer.invoke(
       'runtime.prepareExecute',
       runtime.id,
-      historicalExecution ? historicalExecution.prompt : runtime.prompt
+      historicalExecution ? historicalExecution.prompt : runtime.prompt,
+      'default'
     )
 
     await reloadRuntimesFromBackend()

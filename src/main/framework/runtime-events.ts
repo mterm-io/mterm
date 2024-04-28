@@ -3,6 +3,8 @@ import { BootstrapContext } from '../bootstrap'
 import {
   Command,
   CommandViewModel,
+  Profile,
+  ProfileMap,
   Result,
   ResultStream,
   ResultStreamEvent,
@@ -12,7 +14,11 @@ import short from 'short-uuid'
 import { execute } from './runtime-executor'
 import createDOMPurify from 'dompurify'
 import { JSDOM } from 'jsdom'
-import { DEFAULT_PLATFORM, DEFAULT_SETTING_IS_COMMANDER_MODE } from '../../constants'
+import {
+  DEFAULT_PROFILE,
+  DEFAULT_PROFILES,
+  DEFAULT_SETTING_IS_COMMANDER_MODE
+} from '../../constants'
 import Convert from 'ansi-to-html'
 
 const convert = new Convert()
@@ -115,7 +121,13 @@ export function attach({ app, workspace }: BootstrapContext): void {
       throw `Command '${id}' in runtime '${runtimeTarget}' does not exist`
     }
 
-    const platform = workspace.settings.get<string>('platform', DEFAULT_PLATFORM)
+    let profileKey = runtimeTarget.profile
+    if (profileKey === 'default') {
+      profileKey = workspace.settings.get<string>('defaultProfile', DEFAULT_PROFILE)
+    }
+
+    const profiles = workspace.settings.get<ProfileMap>('profiles', DEFAULT_PROFILES)
+    const profile: Profile = profiles[profileKey]
 
     const result: Result = command.result
 
@@ -153,6 +165,11 @@ export function attach({ app, workspace }: BootstrapContext): void {
         command.error = result.code !== 0
       }
 
+      if (!profile) {
+        throw `Profile ${profileKey} does not exist, provided by runtime as = ${runtimeTarget.profile}`
+      }
+
+      const platform = profile.platform
       const finalizeConfirm = await execute({
         platform,
         workspace,
