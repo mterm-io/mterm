@@ -68,6 +68,34 @@ export function attach({ app, workspace }: BootstrapContext): void {
     await shell.openPath(workspace.folder)
   })
 
+  ipcMain.handle('store.is', async () => {
+    return await workspace.store.exists()
+  })
+
+  ipcMain.handle('store.setup', async (_, password) => {
+    workspace.store.vault = {}
+    await workspace.store.save(password)
+    return await workspace.store.open(password)
+  })
+
+  ipcMain.handle('store.unlocked', async () => {
+    return workspace.store.unlocked
+  })
+
+  ipcMain.handle('store.save', async (_, store) => {
+    workspace.store.vault = store
+    await workspace.store.save()
+    return store
+  })
+
+  ipcMain.handle('store.unlock', async (_, password: string) => {
+    return await workspace.store.open(password)
+  })
+
+  ipcMain.handle('store.model', async () => {
+    return workspace.store.vault
+  })
+
   ipcMain.on('system.exit', () => app.quit())
   ipcMain.on('runtime.prompt', (_, value: string) => {
     workspace.runtime.prompt = value

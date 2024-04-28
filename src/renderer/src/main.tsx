@@ -24,12 +24,12 @@ const router = createHashRouter([
     element: <About />
   },
   {
-    path: '/store',
-    element: <Store />
-  },
-  {
     path: '/error',
     element: <ErrorRuntimePage />
+  },
+  {
+    path: '/store',
+    element: <Store />
   },
   {
     path: '/settings',

@@ -9,12 +9,13 @@ import Tab from './system-commands/tab'
 import Test from './system-commands/test'
 import Clear from './system-commands/clear'
 import Version from './system-commands/version'
+import Vault from './system-commands/vault'
 
 const systemCommands: Array<{
   command: string
   alias?: string[]
   task: (context: ExecuteContext) => Promise<void> | void
-}> = [Reload, Exit, History, Cd, Tab, Test, Clear, Version]
+}> = [Reload, Exit, History, Cd, Tab, Test, Clear, Version, Vault]
 export async function execute(context: ExecuteContext): Promise<void | boolean> {
   const { platform, workspace, runtime, command, out, finish } = context
   const [cmd, ...args] = command.prompt.split(' ')

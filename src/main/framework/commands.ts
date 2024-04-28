@@ -40,14 +40,26 @@ export class Commands {
 
     const scoped = {
       ...state,
-      context
+      context,
+      vault: {
+        async unlock(password: string): Promise<object> {
+          return context.workspace.store.open(password)
+        },
+        get(key: string, orElse?: string): string {
+          if (!context.workspace.store.unlocked) {
+            throw 'Vault is locked, unlock before using secrets. Open with :vault'
+          }
+          return context.workspace.store.get(key, orElse)
+        }
+      }
     }
 
     const exec = cmd.call(scoped, ...args)
 
     this.state[key] = {
       ...scoped,
-      context: undefined
+      context: undefined,
+      vault: undefined
     }
 
     return exec
