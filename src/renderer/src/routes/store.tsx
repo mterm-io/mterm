@@ -1,5 +1,6 @@
 import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
 import { Runtime } from '../runner/runtime'
+import short from 'short-uuid'
 
 interface PasswordSetup {
   password: string
@@ -10,8 +11,10 @@ export default function Store(): ReactElement {
   const [hasStore, setHasStore] = useState<boolean>(false)
   const [setup, setIsSetup] = useState<boolean>(false)
   const [store, setStore] = useState<object>({})
+  const [storeKeys, setStoreKeys] = useState<object>({})
   const [storeIsUnlocked, setStoreIsUnlocked] = useState<boolean>(false)
   const [setupError, setSetupError] = useState<string>('')
+  const [saveError, setSaveError] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [loginError, setLoginError] = useState<string>('')
   const [generalError, setGeneralError] = useState<string>('')
@@ -38,6 +41,7 @@ export default function Store(): ReactElement {
       setStoreIsUnlocked(true)
       setHasStore(true)
       setIsSetup(false)
+      setIsLoading(false)
     } else {
       setPassword('')
       setLoginError('')
@@ -114,6 +118,39 @@ export default function Store(): ReactElement {
     }
   }
 
+  const onClickSave = (): void => {
+    const finalStore = {
+      ...store
+    }
+
+    Object.keys(storeKeys).forEach((key) => {
+      const newStoreKey = storeKeys[key]
+
+      const value: string = finalStore[key]
+
+      delete finalStore[key]
+
+      if (newStoreKey) {
+        finalStore[newStoreKey] = value
+      }
+    })
+
+    setIsLoading(true)
+    setSaveError('')
+
+    window.electron.ipcRenderer
+      .invoke('store.save', finalStore)
+      .then((store) => {
+        setStore(store)
+        setStoreKeys({})
+        setIsLoading(false)
+      })
+      .catch((error) => {
+        setIsLoading(false)
+        setSaveError(error.message)
+      })
+  }
+
   useEffect(() => {
     getStore().catch((error) => {
       setIsLoading(false)
@@ -140,8 +177,56 @@ export default function Store(): ReactElement {
     })
   }
 
+  const onClickAdd = (): void => {
+    setStore((store) => {
+      return {
+        ...store,
+        [`KEY_${short.generate().substring(0, 4)}`]: ''
+      }
+    })
+  }
+
+  const onClickDelete = (key: string): void => {
+    setStore((store) => {
+      const newStore = {}
+      Object.keys(store).forEach((storeKey) => {
+        if (key !== storeKey) {
+          newStore[storeKey] = store[storeKey]
+        }
+      })
+      return newStore
+    })
+    setStoreKeys((store) => {
+      const newStore = {}
+      Object.keys(store).forEach((storeKey) => {
+        if (key !== storeKey) {
+          newStore[storeKey] = store[storeKey]
+        }
+      })
+      return newStore
+    })
+  }
+
   const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setPassword(event.target.value)
+  }
+
+  const handleStoreKeyChange = (key: string, event: ChangeEvent<HTMLInputElement>) => {
+    setStoreKeys((keys) => {
+      return {
+        ...keys,
+        [key]: event.target.value
+      }
+    })
+  }
+
+  const handleStoreValueChange = (key: string, event: ChangeEvent<HTMLInputElement>) => {
+    setStore((store) => {
+      return {
+        ...store,
+        [key]: event.target.value
+      }
+    })
   }
 
   if (setup) {
@@ -229,5 +314,45 @@ export default function Store(): ReactElement {
     )
   }
 
-  return <p>STORE SETUP</p>
+  const keys = Object.keys(store)
+  return (
+    <div className="store-editor">
+      <div className="store-editor-title">mterm vault</div>
+      {keys.map((key) => (
+        <div key={key} className="store-entry">
+          <div className="store-entry-key">
+            <input
+              className="store-edit-input"
+              type="text"
+              value={typeof storeKeys[key] !== 'undefined' ? storeKeys[key] : key}
+              onChange={(e) => handleStoreKeyChange(key, e)}
+            />
+          </div>
+          <div className="store-entry-divider">=</div>
+          <div className="store-entry-value">
+            <input
+              className="store-edit-input"
+              type="password"
+              value={store[key]}
+              onChange={(e) => handleStoreValueChange(key, e)}
+            />
+          </div>
+          <div className="store-entry-action">
+            <div className="store-entry-action-delete" onClick={() => onClickDelete(key)}>
+              DELETE
+            </div>
+          </div>
+        </div>
+      ))}
+      {saveError && <div className="info-error">{saveError}</div>}
+      <div className="store-action-add">
+        <button className="store-button" onClick={onClickAdd}>
+          ADD
+        </button>
+        <button className="store-button" onClick={onClickSave}>
+          SAVE
+        </button>
+      </div>
+    </div>
+  )
 }

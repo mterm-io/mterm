@@ -64,3 +64,42 @@
 .file-path {
   color: #dcb8b8;
 }
+.store-editor {
+  padding: 25px
+}
+.store-entry {
+  padding: 5px;
+  margin-top: 10px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: auto 20px auto 50px;
+  align-items: center;
+}
+.store-entry-key {
+  border-left: 5px solid #12aacc;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.store-entry-value {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.store-entry-action {
+  text-align: center;
+}
+.store-entry-action-delete {
+  color: #b03a3a;
+  cursor: pointer;
+}
+.store-edit-input {
+  width: 100%;
+  border: 0;
+  height: 40px;
+  outline: none;
+  border-bottom: 1px solid #077dd0;
+  color: #3d8895;
+  background: transparent;
+}
+.store-action-add {
+  margin-top: 5px;
+}

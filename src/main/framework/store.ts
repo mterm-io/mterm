@@ -25,7 +25,8 @@ function encrypt(text: string, password: string): string {
 }
 
 export class Store {
-  private vault: object = {}
+  public vault: object = {}
+  public password: string = ''
   public unlocked: boolean = false
   constructor(private location: string) {}
 
@@ -40,7 +41,7 @@ export class Store {
   set(key: string, value: string): void {
     this.vault[key] = value
   }
-  async save(password: string): Promise<void> {
+  async save(password: string = this.password): Promise<void> {
     const prettyJSON = JSON.stringify(this.vault, null, 2)
 
     const text = encrypt(prettyJSON, password)
@@ -48,7 +49,7 @@ export class Store {
     await writeFile(this.location, text, 'utf-8')
   }
 
-  async open(password: string): Promise<void> {
+  async open(password: string): Promise<object> {
     this.unlocked = false
     this.vault = {}
 
@@ -57,11 +58,19 @@ export class Store {
 
     const json = decrypt(text, password)
 
-    const map = JSON.parse(json)
+    try {
+      const map = JSON.parse(json)
 
-    this.unlocked = true
+      this.unlocked = true
 
-    merge(this.vault, map)
+      merge(this.vault, map)
+
+      this.password = password
+    } catch (e) {
+      throw new Error('Invalid password!')
+    }
+
+    return this.vault
   }
 
   get(key: string, orElse: string = ''): string {

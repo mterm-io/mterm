@@ -76,6 +76,14 @@ export function attach({ app, workspace }: BootstrapContext): void {
     return workspace.store.unlocked
   })
 
+  ipcMain.handle('store.unlock', async (_, password: string) => {
+    return await workspace.store.open(password)
+  })
+
+  ipcMain.handle('store.model', async () => {
+    return workspace.store.vault
+  })
+
   ipcMain.on('system.exit', () => app.quit())
   ipcMain.on('runtime.prompt', (_, value: string) => {
     workspace.runtime.prompt = value
