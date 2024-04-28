@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.24-beta](https://github.com/mterm-io/mterm/compare/v1.0.23-beta...v1.0.24-beta) (2024-04-28)
+
+
+### Bug Fixes
+
+* attempt to provide team id to mac worker ([90da25c](https://github.com/mterm-io/mterm/commit/90da25c1dd1b67e1f787a42588162ba8e2b3fac3))
+
 ## [1.0.23-beta](https://github.com/mterm-io/mterm/compare/v1.0.22-beta...v1.0.23-beta) (2024-04-28)
 
 
