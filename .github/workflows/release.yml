@@ -78,3 +78,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
           CSC_LINK: ${{ secrets.MAC_CSC }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
