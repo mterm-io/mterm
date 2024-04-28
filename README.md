@@ -11,6 +11,9 @@
 
 > This documentation is a work in progress!
 
+
+![image](https://github.com/mterm-io/mterm/assets/7341502/27bcad62-6891-4b49-80b5-e5a17e0562ab)
+
 ### Commands
 
 Need your own command? MTERM includes `~/mterm/commands.ts` from your home directory - with any exported functions as available commands.
