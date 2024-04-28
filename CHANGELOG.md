@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.20-beta](https://github.com/mterm-io/mterm/compare/v1.0.19-beta...v1.0.20-beta) (2024-04-28)
+
+
+### Bug Fixes
+
+* profile support, default profile powershell on window or sh on unix ([#58](https://github.com/mterm-io/mterm/issues/58)) ([eb614e4](https://github.com/mterm-io/mterm/commit/eb614e4a14bc212b2a5b7614bf214a8797cde0b4)), closes [#15](https://github.com/mterm-io/mterm/issues/15)
+
 ## [1.0.19-beta](https://github.com/mterm-io/mterm/compare/v1.0.18-beta...v1.0.19-beta) (2024-04-27)
 
 
