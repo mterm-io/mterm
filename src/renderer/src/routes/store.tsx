@@ -196,6 +196,7 @@ export default function Store(): ReactElement {
       })
       return newStore
     })
+
     setStoreKeys((store) => {
       const newStore = {}
       Object.keys(store).forEach((storeKey) => {
@@ -211,7 +212,7 @@ export default function Store(): ReactElement {
     setPassword(event.target.value)
   }
 
-  const handleStoreKeyChange = (key: string, event: ChangeEvent<HTMLInputElement>) => {
+  const handleStoreKeyChange = (key: string, event: ChangeEvent<HTMLInputElement>): void => {
     setStoreKeys((keys) => {
       return {
         ...keys,
@@ -220,7 +221,7 @@ export default function Store(): ReactElement {
     })
   }
 
-  const handleStoreValueChange = (key: string, event: ChangeEvent<HTMLInputElement>) => {
+  const handleStoreValueChange = (key: string, event: ChangeEvent<HTMLInputElement>): void => {
     setStore((store) => {
       return {
         ...store,
@@ -277,8 +278,8 @@ export default function Store(): ReactElement {
         <div className="info-text-header">Within extensions and scripts -</div>
         <pre className="info-text-example">
           export async function login() &#123; <br />
-          <div className="tab"></div>await this.get(<span className="secret">'PASSWORD'</span>){' '}
-          <br />
+          <div className="tab"></div>await this.vault.get(<span className="secret">'PASSWORD'</span>
+          ) <br />
           <br />
           <div className="tab"></div>...rest
           <br />

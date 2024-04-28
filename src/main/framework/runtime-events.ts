@@ -76,6 +76,12 @@ export function attach({ app, workspace }: BootstrapContext): void {
     return workspace.store.unlocked
   })
 
+  ipcMain.handle('store.save', async (_, store) => {
+    workspace.store.vault = store
+    await workspace.store.save()
+    return store
+  })
+
   ipcMain.handle('store.unlock', async (_, password: string) => {
     return await workspace.store.open(password)
   })
