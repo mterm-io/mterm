@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.23-beta](https://github.com/mterm-io/mterm/compare/v1.0.22-beta...v1.0.23-beta) (2024-04-28)
+
+
+### Bug Fixes
+
+* apple specific password for build ([0e79b39](https://github.com/mterm-io/mterm/commit/0e79b39546d524cd1c78c10fb91c6f7f02401b3f))
+
 ## [1.0.22-beta](https://github.com/mterm-io/mterm/compare/v1.0.21-beta...v1.0.22-beta) (2024-04-28)
 
 
