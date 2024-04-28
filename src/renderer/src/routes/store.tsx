@@ -1,5 +1,4 @@
 import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
-import { Runtime } from '../runner/runtime'
 import short from 'short-uuid'
 
 interface PasswordSetup {
@@ -278,7 +277,8 @@ export default function Store(): ReactElement {
         <div className="info-text-header">Within extensions and scripts -</div>
         <pre className="info-text-example">
           export async function login() &#123; <br />
-          <div className="tab"></div>await this.vault.get(<span className="secret">'PASSWORD'</span>
+          <div className="tab"></div>const password = this.vault.get(
+          <span className="secret">'PASSWORD'</span>
           ) <br />
           <br />
           <div className="tab"></div>...rest
