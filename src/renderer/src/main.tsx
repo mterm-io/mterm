@@ -8,7 +8,7 @@ import ErrorPage from './error-page'
 import Runner from './runner/runner'
 import About from './routes/about'
 import Settings from './routes/settings/settings'
-import Store from './routes/store'
+import Store from './routes/store/store'
 import SettingsGeneral from './routes/settings/settings-general'
 import SettingsTheme from './routes/settings/settings-theme'
 import ErrorRuntimePage from './error-runtime'
@@ -24,12 +24,23 @@ const router = createHashRouter([
     element: <About />
   },
   {
-    path: '/store',
-    element: <Store />
-  },
-  {
     path: '/error',
     element: <ErrorRuntimePage />
+  },
+  {
+    path: '/store',
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: '',
+        element: <Store />,
+        index: true
+      },
+      {
+        path: 'setup',
+        element: <SettingsTheme />
+      }
+    ]
   },
   {
     path: '/settings',
