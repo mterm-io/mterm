@@ -278,7 +278,7 @@ export default function Store(): ReactElement {
         <pre className="info-text-example">
           export async function login() &#123; <br />
           <div className="tab"></div>const password = this.vault.get(
-          <span className="secret">'PASSWORD'</span>
+          <span className="secret">&apos;PASSWORD&apos;</span>
           ) <br />
           <br />
           <div className="tab"></div>...rest
@@ -295,9 +295,9 @@ export default function Store(): ReactElement {
   if (!storeIsUnlocked) {
     return (
       <div className="info-text">
-        Unlock the <span className="brand">mterm</span> vault. If you don't remember the password,
-        delete the file at <span className="file-path">~/mterm/.mterm-store</span> to set this up
-        again. There is no way to recover this.
+        Unlock the <span className="brand">mterm</span> vault. If you don&apos;t remember the
+        password, delete the file at <span className="file-path">~/mterm/.mterm-store</span> to set
+        this up again. There is no way to recover this.
         <div className="input-container">
           <input
             type="password"
