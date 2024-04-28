@@ -31,7 +31,7 @@ export async function createTray(context: BootstrapContext): Promise<void> {
       }
     },
     {
-      label: 'Secrets',
+      label: 'Vault and Secrets',
       click(): void {
         context.workspace.showAndHideOthers(PlatformWindow, 'store')
       }
