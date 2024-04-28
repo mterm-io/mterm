@@ -1,18 +1,123 @@
 
-<h1 align="right">mterm</h1>
-<h5 align="right">An electron terminal written with React and TypeScript.</h5>
-<p align="right">
-  <img alt="slate@taff" width="100px" src="resources/icon.png">
-</p>
-<h5 align="right">Join us on discord @ <a href=https://discord.gg/mterm">discord.gg/mterm</a></h5>
+<h1 align="left">mterm</h1>
+<h5 align="left">An electron terminal written with TypeScript, and rendered with React.</h5>
+<h5 align="left">Join us on discord @ <a href=https://discord.gg/mterm">discord.gg/mterm</a></h5>
+<img alt="mterm" width="50px" src="resources/icon.png">
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mterm-io_mterm&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=mterm-io_mterm)
 [![release](https://github.com/mterm-io/mterm/actions/workflows/release.yml/badge.svg)](https://github.com/mterm-io/mterm/actions/workflows/release.yml)
 
-> This documentation is a work in progress!
-
-
 ![image](https://github.com/mterm-io/mterm/assets/7341502/27bcad62-6891-4b49-80b5-e5a17e0562ab)
+
+**mterm** is a cross-platform command-line terminal that proxies the underlying command-line interpreters, such as [powershell](https://learn.microsoft.com/en-us/powershell/), [sh](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html) or [wsl](https://ubuntu.com/desktop/wsl). commands are executed in the background and results streamed to the foreground.
+
+this means commands such as `ls`, `cd` or program commands such as `node -v` or `yarn install` will work out of the box as long as the host machine supports these commands. you can configure the desired interpreter [below](#configure)
+
+
+### Install
+
+Head over to the [release page](https://github.com/mterm-io/mterm/releases/latest) to find the binary for your system type. mterm is evergreen and updates are automatically installed on your system as hey get released. Run `:v` to see your current mterm version.
+
+### Command Mode
+
+By default, **mterm** opens in command mode (you can change this in [settings](#settings)). A couple of notes about command mode -
+- This window is always on top
+- This window follows to any desktop
+- The font and theme is larger to account for large size
+
+This is a nice way to focus on execution details but it can be annoying if multiple windows are in use.
+
+Hide mterm with the default toggle hotkey -
+```bash
+~ + CommandOrControl
+```
+
+Disable command mode and go to normal terminal window mode with -
+```bash
+~ + Shift + CommandOrControl
+```
+
+Or change the behaviour of all of this with [settings](#settings).
+
+### Configure
+
+mterm creates the `mterm` folder on a host machine on first launch a the user's home directory
+
+for windows -
+```bash
+C:/Users/<YOUR_NAME>/mterm
+```
+
+for mac -
+```bash
+/Users/<YOUR_NAME>/mterm
+```
+
+for everything else -
+```bash
+/home/<YOUR_NAME>/mterm
+```
+
+in this folder, there are a couple of important files to help configure mterm -
+
+- `commands.ts`, used to attach commands to the terminal. see [commands](#commands)
+- `package.json`, an npm package declaration for use by [commands](#commands)
+- `settings`, general runtime settings [settings](#settings)
+
+### Settings
+
+here is an example `~/mterm/settings.json` -
+
+```json
+{
+  "defaultProfile": "wsl",
+  "profiles": {
+    "powershell": {
+      "platform": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -noprofile -command $ARGS",
+      "theme": "theme.css",
+      "icon": "default"
+    },
+    "wsl": {
+      "platform": "bash -c $ARGS",
+      "theme": "theme.css",
+      "icon": "default"
+    }
+  },
+  "runner": {
+    "shortcut": "`+CommandOrControl",
+    "bounds": {
+      "screen": "PRIMARY",
+      "x": "SCREEN:-.5",
+      "y": "SCREEN:-.5",
+      "w": 720,
+      "h": 500
+    },
+    "commanderModeShortcut": "`+Shift+CommandOrControl",
+    "commanderMode": true,
+    "commanderModeBounds": {
+      "screen": 0,
+      "x": 0,
+      "y": "SCREEN:-.5",
+      "w": "SCREEN",
+      "h": 500
+    }
+  }
+}
+```
+
+- default profile: the desired platform to execute commands against
+- profiles: a list of profiles in the terminal
+- runner
+  - shortcut: the global hotkey to toggle the runner
+  - bounds: the location of the terminal
+    - screen: `PRIMARY | number`, use the primary monitor or use the desired screen #
+    - x, y, w, h: `SCREEN:ratio | number` use a ratio of the screen size (for centering etc) or use a static number
+  - commandModeShorcut: the hotkey to toggle [command mode](#command-mode)
+  - commandMode: should mterm start by default in [command mode](#command-mode)?
+  - commanderModeBounds: the location of the terminal in command mode
+    - screen: `PRIMARY | number`, use the primary monitor or use the desired screen #
+    - x, y, w, h: `SCREEN:ratio | number` use a ratio of the screen size (for centering etc) or use a static number
+
 
 ### Commands
 
@@ -48,9 +153,15 @@ export async function query(): Promise<{
 }
 ```
 
-![image](https://github.com/mterm-io/mterm/assets/7341502/df8e74d4-896c-4964-861d-bad3ced17c80)
+You can install packages in the `~/mterm` folder and use them in `commands.ts`
+
+<img src="https://github.com/mterm-io/mterm/assets/7341502/df8e74d4-896c-4964-861d-bad3ced17c80" alt="drawing" width="500"/>
+
 
 > Note the return type is optional, just added above to highlight the typescript engine provided
+
+
+
 
 ### Secrets
 
@@ -60,13 +171,13 @@ While `mterm` does support reading env variables in the terminal, an alternative
 
 Passwords, URLS (any value really) can be stored in the vault -
 
-![image](https://github.com/mterm-io/mterm/assets/7341502/ad55761a-a7b7-4a13-987e-23caf5e21ef2)
+<img src="https://github.com/mterm-io/mterm/assets/7341502/ad55761a-a7b7-4a13-987e-23caf5e21ef2" alt="drawing" width="250"/>
 
 > Open the vault wih `:vault` or use the tray icon open `Vault and Secrets`
 
 The mterm vault is an `AES-256` encrypted store on your local machine. During setup, you provide a password for this store.
 
-![image](https://github.com/mterm-io/mterm/assets/7341502/423161d4-c5da-4185-9938-36c823eb9091)
+<img src="https://github.com/mterm-io/mterm/assets/7341502/423161d4-c5da-4185-9938-36c823eb9091" alt="drawing" width="250"/>
 
 Every time `mterm` is launched, the password is required to use these values provided. You can find vault values by using `this.vault.get` in commands -
 
@@ -81,35 +192,52 @@ export function who() {
 
 ![image](https://github.com/mterm-io/mterm/assets/7341502/76b26a62-33ea-4883-b07c-677f99ab3355)
 
-### Project Setup
+### contributing
 
-### Install
+see [local setup](#local-setup) for code setup info.
+
+ensure editor has prettier settings configured for `.pretierrc.yaml` or PRs will fail.
+
+every commit must be in [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/) format. this is how we auto generate release notes and change logs. features might be ignored if this rule is not followed.
+
+make sure to make a pr with this format: `feature/<name_or_issue_number>`.
+
+reach out on [discord](https://discord.gg/mterm) for contributor role.
+
+### local setup
+
+requires [node](https://nodejs.org/en/blog/release/v20.9.0)
+requires [yarn](https://yarnpkg.com/getting-started/install)
+
+> note: quickly install yarn on node 20+ with `corepack enable`
+
+clone -
 
 ```bash
-$ yarn
+git clone git@github.com:mterm-io/mterm.git
 ```
 
-### Development
+install deps -
+```bash
+yarn
+```
 
+run locally -
 ```bash
 $ yarn dev
 ```
 
-### To switch from command mode to window mode
+### build
 
-```bash
-$ control + shift + ~
-```
-
-### Build
+note, because these require github token during build - this will probably fail for you. adding here either way for completeness
 
 ```bash
 # For windows
-$ yarn build:win
+yarn build:win
 
 # For macOS
-$ yarn build:mac
+yarn build:mac
 
 # For Linux
-$ yarn build:linux
+yarn build:linux
 ```
