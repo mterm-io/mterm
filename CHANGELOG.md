@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.22-beta](https://github.com/mterm-io/mterm/compare/v1.0.21-beta...v1.0.22-beta) (2024-04-28)
+
+
+### Bug Fixes
+
+* add apple notarize w/ dev cert ([a2c5bd5](https://github.com/mterm-io/mterm/commit/a2c5bd5c73d12d06e055102d666ed63ce9364e5f))
+* doc cleanup ([#63](https://github.com/mterm-io/mterm/issues/63))  ([5bc9ec4](https://github.com/mterm-io/mterm/commit/5bc9ec40eba9a084b07e5be640131251501f18fb)), closes [#42](https://github.com/mterm-io/mterm/issues/42)
+
 ## [1.0.21-beta](https://github.com/mterm-io/mterm/compare/v1.0.20-beta...v1.0.21-beta) (2024-04-28)
 
 
