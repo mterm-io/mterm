@@ -1,6 +1,7 @@
 import {
   DEFAULT_WORKSPACE,
-  DEFAULT_PLATFORM,
+  DEFAULT_PROFILE,
+  DEFAULT_PROFILES,
   DEFAULT_FOLDER,
   DEFAULT_SETTING_RUNNER_SHORTCUT,
   DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT,
@@ -10,28 +11,58 @@ import {
   DEFAULT_SETTINGS
 } from './constants'
 
-describe('Default settings', () => {
-  test('DEFAULT_WORKSPACE should be "~/mterm"', () => {
+describe('constants', () => {
+  it('should have the correct default workspace', () => {
     expect(DEFAULT_WORKSPACE).toBe('~/mterm')
   })
 
-  test('DEFAULT_FOLDER should be "$CWD"', () => {
+  it('should have the correct default profile based on platform', () => {
+    const expectedDefaultProfile = process.platform === 'win32' ? 'powershell' : 'sh'
+    expect(DEFAULT_PROFILE).toBe(expectedDefaultProfile)
+  })
+
+  it('should have the correct default profiles based on platform', () => {
+    const expectedDefaultProfiles =
+      process.platform === 'win32'
+        ? {
+            powershell: {
+              platform: `${process.env.SYSTEMROOT}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -noprofile -command $ARGS`,
+              theme: 'theme.css',
+              icon: 'default'
+            },
+            wsl: {
+              platform: `bash -c $ARGS`,
+              theme: 'theme.css',
+              icon: 'default'
+            }
+          }
+        : {
+            sh: {
+              platform: 'sh -c $ARGS',
+              theme: 'theme.css',
+              icon: 'default'
+            }
+          }
+    expect(DEFAULT_PROFILES).toEqual(expectedDefaultProfiles)
+  })
+
+  it('should have the correct default folder', () => {
     expect(DEFAULT_FOLDER).toBe('$CWD')
   })
 
-  test('DEFAULT_SETTING_RUNNER_SHORTCUT should be "`+CommandOrControl"', () => {
+  it('should have the correct default setting runner shortcut', () => {
     expect(DEFAULT_SETTING_RUNNER_SHORTCUT).toBe('`+CommandOrControl')
   })
 
-  test('DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT should be "`+Shift+CommandOrControl"', () => {
+  it('should have the correct default setting commander mode toggle shortcut', () => {
     expect(DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT).toBe('`+Shift+CommandOrControl')
   })
 
-  test('DEFAULT_SETTING_IS_COMMANDER_MODE should be true', () => {
+  it('should have the correct default setting for commander mode', () => {
     expect(DEFAULT_SETTING_IS_COMMANDER_MODE).toBe(true)
   })
 
-  test('DEFAULT_SETTING_COMMANDER_MODE_BOUNDS should have correct values', () => {
+  it('should have the correct default setting for commander mode bounds', () => {
     expect(DEFAULT_SETTING_COMMANDER_MODE_BOUNDS).toEqual({
       screen: 0,
       x: 0,
@@ -41,7 +72,7 @@ describe('Default settings', () => {
     })
   })
 
-  test('DEFAULT_SETTING_RUNNER_BOUNDS should have correct values', () => {
+  it('should have the correct default setting for runner bounds', () => {
     expect(DEFAULT_SETTING_RUNNER_BOUNDS).toEqual({
       screen: 'PRIMARY',
       x: 'SCREEN:-.5',
@@ -51,9 +82,10 @@ describe('Default settings', () => {
     })
   })
 
-  test('DEFAULT_SETTINGS should have correct values', () => {
+  it('should have the correct default settings', () => {
     expect(DEFAULT_SETTINGS).toEqual({
-      platform: DEFAULT_PLATFORM,
+      defaultProfile: DEFAULT_PROFILE,
+      profiles: DEFAULT_PROFILES,
       runner: {
         shortcut: DEFAULT_SETTING_RUNNER_SHORTCUT,
         bounds: DEFAULT_SETTING_RUNNER_BOUNDS,
