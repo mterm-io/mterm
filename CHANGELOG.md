@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.21-beta](https://github.com/mterm-io/mterm/compare/v1.0.20-beta...v1.0.21-beta) (2024-04-28)
+
+
+### Bug Fixes
+
+* update unit tests for new default profile setting ([c7cc5f7](https://github.com/mterm-io/mterm/commit/c7cc5f712d41c247772903a667c7d6ece35def21))
+
 ## [1.0.20-beta](https://github.com/mterm-io/mterm/compare/v1.0.19-beta...v1.0.20-beta) (2024-04-28)
 
 
