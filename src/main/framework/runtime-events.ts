@@ -68,6 +68,14 @@ export function attach({ app, workspace }: BootstrapContext): void {
     await shell.openPath(workspace.folder)
   })
 
+  ipcMain.handle('store.is', async () => {
+    return await workspace.store.exists()
+  })
+
+  ipcMain.handle('store.unlocked', async () => {
+    return workspace.store.unlocked
+  })
+
   ipcMain.on('system.exit', () => app.quit())
   ipcMain.on('runtime.prompt', (_, value: string) => {
     workspace.runtime.prompt = value

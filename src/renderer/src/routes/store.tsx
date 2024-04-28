@@ -10,7 +10,10 @@ export default function Store(): ReactElement {
   const [hasStore, setHasStore] = useState<boolean>(false)
   const [setup, setIsSetup] = useState<boolean>(false)
   const [store, setStore] = useState<object>({})
+  const [storeIsUnlocked, setStoreIsUnlocked] = useState<boolean>(false)
   const [setupError, setSetupError] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+  const [loginError, setLoginError] = useState<string>('')
   const [generalError, setGeneralError] = useState<string>('')
 
   const [passwordSetup, setPasswordSetup] = useState<PasswordSetup>({
@@ -19,12 +22,29 @@ export default function Store(): ReactElement {
   })
 
   const getStore = async (): Promise<void> => {
-    const hasStore = await window.electron.ipcRenderer.invoke('store.setup')
+    const hasStore = await window.electron.ipcRenderer.invoke('store.is')
     if (!hasStore) {
       setIsLoading(false)
       setHasStore(false)
       setIsSetup(true)
+      setStoreIsUnlocked(false)
       return
+    }
+
+    const storeIsUnlocked = await window.electron.ipcRenderer.invoke('store.unlocked')
+    if (storeIsUnlocked) {
+      const store = await window.electron.ipcRenderer.invoke('store.model')
+      setStore(store)
+      setStoreIsUnlocked(true)
+      setHasStore(true)
+      setIsSetup(false)
+    } else {
+      setPassword('')
+      setLoginError('')
+      setIsSetup(false)
+      setHasStore(true)
+      setStoreIsUnlocked(false)
+      setIsLoading(false)
     }
   }
 
@@ -55,12 +75,41 @@ export default function Store(): ReactElement {
         .then((store) => {
           setIsLoading(false)
           setStore(store)
+          setStoreIsUnlocked(true)
           setHasStore(true)
           setIsSetup(false)
         })
         .catch((error) => {
           setIsLoading(false)
           setSetupError(error.message)
+        })
+    }
+  }
+
+  const onClickOpen = (): void => {
+    let error = ''
+    if (!password) {
+      error = 'Provide the vault password!'
+    }
+
+    setLoginError(error)
+
+    if (!error) {
+      setIsLoading(true)
+
+      window.electron.ipcRenderer
+        .invoke('store.unlock', password)
+        .then((store) => {
+          setIsLoading(false)
+          setStore(store)
+          setPassword('')
+          setStoreIsUnlocked(true)
+          setHasStore(true)
+          setIsSetup(false)
+        })
+        .catch((error) => {
+          setIsLoading(false)
+          setLoginError(error.message)
         })
     }
   }
@@ -89,6 +138,10 @@ export default function Store(): ReactElement {
         [key]: value
       }
     })
+  }
+
+  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    setPassword(event.target.value)
   }
 
   if (setup) {
@@ -148,6 +201,29 @@ export default function Store(): ReactElement {
         </pre>
         <button className="store-button" onClick={onClickSetup}>
           Setup
+        </button>
+      </div>
+    )
+  }
+
+  if (!storeIsUnlocked) {
+    return (
+      <div className="info-text">
+        Unlock the <span className="brand">mterm</span> vault. If you don't remember the password,
+        delete the file at <span className="file-path">~/mterm/.mterm-store</span> to set this up
+        again. There is no way to recover this.
+        <div className="input-container">
+          <input
+            type="password"
+            className="store-password"
+            placeholder="PASSWORD"
+            value={password}
+            onChange={(e) => handlePasswordChange(e)}
+          />
+        </div>
+        {loginError && <div className="info-error">{loginError}</div>}
+        <button className="store-button" onClick={onClickOpen}>
+          Open
         </button>
       </div>
     )
