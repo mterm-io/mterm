@@ -9,6 +9,7 @@ import { setWindowValueFromPath } from '../util'
 import { Runtime } from './runtime'
 import { DEFAULT_FOLDER } from '../../constants'
 import { Commands } from './commands'
+import { Store } from './store'
 
 export function resolveFolderPathForMTERM(folder: string): string {
   folder = folder.replace('~', homedir())
@@ -19,6 +20,7 @@ export function resolveFolderPathForMTERM(folder: string): string {
   return folder
 }
 export class Workspace {
+  public store: Store
   public settings: Settings
   public commands: Commands
   public isAppQuiting: boolean = false
@@ -36,6 +38,7 @@ export class Workspace {
 
     this.commands = new Commands(join(this.folder), join(app.getAppPath(), './resources/commands'))
     this.settings = new Settings(join(this.folder, 'settings.json'), defaultSettings)
+    this.store = new Store(join(this.folder, '.mterm-store'))
   }
 
   get runtime(): Runtime {
