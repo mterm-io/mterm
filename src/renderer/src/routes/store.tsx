@@ -1,30 +1,99 @@
-import { ReactElement, useState } from 'react'
+import { ChangeEvent, ReactElement, useState } from 'react'
 
+interface PasswordSetup {
+  password: string
+  passwordConfirm: string
+}
 export default function Store(): ReactElement {
   const [loading, setIsLoading] = useState<boolean>(false)
   const [hasStore, setHasStore] = useState<boolean>(false)
   const [setup, setIsSetup] = useState<boolean>(false)
   const [store, setStore] = useState<object>({})
+  const [setupError, setSetupError] = useState<string>('')
+
+  const [passwordSetup, setPasswordSetup] = useState<PasswordSetup>({
+    password: '',
+    passwordConfirm: ''
+  })
 
   const onClickSetup = (): void => {
     setIsSetup(true)
   }
 
+  const onClickCreate = (): void => {
+    let error = ''
+    if (passwordSetup.password !== passwordSetup.passwordConfirm) {
+      error = 'The passwords do not match!'
+    }
+    if (passwordSetup.password.length < 5) {
+      error = 'The password needs to be at least 5 characters!'
+    }
+
+    setSetupError(error)
+    if (!error) {
+      setIsLoading(true)
+      setPasswordSetup({
+        password: '',
+        passwordConfirm: ''
+      })
+
+      window.electron.ipcRenderer
+        .invoke('store.setup', passwordSetup.password)
+        .then((store) => {
+          setIsLoading(false)
+          setStore(store)
+          setHasStore(true)
+          setIsSetup(false)
+        })
+        .catch((error) => {
+          setIsLoading(false)
+          setSetupError(error.message)
+        })
+    }
+  }
+
   if (loading) {
-    return <p className="info-text">Loading...</p>
+    return <div className="info-text">Loading...</div>
+  }
+
+  const handlePasswordSetupChange = (key: string, event: ChangeEvent<HTMLInputElement>): void => {
+    const value = event.target.value
+
+    setPasswordSetup((passwordSetup) => {
+      return {
+        ...passwordSetup,
+        [key]: value
+      }
+    })
   }
 
   if (setup) {
     return (
       <div className="info-text">
-        Set a password for the <span className="brand">mterm</span> password store. Remember, if
-        this is forget; all secrets will irretrievable - so be sure to make this memorable and safe.
+        Set a password for the <span className="brand">mterm</span> vault. Remember, if this is
+        forget; all secrets will irretrievable - so be sure to make this memorable and safe.
         <div className="input-container">
-          <input type="password" className="store-password" placeholder="PASSWORD" />
+          <input
+            type="password"
+            className="store-password"
+            placeholder="PASSWORD"
+            value={passwordSetup.password}
+            onChange={(e) => handlePasswordSetupChange('password', e)}
+          />
         </div>
         <div className="input-container">
-          <input type="password" className="store-password" placeholder="PASSWORD" />
+          <input
+            type="password"
+            className="store-password"
+            placeholder="PASSWORD AGAIN"
+            value={passwordSetup.passwordConfirm}
+            onChange={(e) => handlePasswordSetupChange('passwordConfirm', e)}
+          />
         </div>
+        {setupError && <div className="info-error">{setupError}</div>}
+        <button className="store-button" onClick={onClickCreate}>
+          Create
+        </button>
       </div>
     )
   }

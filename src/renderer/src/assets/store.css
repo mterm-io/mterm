@@ -56,3 +56,8 @@
   width: 100%;
   background: transparent;
 }
+.info-error {
+  padding-top: 10px;
+  margin: 10px 0;
+  color: #f44242;
+}
