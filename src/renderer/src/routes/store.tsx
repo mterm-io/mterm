@@ -1,20 +1,32 @@
-import { ChangeEvent, ReactElement, useState } from 'react'
+import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
+import { Runtime } from '../runner/runtime'
 
 interface PasswordSetup {
   password: string
   passwordConfirm: string
 }
 export default function Store(): ReactElement {
-  const [loading, setIsLoading] = useState<boolean>(false)
+  const [loading, setIsLoading] = useState<boolean>(true)
   const [hasStore, setHasStore] = useState<boolean>(false)
   const [setup, setIsSetup] = useState<boolean>(false)
   const [store, setStore] = useState<object>({})
   const [setupError, setSetupError] = useState<string>('')
+  const [generalError, setGeneralError] = useState<string>('')
 
   const [passwordSetup, setPasswordSetup] = useState<PasswordSetup>({
     password: '',
     passwordConfirm: ''
   })
+
+  const getStore = async (): Promise<void> => {
+    const hasStore = await window.electron.ipcRenderer.invoke('store.setup')
+    if (!hasStore) {
+      setIsLoading(false)
+      setHasStore(false)
+      setIsSetup(true)
+      return
+    }
+  }
 
   const onClickSetup = (): void => {
     setIsSetup(true)
@@ -30,6 +42,7 @@ export default function Store(): ReactElement {
     }
 
     setSetupError(error)
+
     if (!error) {
       setIsLoading(true)
       setPasswordSetup({
@@ -50,6 +63,17 @@ export default function Store(): ReactElement {
           setSetupError(error.message)
         })
     }
+  }
+
+  useEffect(() => {
+    getStore().catch((error) => {
+      setIsLoading(false)
+      setGeneralError(error.message)
+    })
+  }, [])
+
+  if (generalError) {
+    return <div className="info-text">{generalError}</div>
   }
 
   if (loading) {
