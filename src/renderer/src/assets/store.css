@@ -43,3 +43,16 @@
 .store-button:hover {
   background: #49677b;
 }
+
+.input-container {
+  margin: 20px 0
+}
+.store-password {
+  height: 40px;
+  outline: none;
+  border: 0;
+  border-bottom: 1px solid #077dd0;
+  color: #3d8895;
+  width: 100%;
+  background: transparent;
+}

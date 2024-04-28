@@ -19,6 +19,12 @@ export default function Store(): ReactElement {
       <div className="info-text">
         Set a password for the <span className="brand">mterm</span> password store. Remember, if
         this is forget; all secrets will irretrievable - so be sure to make this memorable and safe.
+        <div className="input-container">
+          <input type="password" className="store-password" placeholder="PASSWORD" />
+        </div>
+        <div className="input-container">
+          <input type="password" className="store-password" placeholder="PASSWORD" />
+        </div>
       </div>
     )
   }
@@ -26,9 +32,10 @@ export default function Store(): ReactElement {
   if (!hasStore) {
     return (
       <div className="info-text">
-        This is the <span className="brand">mterm</span> password store. Here passwords are saved on
-        your computer, stored with a layer <span className="protocol">AES-256</span> encryption. The
-        way in and out of this password store is with a password.
+        This is the <span className="brand">mterm</span> vault. Here passwords, secrets, api keys
+        and more are saved on your computer, stored with a layer of {''}
+        <span className="protocol">AES-256</span> encryption. The way in and out of this vault is
+        with a password.
         <div className="info-text-header">
           After setting up the store, you can fetch these passwords in two ways on the terminal
         </div>
