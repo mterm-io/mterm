@@ -62,7 +62,7 @@ export async function boostrap(context: BootstrapContext): Promise<void> {
       }
     })
 
-    await workspace.commands.load()
+    await workspace.commands.load(workspace.settings)
   } catch (e) {
     console.error(e)
 

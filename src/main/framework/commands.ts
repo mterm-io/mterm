@@ -6,6 +6,7 @@ import { runInNewContext } from 'node:vm'
 import * as tryRequire from 'try-require'
 import { compile } from '../vendor/webpack'
 import { ExecuteContext } from './runtime'
+import { Settings } from './settings'
 
 export class Commands {
   public lib: object = {}
@@ -65,18 +66,20 @@ export class Commands {
     return exec
   }
 
-  async load(): Promise<void> {
+  async load(settings: Settings): Promise<void> {
     const filesToCreate = [
       { templateFile: 'package.json', outputFile: 'package.json' },
       { templateFile: 'commands.ts', outputFile: 'commands.ts' },
       { templateFile: 'node_types.ts', outputFile: 'types.d.ts' }
     ]
 
+    const ignoreTemplates = settings.get<string[]>('ignoreTemplate', [])
+
     for (const { templateFile, outputFile } of filesToCreate) {
       const outputFilePath = join(this.workingDirectory, outputFile)
       const isExist = await pathExists(outputFilePath)
 
-      if (!isExist) {
+      if (!isExist && !ignoreTemplates.includes(outputFile)) {
         const templateFilePath = join(this.templateDirectory, templateFile)
         const templateContent: Buffer = await readFile(templateFilePath)
         await writeFile(outputFilePath, templateContent, 'utf-8')
@@ -85,7 +88,7 @@ export class Commands {
 
     const tsConfigTarget = join(this.workingDirectory, 'tsconfig.json')
     const isTSConfigExists = await pathExists(tsConfigTarget)
-    if (!isTSConfigExists) {
+    if (!isTSConfigExists && !ignoreTemplates.includes('tsconfig.json')) {
       const tsConfig = await readJson(join(this.templateDirectory, 'tsconfig.json'))
 
       tsConfig['compilerOptions'].types = tsConfig['compilerOptions'].types || []
@@ -104,6 +107,8 @@ export class Commands {
     await compile(commandFileLocation, temp, join(this.workingDirectory, 'node_modules'))
 
     const jsFile: Buffer = await readFile(join(temp, 'commands.js'))
+
+    this.lib = {}
 
     runInNewContext(`${jsFile}`, this)
   }
