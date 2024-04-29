@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.29-beta](https://github.com/mterm-io/mterm/compare/v1.0.28-beta...v1.0.29-beta) (2024-04-29)
+
+
+### Bug Fixes
+
+* update app id ([b5baf5b](https://github.com/mterm-io/mterm/commit/b5baf5b02cbd08b142e24d4c58a3e012dd05de28))
+
 ## [1.0.28-beta](https://github.com/mterm-io/mterm/compare/v1.0.27-beta...v1.0.28-beta) (2024-04-29)
 
 
