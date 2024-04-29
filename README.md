@@ -13,6 +13,11 @@
 
 this means commands such as `ls`, `cd` or program commands such as `node -v` or `yarn install` will work out of the box as long as the host machine supports these commands. you can configure the desired interpreter [below](#configure)
 
+### Why
+- by no means does mterm replace your sh, or pwsh but we think abstractions such as [secrets](#secrets), and [commands](#commands) can supplement your development routines
+  - in other words, instead of building a utility for a dev task in a shell script for local use, use typescript
+- mterm comes with tabs but also within the scope of a tab; each command is ran in the background - this means you can use your keyboard to hop around execution stacks
+- output for commands do not stay in the terminal when you work on a new command. this new workflow considers the last execution while typing your next - but expects you to be in control of what you want to see (you'll have to see this to understand)
 
 ### Install
 
