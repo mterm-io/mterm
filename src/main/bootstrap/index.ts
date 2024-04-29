@@ -22,7 +22,7 @@ export async function boostrap(context: BootstrapContext): Promise<void> {
 
   await app.whenReady()
 
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('mterm.io')
 
   app.on('before-quit', function () {
     workspace.isAppQuiting = true
