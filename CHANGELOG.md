@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.25-beta](https://github.com/mterm-io/mterm/compare/v1.0.24-beta...v1.0.25-beta) (2024-04-29)
+
+
+### Bug Fixes
+
+* add debug to notarize process ([d58af0b](https://github.com/mterm-io/mterm/commit/d58af0bfd13caec31c312def0a287f6f37cae22c))
+
 ## [1.0.24-beta](https://github.com/mterm-io/mterm/compare/v1.0.23-beta...v1.0.24-beta) (2024-04-28)
 
 
