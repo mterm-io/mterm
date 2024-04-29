@@ -76,6 +76,7 @@ jobs:
         with:
           cmd: build:mac
         env:
+          DEBUG: electron-notarize*
           GH_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
           CSC_LINK: ${{ secrets.MAC_CSC }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
