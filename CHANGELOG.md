@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.30-beta](https://github.com/mterm-io/mterm/compare/v1.0.29-beta...v1.0.30-beta) (2024-04-29)
+
+
+### Bug Fixes
+
+* darwin install path ([7b9561d](https://github.com/mterm-io/mterm/commit/7b9561db65b01af07d95a804d5667a850f058f1a))
+
 ## [1.0.29-beta](https://github.com/mterm-io/mterm/compare/v1.0.28-beta...v1.0.29-beta) (2024-04-29)
 
 
