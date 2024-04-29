@@ -64,6 +64,31 @@ export function attach({ app, workspace }: BootstrapContext): void {
     )
   })
 
+  ipcMain.handle('runtime.kill', async (_, commandId, runtimeId): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+    const command = runtime.history.find((c) => c.id === commandId)
+    if (!command) {
+      return false
+    }
+
+    if (command.process) {
+      try {
+        command.process.kill(0)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    if (!command.complete) {
+      command.aborted = true
+    }
+    command.complete = true
+
+    return true
+  })
+
   ipcMain.on('open.workspace', async () => {
     await shell.openPath(workspace.folder)
   })
@@ -123,6 +148,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
       prompt,
       error: false,
       complete: false,
+      aborted: false,
       result: {
         code: 0,
         stream: []
@@ -163,6 +189,10 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
     try {
       const out = (text: string, error: boolean = false): void => {
+        if (command.aborted || command.complete) {
+          return
+        }
+
         const raw = text.toString()
 
         text = DOMPurify.sanitize(raw)
@@ -187,6 +217,10 @@ export function attach({ app, workspace }: BootstrapContext): void {
         }
       }
       const finish = (code: number): void => {
+        if (command.aborted || command.complete) {
+          return
+        }
+
         result.code = code
 
         command.complete = true

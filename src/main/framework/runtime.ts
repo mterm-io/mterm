@@ -23,6 +23,7 @@ export interface Command {
   result: Result
   runtime: string
   complete: boolean
+  aborted: boolean
   error: boolean
   id: string
   process?: ChildProcessWithoutNullStreams
@@ -32,6 +33,7 @@ export interface CommandViewModel {
   prompt: string
   result: Result
   runtime: string
+  aborted: boolean
   complete: boolean
   error: boolean
   id: string

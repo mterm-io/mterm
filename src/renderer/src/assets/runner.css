@@ -148,6 +148,9 @@ body {
 .runner-history-complete {
   border-left: 5px solid #23682d;
 }
+.runner-history-aborted {
+  border-left: 5px solid #ac1298;
+}
 .runner-history-error {
   border-left: 5px solid #ff6767;
 }

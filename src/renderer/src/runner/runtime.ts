@@ -18,6 +18,7 @@ export interface Command {
   prompt: string
   result: Result
   complete: boolean
+  aborted: boolean
   runtime: string
   error: boolean
   id: string
