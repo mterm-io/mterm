@@ -69,7 +69,7 @@ export class Commands {
     const filesToCreate = [
       { templateFile: 'package.json', outputFile: 'package.json' },
       { templateFile: 'commands.ts', outputFile: 'commands.ts' },
-      { templateFile: 'tsconfig.json', outputFile: 'tsconfig.json' }
+      { templateFile: 'node_types.ts', outputFile: 'types.d.ts' }
     ]
 
     for (const { templateFile, outputFile } of filesToCreate) {
@@ -83,31 +83,25 @@ export class Commands {
       }
     }
 
-    const nodeTypesFileLocation = join(this.templateDirectory, 'node_types.ts')
-    const types: Buffer = await readFile(nodeTypesFileLocation)
+    const tsConfigTarget = join(this.workingDirectory, 'tsconfig.json')
+    const isTSConfigExists = await pathExists(tsConfigTarget)
+    if (!isTSConfigExists) {
+      const tsConfig = await readJson(join(this.templateDirectory, 'tsconfig.json'))
+
+      tsConfig['compilerOptions'].types = tsConfig['compilerOptions'].types || []
+      tsConfig['compilerOptions'].types.push(join(this.workingDirectory, 'types.d.ts'))
+
+      await writeJson(tsConfigTarget, tsConfig)
+    }
 
     const packageJson = await readJson(join(this.workingDirectory, 'package.json'))
-
     const commandFileLocation = join(this.workingDirectory, packageJson.main)
-    const commands: Buffer = await readFile(commandFileLocation)
-
-    const tsConfig = await readJson(join(this.workingDirectory, 'tsconfig.json'))
 
     const id = short.generate()
     const temp = join(tmpdir(), `mterm-${id}`)
     await mkdirs(temp)
 
-    tsConfig['compilerOptions'].types = tsConfig['compilerOptions'].types || []
-    tsConfig['compilerOptions'].types.push(join(temp, 'node.d.ts'))
-
-    const scriptFile = join(temp, packageJson.main)
-    await writeFile(scriptFile, commands, 'utf-8')
-    await writeJson(join(temp, 'tsconfig.json'), tsConfig, 'utf-8')
-    await writeJson(join(temp, 'package.json'), packageJson, 'utf-8')
-
-    await writeFile(join(temp, 'node.d.ts'), types, 'utf-8')
-
-    await compile(scriptFile, temp, join(this.workingDirectory, 'node_modules'))
+    await compile(commandFileLocation, temp, join(this.workingDirectory, 'node_modules'))
 
     const jsFile: Buffer = await readFile(join(temp, 'commands.js'))
 
