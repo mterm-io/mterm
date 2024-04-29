@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.28-beta](https://github.com/mterm-io/mterm/compare/v1.0.27-beta...v1.0.28-beta) (2024-04-29)
+
+
+### Bug Fixes
+
+* add a why to readme ([5e6f34e](https://github.com/mterm-io/mterm/commit/5e6f34e013307180a99008f7ad14499b0f42bfff))
+* control+c to kill command selected ([fc8c1c2](https://github.com/mterm-io/mterm/commit/fc8c1c25c30caf767924d381e73fa7486b8e5896)), closes [#22](https://github.com/mterm-io/mterm/issues/22)
+* reset lib on command load + add a way to ignore mterm templates ([328852c](https://github.com/mterm-io/mterm/commit/328852cf151087e726ab874c67337cb9703a26a0))
+
 ## [1.0.27-beta](https://github.com/mterm-io/mterm/compare/v1.0.26-beta...v1.0.27-beta) (2024-04-29)
 
 
