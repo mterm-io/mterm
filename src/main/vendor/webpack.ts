@@ -9,7 +9,10 @@ export async function compile(
   return new Promise((resolve, reject) => {
     const linux = process.platform === 'linux'
     const darwin: boolean = process.platform === 'darwin'
-    const node_modules = join(rootPath, 'node_modules', 'ts-loader')
+    //'/Applications/mterm.app/node_modules/ts-loader
+    const mac_node_modules = join(rootPath, 'Contents', 'node_modules', 'ts-loader')
+    const linux_node_modules = join('opt', 'mterm', 'node_modules', 'ts-loader')
+    const windows_node_modules = './node_modules/ts-loader'
 
     webpack(
       {
@@ -20,11 +23,7 @@ export async function compile(
           rules: [
             {
               test: /\.tsx?$/,
-              use: linux
-                ? '/opt/mterm/node_modules/ts-loader'
-                : darwin
-                  ? node_modules
-                  : './node_modules/ts-loader',
+              use: linux ? linux_node_modules : darwin ? mac_node_modules : windows_node_modules,
               exclude: /node_modules/
             }
           ]
