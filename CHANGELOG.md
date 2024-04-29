@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.26-beta](https://github.com/mterm-io/mterm/compare/v1.0.25-beta...v1.0.26-beta) (2024-04-29)
+
+
+### Bug Fixes
+
+* app id for nsis and linux ([6a9a8f1](https://github.com/mterm-io/mterm/commit/6a9a8f15ad3a8f2418f6177583dd5d3e08b73e53))
+
 ## [1.0.25-beta](https://github.com/mterm-io/mterm/compare/v1.0.24-beta...v1.0.25-beta) (2024-04-29)
 
 
