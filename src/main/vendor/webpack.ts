@@ -1,5 +1,6 @@
 import webpack from 'webpack'
-
+import { rootPath } from 'electron-root-path'
+import { join } from 'path'
 export async function compile(
   scriptFile: string,
   folderTarget: string,
@@ -7,6 +8,8 @@ export async function compile(
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const linux = process.platform === 'linux'
+    const darwin: boolean = process.platform === 'darwin'
+    const node_modules = join(rootPath, 'node_modules', 'ts-loader')
 
     webpack(
       {
@@ -17,7 +20,11 @@ export async function compile(
           rules: [
             {
               test: /\.tsx?$/,
-              use: linux ? '/opt/mterm/node_modules/ts-loader' : './node_modules/ts-loader',
+              use: linux
+                ? '/opt/mterm/node_modules/ts-loader'
+                : darwin
+                  ? node_modules
+                  : './node_modules/ts-loader',
               exclude: /node_modules/
             }
           ]

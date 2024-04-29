@@ -2628,6 +2628,11 @@ electron-builder@^24.9.1:
     simple-update-notifier "2.0.0"
     yargs "^17.6.2"
 
+electron-is-packaged@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/electron-is-packaged/-/electron-is-packaged-1.0.2.tgz#d4efc0dc14991ab981de65f52271badf92323c7e"
+  integrity sha512-JZpV9QgVsehop7tm3KDll2/iJ9K3e7mL+jm6E3gA96zurIhxv3FZ0kxJK0eGL9c3SYORU1rN+/q2Ia8/v62Pjw==
+
 electron-publish@24.13.1:
   version "24.13.1"
   resolved "https://registry.npmjs.org/electron-publish/-/electron-publish-24.13.1.tgz"
@@ -2640,6 +2645,13 @@ electron-publish@24.13.1:
     fs-extra "^10.1.0"
     lazy-val "^1.0.5"
     mime "^2.5.2"
+
+electron-root-path@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/electron-root-path/-/electron-root-path-1.1.0.tgz#a413b1ad50cbe09cb2b723ea1aacdebad47622f8"
+  integrity sha512-hx9BU0cS36XV4EmIrHhYObADq2gMPB96dPjZ71ROfIbVp56KC058dDR38YY2xaB3M94ATa0w6bWyDBBYrKsYKw==
+  dependencies:
+    electron-is-packaged "^1.0.2"
 
 electron-to-chromium@^1.4.668:
   version "1.4.731"
