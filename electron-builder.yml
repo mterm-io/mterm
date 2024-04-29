@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: mterm.io
 productName: mterm
 directories:
   buildResources: build
@@ -40,7 +40,7 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: mterm.io
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
