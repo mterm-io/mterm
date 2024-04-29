@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.31-beta](https://github.com/mterm-io/mterm/compare/v1.0.30-beta...v1.0.31-beta) (2024-04-29)
+
+
+### Bug Fixes
+
+* darwin production install test v2 ([14ecedf](https://github.com/mterm-io/mterm/commit/14ecedf51f23343a36d1dd2b719ed6b3fa564b38))
+
 ## [1.0.30-beta](https://github.com/mterm-io/mterm/compare/v1.0.29-beta...v1.0.30-beta) (2024-04-29)
 
 
