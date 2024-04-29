@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.27-beta](https://github.com/mterm-io/mterm/compare/v1.0.26-beta...v1.0.27-beta) (2024-04-29)
+
+
+### Bug Fixes
+
+* apply compile on user dir for commands.ts ([fb7ae4b](https://github.com/mterm-io/mterm/commit/fb7ae4b193dd83208e93b9b8d23035c6b517a943))
+
 ## [1.0.26-beta](https://github.com/mterm-io/mterm/compare/v1.0.25-beta...v1.0.26-beta) (2024-04-29)
 
 
