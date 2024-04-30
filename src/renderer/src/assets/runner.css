@@ -144,6 +144,19 @@ body {
 }
 .runner-history-running {
   border-left: 5px solid #f1ce00;
+  animation: pulse .6s linear infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    border-color: #f1ce00;
+  }
+
+  50% {
+    border-color: transparent;
+  }
 }
 .runner-history-complete {
   border-left: 5px solid #23682d;
