@@ -10,10 +10,19 @@ export class Settings {
   private properties: object = {}
   private overrides: object = {}
   constructor(
-    private location: string,
+    public location: string,
     private defaultSettings: object
   ) {}
 
+  set<T>(path: string, value: T): void {
+    setFromPath(this.properties, path, value)
+  }
+
+  async save(): Promise<void> {
+    const prettyJSON = JSON.stringify(this.properties, null, 2)
+
+    await writeFile(this.location, prettyJSON, 'utf-8')
+  }
   value<T>(path: string): T {
     const props = merge({}, this.properties, this.overrides)
     return getFromPath(props, path)

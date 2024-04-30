@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: mterm.io
 productName: mterm
 directories:
   buildResources: build
@@ -30,7 +30,9 @@ mac:
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
+  notarize:
+    teamId: Y339J6M4W6
+
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
@@ -38,13 +40,13 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: mterm.io
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  releaseType: release
+  provider: github
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

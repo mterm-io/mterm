@@ -23,6 +23,7 @@ export interface Command {
   result: Result
   runtime: string
   complete: boolean
+  aborted: boolean
   error: boolean
   id: string
   process?: ChildProcessWithoutNullStreams
@@ -32,13 +33,27 @@ export interface CommandViewModel {
   prompt: string
   result: Result
   runtime: string
+  aborted: boolean
   complete: boolean
   error: boolean
   id: string
 }
+
+export interface Profile {
+  platform: string
+  theme: string
+  icon: string
+}
+
+export interface ProfileViewModel extends Profile {
+  key: string
+}
+
+export type ProfileMap = Record<string, Profile>
 export interface RuntimeModel {
   id: string
   prompt: string
+  profile: string
   result: Result
   target: boolean
   folder: string
@@ -53,6 +68,7 @@ export class Runtime {
   constructor(public folder: string) {
     this.folder = resolveFolderPathForMTERM(folder)
   }
+  public profile: string = 'default'
   public id: string = short.generate()
   public history: Command[] = []
   public prompt: string = ''

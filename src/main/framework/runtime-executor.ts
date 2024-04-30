@@ -8,18 +8,24 @@ import Cd from './system-commands/cd'
 import Tab from './system-commands/tab'
 import Test from './system-commands/test'
 import Clear from './system-commands/clear'
-import cls from './system-commands/cls'
+import Version from './system-commands/version'
+import Vault from './system-commands/vault'
+import Workspace from './system-commands/workspace'
+import Settings from './system-commands/settings'
 
-const systemCommands = [Reload, Exit, History, Cd, Tab, Test, Clear, cls]
-
+const systemCommands: Array<{
+  command: string
+  alias?: string[]
+  task: (context: ExecuteContext, ...args: string[]) => Promise<void> | void
+}> = [Reload, Exit, History, Cd, Tab, Test, Clear, Version, Vault, Workspace, Settings]
 export async function execute(context: ExecuteContext): Promise<void | boolean> {
   const { platform, workspace, runtime, command, out, finish } = context
   const [cmd, ...args] = command.prompt.split(' ')
 
   // check for system commands
   for (const systemCommand of systemCommands) {
-    if (systemCommand.command === cmd) {
-      await systemCommand.task(context)
+    if (systemCommand.command === cmd || systemCommand?.alias?.includes(cmd)) {
+      await systemCommand.task(context, ...args)
 
       return
     }
@@ -27,11 +33,15 @@ export async function execute(context: ExecuteContext): Promise<void | boolean> 
 
   // check for user commands
   if (workspace.commands.has(cmd)) {
-    const result = await Promise.resolve(workspace.commands.run(context, cmd, ...args))
+    let result = await Promise.resolve(workspace.commands.run(context, cmd, ...args))
 
     if (!result) {
       // nothing was replied with, assume this is a run that will happen in time
       return false
+    }
+
+    if (typeof result === 'object') {
+      result = JSON.stringify(result, null, 2)
     }
 
     out(`${result}`)

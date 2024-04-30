@@ -13,5 +13,6 @@ async function exit(context: ExecuteContext): Promise<void> {
 
 export default {
   command: ':exit',
+  alias: ['exit'],
   task: exit
 }

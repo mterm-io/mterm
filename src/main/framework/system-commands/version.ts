@@ -1,8 +1,10 @@
 import { ExecuteContext } from '../runtime'
+import { app } from 'electron'
 
 export default {
-  command: 'cls',
+  command: ':version',
+  alias: [':v'],
   async task(context: ExecuteContext): Promise<void> {
-    context.out('')
+    context.out(app.getVersion())
   }
 }

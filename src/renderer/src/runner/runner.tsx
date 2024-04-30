@@ -1,5 +1,4 @@
-/* eslint-disable prettier/prettier */
-import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
+import { ChangeEvent, ReactElement, useEffect, useState, useRef } from 'react'
 import { Command, ResultStreamEvent, Runtime } from './runtime'
 
 export default function Runner(): ReactElement {
@@ -7,6 +6,7 @@ export default function Runner(): ReactElement {
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
   const [rawMode, setRawMode] = useState<boolean>(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   const reloadRuntimesFromBackend = async (): Promise<void> => {
     const isCommanderMode = await window.electron.ipcRenderer.invoke('runner.isCommanderMode')
     const runtimesFetch: Runtime[] = await window.electron.ipcRenderer.invoke('runtimes')
@@ -43,13 +43,26 @@ export default function Runner(): ReactElement {
     const command: Command = await window.electron.ipcRenderer.invoke(
       'runtime.prepareExecute',
       runtime.id,
-      historicalExecution ? historicalExecution.prompt : runtime.prompt
+      historicalExecution ? historicalExecution.prompt : runtime.prompt,
+      'default'
     )
 
     await reloadRuntimesFromBackend()
 
     // renderer -> "backend"
     await window.electron.ipcRenderer.invoke('runtime.execute', command)
+
+    await reloadRuntimesFromBackend()
+  }
+
+  const kill = async (): Promise<void> => {
+    if (!historicalExecution) {
+      return
+    }
+    const runtime = historicalExecution.runtime
+    const id = historicalExecution.id
+
+    await window.electron.ipcRenderer.invoke('runtime.kill', id, runtime)
 
     await reloadRuntimesFromBackend()
   }
@@ -106,7 +119,36 @@ export default function Runner(): ReactElement {
         applyHistoryIndex(historyIndex + 1)
       }
     }
+
+    if (e.code === 'KeyC' && e.ctrlKey) {
+      kill().catch((error) => console.error(error))
+    }
   }
+
+  useEffect(() => {
+    inputRef.current?.focus()
+
+    // Conditionally handle keydown of letter or arrow to refocus input
+    const handleGlobalKeyDown = (event): void => {
+      if (
+        /^[a-zA-Z]$/.test(event.key) ||
+        event.key === 'ArrowUp' ||
+        event.key === 'ArrowDown' ||
+        (!event.shiftKey && !event.ctrlKey && !event.altKey)
+      ) {
+        if (document.activeElement !== inputRef.current) {
+          inputRef.current?.focus()
+        }
+        handleKeyDown(event)
+      }
+    }
+
+    document.addEventListener('keydown', handleGlobalKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleGlobalKeyDown)
+    }
+  }, [])
 
   useEffect(() => {
     reloadRuntimesFromBackend().catch((error) => console.error(error))
@@ -156,6 +198,7 @@ export default function Runner(): ReactElement {
           <div className="runner-input-container">
             <div className="runner-input">
               <input
+                ref={inputRef}
                 autoFocus
                 className="runner-input-field"
                 placeholder=">"
@@ -173,7 +216,11 @@ export default function Runner(): ReactElement {
               <div
                 key={index}
                 className={`runner-history-item ${historyIndex === index ? 'runner-history-selected' : ''} ${
-                  command.complete ? 'runner-history-complete' : 'runner-history-running'
+                  command.complete
+                    ? command.aborted
+                      ? 'runner-history-aborted'
+                      : 'runner-history-complete'
+                    : 'runner-history-running'
                 } ${command.error ? 'runner-history-error' : ''}`}
                 onClick={() => onHistoryItemClicked(index)}
               >

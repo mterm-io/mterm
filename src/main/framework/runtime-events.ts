@@ -3,6 +3,8 @@ import { BootstrapContext } from '../bootstrap'
 import {
   Command,
   CommandViewModel,
+  Profile,
+  ProfileMap,
   Result,
   ResultStream,
   ResultStreamEvent,
@@ -12,7 +14,11 @@ import short from 'short-uuid'
 import { execute } from './runtime-executor'
 import createDOMPurify from 'dompurify'
 import { JSDOM } from 'jsdom'
-import { DEFAULT_PLATFORM, DEFAULT_SETTING_IS_COMMANDER_MODE } from '../../constants'
+import {
+  DEFAULT_PROFILE,
+  DEFAULT_PROFILES,
+  DEFAULT_SETTING_IS_COMMANDER_MODE
+} from '../../constants'
 import Convert from 'ansi-to-html'
 
 const convert = new Convert()
@@ -58,8 +64,61 @@ export function attach({ app, workspace }: BootstrapContext): void {
     )
   })
 
+  ipcMain.handle('runtime.kill', async (_, commandId, runtimeId): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+    const command = runtime.history.find((c) => c.id === commandId)
+    if (!command) {
+      return false
+    }
+
+    if (command.process) {
+      try {
+        command.process.kill(0)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    if (!command.complete) {
+      command.aborted = true
+    }
+    command.complete = true
+
+    return true
+  })
+
   ipcMain.on('open.workspace', async () => {
     await shell.openPath(workspace.folder)
+  })
+
+  ipcMain.handle('store.is', async () => {
+    return await workspace.store.exists()
+  })
+
+  ipcMain.handle('store.setup', async (_, password) => {
+    workspace.store.vault = {}
+    await workspace.store.save(password)
+    return await workspace.store.open(password)
+  })
+
+  ipcMain.handle('store.unlocked', async () => {
+    return workspace.store.unlocked
+  })
+
+  ipcMain.handle('store.save', async (_, store) => {
+    workspace.store.vault = store
+    await workspace.store.save()
+    return store
+  })
+
+  ipcMain.handle('store.unlock', async (_, password: string) => {
+    return await workspace.store.open(password)
+  })
+
+  ipcMain.handle('store.model', async () => {
+    return workspace.store.vault
   })
 
   ipcMain.on('system.exit', () => app.quit())
@@ -89,6 +148,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
       prompt,
       error: false,
       complete: false,
+      aborted: false,
       result: {
         code: 0,
         stream: []
@@ -115,7 +175,13 @@ export function attach({ app, workspace }: BootstrapContext): void {
       throw `Command '${id}' in runtime '${runtimeTarget}' does not exist`
     }
 
-    const platform = workspace.settings.get<string>('platform', DEFAULT_PLATFORM)
+    let profileKey = runtimeTarget.profile
+    if (profileKey === 'default') {
+      profileKey = workspace.settings.get<string>('defaultProfile', DEFAULT_PROFILE)
+    }
+
+    const profiles = workspace.settings.get<ProfileMap>('profiles', DEFAULT_PROFILES)
+    const profile: Profile = profiles[profileKey]
 
     const result: Result = command.result
 
@@ -123,6 +189,10 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
     try {
       const out = (text: string, error: boolean = false): void => {
+        if (command.aborted || command.complete) {
+          return
+        }
+
         const raw = text.toString()
 
         text = DOMPurify.sanitize(raw)
@@ -147,12 +217,21 @@ export function attach({ app, workspace }: BootstrapContext): void {
         }
       }
       const finish = (code: number): void => {
+        if (command.aborted || command.complete) {
+          return
+        }
+
         result.code = code
 
         command.complete = true
         command.error = result.code !== 0
       }
 
+      if (!profile) {
+        throw `Profile ${profileKey} does not exist, provided by runtime as = ${runtimeTarget.profile}`
+      }
+
+      const platform = profile.platform
       const finalizeConfirm = await execute({
         platform,
         workspace,

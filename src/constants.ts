@@ -1,9 +1,29 @@
+import { Profile } from './main/framework/runtime'
+
 export const DEFAULT_WORKSPACE = '~/mterm'
 
-export const DEFAULT_PLATFORM =
+export const DEFAULT_PROFILE = process.platform === 'win32' ? 'powershell' : 'sh'
+export const DEFAULT_PROFILES: Record<string, Profile> =
   process.platform === 'win32'
-    ? `${process.env.SYSTEMROOT}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -noprofile -command $ARGS`
-    : 'sh $ARGS'
+    ? {
+        powershell: {
+          platform: `${process.env.SYSTEMROOT}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -noprofile -command $ARGS`,
+          theme: 'theme.css',
+          icon: 'default'
+        },
+        wsl: {
+          platform: `bash -c $ARGS`,
+          theme: 'theme.css',
+          icon: 'default'
+        }
+      }
+    : {
+        sh: {
+          platform: 'sh -c $ARGS',
+          theme: 'theme.css',
+          icon: 'default'
+        }
+      }
 export const DEFAULT_FOLDER = '$CWD'
 export const DEFAULT_SETTING_RUNNER_SHORTCUT = '`+CommandOrControl'
 export const DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT = '`+Shift+CommandOrControl'
@@ -24,7 +44,8 @@ export const DEFAULT_SETTING_RUNNER_BOUNDS = {
   h: 500
 }
 export const DEFAULT_SETTINGS = {
-  platform: DEFAULT_PLATFORM,
+  defaultProfile: DEFAULT_PROFILE,
+  profiles: DEFAULT_PROFILES,
   runner: {
     shortcut: DEFAULT_SETTING_RUNNER_SHORTCUT,
     bounds: DEFAULT_SETTING_RUNNER_BOUNDS,
