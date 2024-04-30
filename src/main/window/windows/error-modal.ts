@@ -7,8 +7,10 @@ const hasErrorMessage = (value: unknown): value is { message: string } => {
   return typeof value === 'object' && value !== null && 'message' in value
 }
 export class ErrorModal extends MTermWindow {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   preInitChanges(): void {}
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   postInitChanges(): void {}
   async showError(error: unknown): Promise<void> {
     // const st = await import('stack-trace')

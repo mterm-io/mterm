@@ -1,9 +1,9 @@
 import { BrowserWindow, BrowserWindowConstructorOptions, shell } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
-import { Settings } from '../../framework/settings'
+import { Settings } from '../framework/settings'
 import { attachBrowserWindowListeners } from '../bootstrap/create-windows'
-import { Workspace } from '../../framework/workspace'
+import { Workspace } from '../framework/workspace'
 
 export abstract class MTermWindow {
   public browserWindow?: BrowserWindow
@@ -86,9 +86,11 @@ export abstract class MTermWindow {
     // Load the remote URL for development or the local html file for production.
     if (!isAlreadyOnPath) {
       if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-        await this.browserWindow?.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/${path}`)
+        await this.browserWindow?.loadURL(`${process.env['ELECTRON_RENDERER_URL']}#/${path}`)
       } else {
-        await this.browserWindow?.loadFile(`${join(__dirname, '../renderer/index.html')}/${path}`)
+        await this.browserWindow?.loadFile(`${join(__dirname, `../renderer`, `index.html`)}`, {
+          hash: path
+        })
       }
     }
 

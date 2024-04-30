@@ -1,4 +1,5 @@
-@import './base.css';
+@import 'runner.css';
+@import 'store.css';
 
 @font-face {
   font-family: 'Roboto Mono';

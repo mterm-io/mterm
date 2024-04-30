@@ -2,7 +2,7 @@ import './assets/main.css'
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createHashRouter, RouterProvider } from 'react-router-dom'
 
 import ErrorPage from './error-page'
 import Runner from './runner/runner'
@@ -13,7 +13,7 @@ import SettingsGeneral from './routes/settings/settings-general'
 import SettingsTheme from './routes/settings/settings-theme'
 import ErrorRuntimePage from './error-runtime'
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: '/',
     element: <Runner />,
@@ -24,12 +24,12 @@ const router = createBrowserRouter([
     element: <About />
   },
   {
-    path: '/store',
-    element: <Store />
-  },
-  {
     path: '/error',
     element: <ErrorRuntimePage />
+  },
+  {
+    path: '/store',
+    element: <Store />
   },
   {
     path: '/settings',

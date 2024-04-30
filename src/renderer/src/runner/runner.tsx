@@ -43,13 +43,26 @@ export default function Runner(): ReactElement {
     const command: Command = await window.electron.ipcRenderer.invoke(
       'runtime.prepareExecute',
       runtime.id,
-      historicalExecution ? historicalExecution.prompt : runtime.prompt
+      historicalExecution ? historicalExecution.prompt : runtime.prompt,
+      'default'
     )
 
     await reloadRuntimesFromBackend()
 
     // renderer -> "backend"
     await window.electron.ipcRenderer.invoke('runtime.execute', command)
+
+    await reloadRuntimesFromBackend()
+  }
+
+  const kill = async (): Promise<void> => {
+    if (!historicalExecution) {
+      return
+    }
+    const runtime = historicalExecution.runtime
+    const id = historicalExecution.id
+
+    await window.electron.ipcRenderer.invoke('runtime.kill', id, runtime)
 
     await reloadRuntimesFromBackend()
   }
@@ -105,6 +118,10 @@ export default function Runner(): ReactElement {
       if (runtime && historyIndex < runtime.history.length - 1) {
         applyHistoryIndex(historyIndex + 1)
       }
+    }
+
+    if (e.code === 'KeyC' && e.ctrlKey) {
+      kill().catch((error) => console.error(error))
     }
   }
 
@@ -199,7 +216,11 @@ export default function Runner(): ReactElement {
               <div
                 key={index}
                 className={`runner-history-item ${historyIndex === index ? 'runner-history-selected' : ''} ${
-                  command.complete ? 'runner-history-complete' : 'runner-history-running'
+                  command.complete
+                    ? command.aborted
+                      ? 'runner-history-aborted'
+                      : 'runner-history-complete'
+                    : 'runner-history-running'
                 } ${command.error ? 'runner-history-error' : ''}`}
                 onClick={() => onHistoryItemClicked(index)}
               >

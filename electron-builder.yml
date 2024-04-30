@@ -1,9 +1,11 @@
-appId: com.electron.app
+appId: mterm.io
 productName: mterm
 directories:
   buildResources: build
 files:
   - '!**/.vscode/*'
+  - '!**/.idea/*'
+  - '!**/.github/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
@@ -13,6 +15,9 @@ asarUnpack:
   - resources/**
 win:
   executableName: mterm
+extraFiles:
+  - from: "./node_modules"
+    to: "node_modules"
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -25,7 +30,9 @@ mac:
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
+  notarize:
+    teamId: Y339J6M4W6
+
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
@@ -33,13 +40,13 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: mterm.io
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  releaseType: release
+  provider: github
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

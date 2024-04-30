@@ -18,6 +18,7 @@ export interface Command {
   prompt: string
   result: Result
   complete: boolean
+  aborted: boolean
   runtime: string
   error: boolean
   id: string
@@ -27,6 +28,7 @@ export interface Runtime {
   result: Result
   prompt: string
   target: boolean
+  profile: string
   folder: string
   appearance: {
     title: string

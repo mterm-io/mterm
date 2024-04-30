@@ -1,25 +1,22 @@
 import { app } from 'electron'
 
-import icon from '../../resources/icon.png?asset'
-
 import { PlatformWindow } from './window/windows/platform'
 import { RunnerWindow } from './window/windows/runner'
-import { Workspace } from '../framework/workspace'
+import { Workspace } from './framework/workspace'
 
 import { DEFAULT_SETTINGS, DEFAULT_WORKSPACE } from '../constants'
 import { ErrorModal } from './window/windows/error-modal'
 import { boostrap } from './bootstrap'
+import { join } from 'path'
 
 const workspace = new Workspace(DEFAULT_WORKSPACE, DEFAULT_SETTINGS)
 
+const icon = join(__dirname, '..', '..', 'resources', 'icon.png')
 const runner = new RunnerWindow(
   icon,
   {
     width: 1800,
     height: 600,
-    transparent: true,
-    movable: false,
-    maximizable: false,
     enableLargerThanScreen: true,
     title: 'MTERM'
   },
@@ -53,6 +50,4 @@ boostrap({
   windows: [runner, platform, errorModal],
   errorModal,
   app
-}).then(() => {
-  console.log('APP LOADED')
 })

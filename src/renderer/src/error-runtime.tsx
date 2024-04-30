@@ -29,9 +29,7 @@ export default function ErrorRuntimePage(): ReactElement {
       <button onClick={exit}>Exit</button>
       <button onClick={workspace}>Workspace</button>
       <hr />
-      <pre>
-        <code>{errorMessage}</code>
-      </pre>
+      <pre>{errorMessage}</pre>
     </div>
   )
 }

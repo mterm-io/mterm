@@ -2,13 +2,14 @@ import { join, resolve } from 'path'
 import { Settings } from './settings'
 import { mkdirs, pathExists } from 'fs-extra'
 import { homedir } from 'node:os'
-import { MTermWindow } from '../main/window/mterm-window'
+import { MTermWindow } from '../window/mterm-window'
 import { remove } from 'lodash'
-import { BrowserWindowConstructorOptions } from 'electron'
-import { setWindowValueFromPath } from '../main/util'
+import { app, BrowserWindowConstructorOptions } from 'electron'
+import { setWindowValueFromPath } from '../util'
 import { Runtime } from './runtime'
-import { DEFAULT_FOLDER } from '../constants'
+import { DEFAULT_FOLDER } from '../../constants'
 import { Commands } from './commands'
+import { Store } from './store'
 
 export function resolveFolderPathForMTERM(folder: string): string {
   folder = folder.replace('~', homedir())
@@ -19,6 +20,7 @@ export function resolveFolderPathForMTERM(folder: string): string {
   return folder
 }
 export class Workspace {
+  public store: Store
   public settings: Settings
   public commands: Commands
   public isAppQuiting: boolean = false
@@ -34,8 +36,9 @@ export class Workspace {
      */
     this.folder = resolveFolderPathForMTERM(this.folder)
 
-    this.commands = new Commands(join(this.folder), './resources/commands')
+    this.commands = new Commands(join(this.folder), join(app.getAppPath(), './resources/commands'))
     this.settings = new Settings(join(this.folder, 'settings.json'), defaultSettings)
+    this.store = new Store(join(this.folder, '.mterm-store'))
   }
 
   get runtime(): Runtime {
@@ -80,7 +83,6 @@ export class Workspace {
     }
 
     await this.settings.load()
-    await this.commands.load()
 
     /**
      * Load an initial index
