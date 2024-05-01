@@ -1,6 +1,6 @@
 import { ChangeEvent, ReactElement, useEffect, useState, useRef } from 'react'
 import { Command, ResultStreamEvent, Runtime } from './runtime'
-
+import { ContextMenuTrigger, ContextMenu, ContextMenuItem } from 'rctx-contextmenu'
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
@@ -182,13 +182,26 @@ export default function Runner(): ReactElement {
       >
         <div className="runner-tabs">
           {runtimeList.map((runtime, index: number) => (
-            <div
-              key={index}
-              onClick={() => selectRuntime(index)}
-              className={`runner-tabs-title ${runtime.target ? 'runner-tabs-title-active' : undefined}`}
-            >
-              <div>{runtime.appearance.title}</div>
-            </div>
+            <ContextMenuTrigger key={index} id={`tab-context-menu-${index}`}>
+              <div
+                onClick={() => selectRuntime(index)}
+                className={`runner-tabs-title ${runtime.target ? 'runner-tabs-title-active' : undefined}`}
+              >
+                <div>{runtime.appearance.title}</div>
+
+                <ContextMenu
+                  id={`tab-context-menu-${index}`}
+                  hideOnLeave={false}
+                  className="tab-context-menu"
+                >
+                  <ContextMenuItem>Close</ContextMenuItem>
+                  <ContextMenuItem>Close Others</ContextMenuItem>
+                  <ContextMenuItem>Close (right)</ContextMenuItem>
+                  <ContextMenuItem>Duplicate</ContextMenuItem>
+                  <ContextMenuItem>Rename</ContextMenuItem>
+                </ContextMenu>
+              </div>
+            </ContextMenuTrigger>
           ))}
           <div className="runner-spacer" onClick={onAddRuntimeClick}>
             +
