@@ -155,7 +155,9 @@ export function attach({ app, workspace }: BootstrapContext): void {
       return false
     }
 
-    workspace.removeRuntime(runtime)
+    if (!workspace.removeRuntime(runtime)) {
+      app.quit()
+    }
 
     return true
   })

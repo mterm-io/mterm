@@ -1,5 +1,5 @@
 import { ChangeEvent, ReactElement, useEffect, useRef, useState } from 'react'
-import { Command, ResultStreamEvent, Runtime } from './runtime'
+import { Command, Runtime } from './runtime'
 import { ContextMenu, ContextMenuItem, ContextMenuTrigger } from 'rctx-contextmenu'
 
 export default function Runner(): ReactElement {
