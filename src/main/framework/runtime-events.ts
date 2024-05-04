@@ -134,6 +134,32 @@ export function attach({ app, workspace }: BootstrapContext): void {
     return true
   })
 
+  ipcMain.handle('runtime.close-others', async (_, runtimeId): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+
+    const runtimesToDelete = workspace.runtimes.filter((_) => _.id !== runtimeId)
+
+    runtimesToDelete.forEach((runtime) => workspace.removeRuntime(runtime))
+
+    workspace.runtimeIndex = 0
+
+    return true
+  })
+
+  ipcMain.handle('runtime.close', async (_, runtimeId): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+
+    workspace.removeRuntime(runtime)
+
+    return true
+  })
+
   ipcMain.on('open.workspace', async () => {
     await shell.openPath(workspace.folder)
   })
