@@ -138,11 +138,18 @@ export default function Runner(): ReactElement {
 
   const handleTabAction = (runtime: Runtime, action: string): void => {
     switch (action) {
-      case 'rename': {
-        setPendingTitles((titles) => ({
-          ...titles,
-          [runtime.id]: runtime.appearance.title
-        }))
+      case 'rename':
+        {
+          setPendingTitles((titles) => ({
+            ...titles,
+            [runtime.id]: runtime.appearance.title
+          }))
+        }
+        break
+      default: {
+        window.electron.ipcRenderer.invoke(`runtime.${action}`, runtime.id).then(() => {
+          return reloadRuntimesFromBackend()
+        })
       }
     }
   }
