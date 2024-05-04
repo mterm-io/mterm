@@ -178,15 +178,10 @@ export async function query(): Promise<{
 }
 ```
 
-You can install packages in the `~/mterm` folder and use them in `commands.ts`
-
 <img src="https://github.com/mterm-io/mterm/assets/7341502/df8e74d4-896c-4964-861d-bad3ced17c80" alt="drawing" width="500"/>
 
 
 > Note the return type is optional, just added above to highlight the typescript engine provided
-
-
-
 
 ### Secrets
 
@@ -216,6 +211,12 @@ export function who() {
 ````
 
 ![image](https://github.com/mterm-io/mterm/assets/7341502/76b26a62-33ea-4883-b07c-677f99ab3355)
+
+### Other Notes
+
+When you change the tab name to include `$idx` - this will be replaced with the current tab index
+
+You can install packages in the `~/mterm` folder and use them in `commands.ts`
 
 ### contributing
 

@@ -9,6 +9,7 @@ import { createShortcut } from './create-shortcut'
 import { attach } from '../framework/runtime-events'
 import { RunnerWindow } from '../window/windows/runner'
 import { autoUpdater } from 'electron-updater'
+import { createContext } from './create-context'
 
 export interface BootstrapContext {
   app: App
@@ -49,6 +50,7 @@ export async function boostrap(context: BootstrapContext): Promise<void> {
     await createWindows(context)
 
     await createTray(context)
+    await createContext(context)
 
     createShortcut(context)
 

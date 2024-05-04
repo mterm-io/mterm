@@ -8,6 +8,7 @@ import {
   Result,
   ResultStream,
   ResultStreamEvent,
+  Runtime,
   RuntimeModel
 } from './runtime'
 import short from 'short-uuid'
@@ -85,6 +86,78 @@ export function attach({ app, workspace }: BootstrapContext): void {
       command.aborted = true
     }
     command.complete = true
+
+    return true
+  })
+
+  ipcMain.handle('runtime.rename', async (_, runtimeId, name): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+
+    runtime.appearance.title = name
+
+    return true
+  })
+
+  ipcMain.handle('runtime.duplicate', async (_, runtimeId): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+
+    const duplicatedRuntime = new Runtime(runtime.folder)
+
+    duplicatedRuntime.appearance.title = runtime.appearance.title
+    duplicatedRuntime.profile = runtime.profile
+    duplicatedRuntime.prompt = runtime.prompt
+
+    workspace.runtimes.push(duplicatedRuntime)
+
+    return true
+  })
+
+  ipcMain.handle('runtime.close-right', async (_, runtimeId): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+
+    const runtimeIndex = workspace.runtimes.indexOf(runtime)
+    const runtimesToDelete = workspace.runtimes.filter((_, index) => index > runtimeIndex)
+
+    runtimesToDelete.forEach((runtime) => workspace.removeRuntime(runtime))
+
+    workspace.runtimeIndex = runtimeIndex
+
+    return true
+  })
+
+  ipcMain.handle('runtime.close-others', async (_, runtimeId): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+
+    const runtimesToDelete = workspace.runtimes.filter((_) => _.id !== runtimeId)
+
+    runtimesToDelete.forEach((runtime) => workspace.removeRuntime(runtime))
+
+    workspace.runtimeIndex = 0
+
+    return true
+  })
+
+  ipcMain.handle('runtime.close', async (_, runtimeId): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+
+    if (!workspace.removeRuntime(runtime)) {
+      app.quit()
+    }
 
     return true
   })

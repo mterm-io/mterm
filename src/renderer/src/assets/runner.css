@@ -240,3 +240,17 @@ body {
   min-width: 32px;
   min-height: 32px;
 }
+.contextmenu.tab-context-menu {
+  color: #f1f1f1;
+  width: 150px;
+  background-color: #464545;
+  padding: 5px 0;
+}
+.tab-context-menu > .contextmenu__item {
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 2px 9px;
+}
+.tab-context-menu > .contextmenu__item:hover {
+  color: #2248a9;
+}

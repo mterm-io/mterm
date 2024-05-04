@@ -1,8 +1,10 @@
-import { ChangeEvent, ReactElement, useEffect, useState, useRef } from 'react'
-import { Command, ResultStreamEvent, Runtime } from './runtime'
+import { ChangeEvent, ReactElement, useEffect, useRef, useState } from 'react'
+import { Command, Runtime } from './runtime'
+import { ContextMenu, ContextMenuItem, ContextMenuTrigger } from 'rctx-contextmenu'
 
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
+  const [pendingTitles, setPendingTitles] = useState<object>({})
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
   const [rawMode, setRawMode] = useState<boolean>(false)
@@ -16,14 +18,9 @@ export default function Runner(): ReactElement {
   }
 
   window.electron.ipcRenderer.removeAllListeners('runtime.commandEvent')
-  window.electron.ipcRenderer.on(
-    'runtime.commandEvent',
-    async (_, streamEntry: ResultStreamEvent) => {
-      console.log(streamEntry)
-
-      await reloadRuntimesFromBackend()
-    }
-  )
+  window.electron.ipcRenderer.on('runtime.commandEvent', async () => {
+    await reloadRuntimesFromBackend()
+  })
 
   const setPrompt = (prompt: string): void => {
     setRuntimes((runtimes) => {
@@ -68,7 +65,6 @@ export default function Runner(): ReactElement {
   }
   const handlePromptChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
-    console.log(event)
     if (historyIndex !== -1) {
       applyHistoryIndex(-1)
     }
@@ -76,6 +72,15 @@ export default function Runner(): ReactElement {
     setPrompt(value)
 
     window.electron.ipcRenderer.send('runtime.prompt', value)
+  }
+
+  const handleTitleChange = (id: string, event: ChangeEvent<HTMLInputElement>): void => {
+    const value = event.target.value
+
+    setPendingTitles((titles) => ({
+      ...titles,
+      [id]: value
+    }))
   }
 
   const selectRuntime = (runtimeIndex: number): void => {
@@ -125,30 +130,69 @@ export default function Runner(): ReactElement {
     }
   }
 
-  useEffect(() => {
-    inputRef.current?.focus()
-
-    // Conditionally handle keydown of letter or arrow to refocus input
-    const handleGlobalKeyDown = (event): void => {
-      if (
-        /^[a-zA-Z]$/.test(event.key) ||
-        event.key === 'ArrowUp' ||
-        event.key === 'ArrowDown' ||
-        (!event.shiftKey && !event.ctrlKey && !event.altKey)
-      ) {
-        if (document.activeElement !== inputRef.current) {
-          inputRef.current?.focus()
+  const handleTabAction = (runtime: Runtime, action: string): void => {
+    switch (action) {
+      case 'rename':
+        {
+          setPendingTitles((titles) => ({
+            ...titles,
+            [runtime.id]: runtime.appearance.title
+          }))
         }
-        handleKeyDown(event)
+        break
+      default: {
+        window.electron.ipcRenderer.invoke(`runtime.${action}`, runtime.id).then(() => {
+          return reloadRuntimesFromBackend()
+        })
       }
     }
+  }
 
-    document.addEventListener('keydown', handleGlobalKeyDown)
-
-    return () => {
-      document.removeEventListener('keydown', handleGlobalKeyDown)
+  const handleTabTitleKeyDown = (id: string, e): void => {
+    if (e.key === 'Enter') {
+      const titleToSave = pendingTitles[id] || ''
+      if (titleToSave.trim().length > 0) {
+        // something to save
+        window.electron.ipcRenderer.invoke('runtime.rename', id, titleToSave).then(() => {
+          return reloadRuntimesFromBackend()
+        })
+      }
+      setPendingTitles((titles) => ({ ...titles, [id]: null }))
     }
-  }, [])
+  }
+
+  // useEffect(() => {
+  //   inputRef.current?.focus()
+  //
+  //   if (Object.values(pendingTitles).filter((title) => title !== null).length > 0) {
+  //     //editing session in progress
+  //     return
+  //   }
+  //
+  //   // Conditionally handle keydown of letter or arrow to refocus input
+  //   const handleGlobalKeyDown = (event): void => {
+  //     // if pending a title? ignore this key event: user is probably editing the window title
+  //     // and does not care for input
+  //
+  //     if (
+  //       /^[a-zA-Z]$/.test(event.key) ||
+  //       event.key === 'ArrowUp' ||
+  //       event.key === 'ArrowDown' ||
+  //       (!event.shiftKey && !event.ctrlKey && !event.altKey)
+  //     ) {
+  //       if (document.activeElement !== inputRef.current) {
+  //         inputRef.current?.focus()
+  //       }
+  //       handleKeyDown(event)
+  //     }
+  //   }
+  //
+  //   document.addEventListener('keydown', handleGlobalKeyDown)
+  //
+  //   return () => {
+  //     document.removeEventListener('keydown', handleGlobalKeyDown)
+  //   }
+  // }, [])
 
   useEffect(() => {
     reloadRuntimesFromBackend().catch((error) => console.error(error))
@@ -182,13 +226,47 @@ export default function Runner(): ReactElement {
       >
         <div className="runner-tabs">
           {runtimeList.map((runtime, index: number) => (
-            <div
-              key={index}
-              onClick={() => selectRuntime(index)}
-              className={`runner-tabs-title ${runtime.target ? 'runner-tabs-title-active' : undefined}`}
-            >
-              <div>{runtime.appearance.title}</div>
-            </div>
+            <ContextMenuTrigger key={index} id={`tab-context-menu-${index}`}>
+              <div
+                onClick={() => selectRuntime(index)}
+                className={`runner-tabs-title ${runtime.target ? 'runner-tabs-title-active' : undefined}`}
+              >
+                <div>
+                  {pendingTitles[runtime.id] !== null && pendingTitles[runtime.id] !== undefined ? (
+                    <input
+                      type="text"
+                      onKeyDown={(e) => handleTabTitleKeyDown(runtime.id, e)}
+                      onChange={(e) => handleTitleChange(runtime.id, e)}
+                      value={pendingTitles[runtime.id]}
+                    />
+                  ) : (
+                    runtime.appearance.title
+                  )}
+                </div>
+
+                <ContextMenu
+                  id={`tab-context-menu-${index}`}
+                  hideOnLeave={false}
+                  className="tab-context-menu"
+                >
+                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'close')}>
+                    Close
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'close-others')}>
+                    Close Others
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'close-right')}>
+                    Close (right)
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'duplicate')}>
+                    Duplicate
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'rename')}>
+                    Rename
+                  </ContextMenuItem>
+                </ContextMenu>
+              </div>
+            </ContextMenuTrigger>
           ))}
           <div className="runner-spacer" onClick={onAddRuntimeClick}>
             +
