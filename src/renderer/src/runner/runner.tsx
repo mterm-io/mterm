@@ -18,14 +18,9 @@ export default function Runner(): ReactElement {
   }
 
   window.electron.ipcRenderer.removeAllListeners('runtime.commandEvent')
-  window.electron.ipcRenderer.on(
-    'runtime.commandEvent',
-    async (_, streamEntry: ResultStreamEvent) => {
-      console.log(streamEntry)
-
-      await reloadRuntimesFromBackend()
-    }
-  )
+  window.electron.ipcRenderer.on('runtime.commandEvent', async () => {
+    await reloadRuntimesFromBackend()
+  })
 
   const setPrompt = (prompt: string): void => {
     setRuntimes((runtimes) => {
@@ -82,7 +77,6 @@ export default function Runner(): ReactElement {
   const handleTitleChange = (id: string, event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
 
-    console.log('Titlte changex')
     setPendingTitles((titles) => ({
       ...titles,
       [id]: value
