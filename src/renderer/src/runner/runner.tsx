@@ -1,6 +1,7 @@
-import { ChangeEvent, ReactElement, useEffect, useState, useRef } from 'react'
+import { ChangeEvent, ReactElement, useEffect, useRef, useState } from 'react'
 import { Command, ResultStreamEvent, Runtime } from './runtime'
-import { ContextMenuTrigger, ContextMenu, ContextMenuItem } from 'rctx-contextmenu'
+import { ContextMenu, ContextMenuItem, ContextMenuTrigger } from 'rctx-contextmenu'
+
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
   const [pendingTitles, setPendingTitles] = useState<object>({})
@@ -81,6 +82,7 @@ export default function Runner(): ReactElement {
   const handleTitleChange = (id: string, event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
 
+    console.log('Titlte changex')
     setPendingTitles((titles) => ({
       ...titles,
       [id]: value
@@ -134,44 +136,62 @@ export default function Runner(): ReactElement {
     }
   }
 
-  const handleTitleKeyDown = (id: string, e): void => {
-    if (e.key === 'Enter') {
-      const titleToSave = pendingTitles[id] || ''
-      if (titleToSave.trim().length === 0) {
-        // nothing to save? use old title
-        setPendingTitles((titles) => ({ ...titles, [id]: null }))
-      } else {
-        window.electron.ipcRenderer.invoke('runtime.rename', id, titleToSave).then(() => {
-          return reloadRuntimesFromBackend()
-        })
+  const handleTabAction = (runtime: Runtime, action: string): void => {
+    switch (action) {
+      case 'rename': {
+        setPendingTitles((titles) => ({
+          ...titles,
+          [runtime.id]: runtime.appearance.title
+        }))
       }
     }
   }
 
-  useEffect(() => {
-    inputRef.current?.focus()
-
-    // Conditionally handle keydown of letter or arrow to refocus input
-    const handleGlobalKeyDown = (event): void => {
-      if (
-        /^[a-zA-Z]$/.test(event.key) ||
-        event.key === 'ArrowUp' ||
-        event.key === 'ArrowDown' ||
-        (!event.shiftKey && !event.ctrlKey && !event.altKey)
-      ) {
-        if (document.activeElement !== inputRef.current) {
-          inputRef.current?.focus()
-        }
-        handleKeyDown(event)
+  const handleTabTitleKeyDown = (id: string, e): void => {
+    if (e.key === 'Enter') {
+      const titleToSave = pendingTitles[id] || ''
+      if (titleToSave.trim().length > 0) {
+        // something to save
+        window.electron.ipcRenderer.invoke('runtime.rename', id, titleToSave).then(() => {
+          return reloadRuntimesFromBackend()
+        })
       }
+      setPendingTitles((titles) => ({ ...titles, [id]: null }))
     }
+  }
 
-    document.addEventListener('keydown', handleGlobalKeyDown)
-
-    return () => {
-      document.removeEventListener('keydown', handleGlobalKeyDown)
-    }
-  }, [])
+  // useEffect(() => {
+  //   inputRef.current?.focus()
+  //
+  //   if (Object.values(pendingTitles).filter((title) => title !== null).length > 0) {
+  //     //editing session in progress
+  //     return
+  //   }
+  //
+  //   // Conditionally handle keydown of letter or arrow to refocus input
+  //   const handleGlobalKeyDown = (event): void => {
+  //     // if pending a title? ignore this key event: user is probably editing the window title
+  //     // and does not care for input
+  //
+  //     if (
+  //       /^[a-zA-Z]$/.test(event.key) ||
+  //       event.key === 'ArrowUp' ||
+  //       event.key === 'ArrowDown' ||
+  //       (!event.shiftKey && !event.ctrlKey && !event.altKey)
+  //     ) {
+  //       if (document.activeElement !== inputRef.current) {
+  //         inputRef.current?.focus()
+  //       }
+  //       handleKeyDown(event)
+  //     }
+  //   }
+  //
+  //   document.addEventListener('keydown', handleGlobalKeyDown)
+  //
+  //   return () => {
+  //     document.removeEventListener('keydown', handleGlobalKeyDown)
+  //   }
+  // }, [])
 
   useEffect(() => {
     reloadRuntimesFromBackend().catch((error) => console.error(error))
@@ -211,10 +231,10 @@ export default function Runner(): ReactElement {
                 className={`runner-tabs-title ${runtime.target ? 'runner-tabs-title-active' : undefined}`}
               >
                 <div>
-                  {pendingTitles[runtime.id] ? (
+                  {pendingTitles[runtime.id] !== null && pendingTitles[runtime.id] !== undefined ? (
                     <input
                       type="text"
-                      onKeyDown={(e) => handleTitleKeyDown(runtime.id, e)}
+                      onKeyDown={(e) => handleTabTitleKeyDown(runtime.id, e)}
                       onChange={(e) => handleTitleChange(runtime.id, e)}
                       value={pendingTitles[runtime.id]}
                     />
@@ -228,11 +248,21 @@ export default function Runner(): ReactElement {
                   hideOnLeave={false}
                   className="tab-context-menu"
                 >
-                  <ContextMenuItem>Close</ContextMenuItem>
-                  <ContextMenuItem>Close Others</ContextMenuItem>
-                  <ContextMenuItem>Close (right)</ContextMenuItem>
-                  <ContextMenuItem>Duplicate</ContextMenuItem>
-                  <ContextMenuItem>Rename</ContextMenuItem>
+                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'close')}>
+                    Close
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'close-others')}>
+                    Close Others
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'close-right')}>
+                    Close (right)
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'duplicate')}>
+                    Duplicate
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'rename')}>
+                    Rename
+                  </ContextMenuItem>
                 </ContextMenu>
               </div>
             </ContextMenuTrigger>
