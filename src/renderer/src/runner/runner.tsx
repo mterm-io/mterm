@@ -3,6 +3,7 @@ import { Command, ResultStreamEvent, Runtime } from './runtime'
 import { ContextMenuTrigger, ContextMenu, ContextMenuItem } from 'rctx-contextmenu'
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
+  const [pendingTitles, setPendingTitles] = useState<object>({})
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
   const [rawMode, setRawMode] = useState<boolean>(false)
@@ -68,7 +69,6 @@ export default function Runner(): ReactElement {
   }
   const handlePromptChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
-    console.log(event)
     if (historyIndex !== -1) {
       applyHistoryIndex(-1)
     }
@@ -76,6 +76,15 @@ export default function Runner(): ReactElement {
     setPrompt(value)
 
     window.electron.ipcRenderer.send('runtime.prompt', value)
+  }
+
+  const handleTitleChange = (id: string, event: ChangeEvent<HTMLInputElement>): void => {
+    const value = event.target.value
+
+    setPendingTitles((titles) => ({
+      ...titles,
+      [id]: value
+    }))
   }
 
   const selectRuntime = (runtimeIndex: number): void => {
@@ -122,6 +131,20 @@ export default function Runner(): ReactElement {
 
     if (e.code === 'KeyC' && e.ctrlKey) {
       kill().catch((error) => console.error(error))
+    }
+  }
+
+  const handleTitleKeyDown = (id: string, e): void => {
+    if (e.key === 'Enter') {
+      const titleToSave = pendingTitles[id] || ''
+      if (titleToSave.trim().length === 0) {
+        // nothing to save? use old title
+        setPendingTitles((titles) => ({ ...titles, [id]: null }))
+      } else {
+        window.electron.ipcRenderer.invoke('runtime.rename', id, titleToSave).then(() => {
+          return reloadRuntimesFromBackend()
+        })
+      }
     }
   }
 
@@ -187,7 +210,18 @@ export default function Runner(): ReactElement {
                 onClick={() => selectRuntime(index)}
                 className={`runner-tabs-title ${runtime.target ? 'runner-tabs-title-active' : undefined}`}
               >
-                <div>{runtime.appearance.title}</div>
+                <div>
+                  {pendingTitles[runtime.id] ? (
+                    <input
+                      type="text"
+                      onKeyDown={(e) => handleTitleKeyDown(runtime.id, e)}
+                      onChange={(e) => handleTitleChange(runtime.id, e)}
+                      value={pendingTitles[runtime.id]}
+                    />
+                  ) : (
+                    runtime.appearance.title
+                  )}
+                </div>
 
                 <ContextMenu
                   id={`tab-context-menu-${index}`}

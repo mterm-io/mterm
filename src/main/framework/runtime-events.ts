@@ -89,6 +89,17 @@ export function attach({ app, workspace }: BootstrapContext): void {
     return true
   })
 
+  ipcMain.handle('runtime.rename', async (_, runtimeId, name): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+
+    runtime.appearance.title = name
+
+    return true
+  })
+
   ipcMain.on('open.workspace', async () => {
     await shell.openPath(workspace.folder)
   })
