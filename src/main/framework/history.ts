@@ -7,7 +7,10 @@ export interface HistoricalExecution {
   error: boolean
   aborted: boolean
   profile: string
-  when: number
+  when: {
+    start: number
+    finish: number
+  }
   code: number
 }
 
@@ -26,7 +29,7 @@ export class History {
       this.execution = await readJSON(this.location)
     }
   }
-  append(command: Command, profile: string, saveResult: boolean, max: number): void {
+  append(command: Command, start: number, profile: string, saveResult: boolean, max: number): void {
     if (this.execution.length + 1 > max) {
       this.execution.shift()
     }
@@ -37,7 +40,10 @@ export class History {
       result: saveResult ? command.result.stream.map((o) => o.raw).join('\n') : undefined,
       error: command.error,
       profile,
-      when: Date.now(),
+      when: {
+        start,
+        finish: Date.now()
+      },
       code: command.result.code
     })
   }

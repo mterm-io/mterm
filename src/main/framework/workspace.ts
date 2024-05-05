@@ -7,7 +7,7 @@ import { remove } from 'lodash'
 import { app, BrowserWindowConstructorOptions } from 'electron'
 import { setWindowValueFromPath } from '../util'
 import { Runtime } from './runtime'
-import { DEFAULT_FOLDER } from '../../constants'
+import { DEFAULT_FOLDER, DEFAULT_HISTORY_ENABLED } from '../../constants'
 import { Commands } from './commands'
 import { Store } from './store'
 import { History } from './history'
@@ -162,6 +162,14 @@ export class Workspace {
       }
     }
   }
+
+  async persist(): Promise<void> {
+    const saveHistory = this.settings.get<boolean>('history.enabled', DEFAULT_HISTORY_ENABLED)
+    if (saveHistory) {
+      await this.history.write()
+    }
+  }
+
   /**
    * Applies the updated settings to all the windows in the workspace.
    *

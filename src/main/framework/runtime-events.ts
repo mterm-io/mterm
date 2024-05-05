@@ -260,6 +260,19 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
     let finalize: boolean = true
 
+    const finish = (code: number): void => {
+      if (command.aborted || command.complete) {
+        return
+      }
+
+      result.code = code
+
+      command.complete = true
+      command.error = result.code !== 0
+
+      console.log('FINISH', command.prompt)
+    }
+
     try {
       const out = (text: string, error: boolean = false): void => {
         if (command.aborted || command.complete) {
@@ -289,16 +302,6 @@ export function attach({ app, workspace }: BootstrapContext): void {
           _.sender.send('runtime.commandEvent', streamEvent)
         }
       }
-      const finish = (code: number): void => {
-        if (command.aborted || command.complete) {
-          return
-        }
-
-        result.code = code
-
-        command.complete = true
-        command.error = result.code !== 0
-      }
 
       if (!profile) {
         throw `Profile ${profileKey} does not exist, provided by runtime as = ${runtimeTarget.profile}`
@@ -322,12 +325,14 @@ export function attach({ app, workspace }: BootstrapContext): void {
         text: `${e}`,
         raw: `${e}`
       })
-      result.code = 1
+      finish(1)
     }
 
     if (finalize) {
       command.complete = true
       command.error = result.code !== 0
+
+      finish(result.code)
     }
 
     return command
