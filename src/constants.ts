@@ -25,6 +25,8 @@ export const DEFAULT_PROFILES: Record<string, Profile> =
         }
       }
 export const DEFAULT_FOLDER = '$CWD'
+export const DEFAULT_HISTORY_ENABLED = true
+export const DEFAULT_HISTORY_SAVE_RESULT = true
 export const DEFAULT_SETTING_RUNNER_SHORTCUT = '`+CommandOrControl'
 export const DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT = '`+Shift+CommandOrControl'
 export const DEFAULT_SETTING_IS_COMMANDER_MODE = true
@@ -46,6 +48,10 @@ export const DEFAULT_SETTING_RUNNER_BOUNDS = {
 export const DEFAULT_SETTINGS = {
   defaultProfile: DEFAULT_PROFILE,
   profiles: DEFAULT_PROFILES,
+  history: {
+    enabled: DEFAULT_HISTORY_ENABLED,
+    saveResult: DEFAULT_HISTORY_SAVE_RESULT
+  },
   runner: {
     shortcut: DEFAULT_SETTING_RUNNER_SHORTCUT,
     bounds: DEFAULT_SETTING_RUNNER_BOUNDS,
