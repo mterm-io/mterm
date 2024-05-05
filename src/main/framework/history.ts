@@ -54,7 +54,7 @@ export class History {
     history.sort((historyA, historyB) => historyA.when.start - historyB.when.start)
 
     const historyFinalList =
-      max > history.length ? history.slice(history.length - max, max) : history
+      max < history.length ? history.slice(history.length - max, history.length) : history
 
     await writeFile(this.location, JSON.stringify(historyFinalList, null, 2))
   }
