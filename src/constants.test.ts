@@ -1,8 +1,12 @@
+import { Profile } from './main/framework/runtime'
 import {
   DEFAULT_WORKSPACE,
   DEFAULT_PROFILE,
   DEFAULT_PROFILES,
   DEFAULT_FOLDER,
+  DEFAULT_HISTORY_ENABLED,
+  DEFAULT_HISTORY_MAX_ITEMS,
+  DEFAULT_HISTORY_SAVE_RESULT,
   DEFAULT_SETTING_RUNNER_SHORTCUT,
   DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT,
   DEFAULT_SETTING_IS_COMMANDER_MODE,
@@ -12,17 +16,16 @@ import {
 } from './constants'
 
 describe('constants', () => {
-  it('should have the correct default workspace', () => {
+  it('should have the correct DEFAULT_WORKSPACE', () => {
     expect(DEFAULT_WORKSPACE).toBe('~/mterm')
   })
 
-  it('should have the correct default profile based on platform', () => {
-    const expectedDefaultProfile = process.platform === 'win32' ? 'powershell' : 'sh'
-    expect(DEFAULT_PROFILE).toBe(expectedDefaultProfile)
+  it('should have the correct DEFAULT_PROFILE based on the platform', () => {
+    expect(DEFAULT_PROFILE).toBe(process.platform === 'win32' ? 'powershell' : 'sh')
   })
 
-  it('should have the correct default profiles based on platform', () => {
-    const expectedDefaultProfiles =
+  it('should have the correct DEFAULT_PROFILES based on the platform', () => {
+    const expectedProfiles: Record<string, Profile> =
       process.platform === 'win32'
         ? {
             powershell: {
@@ -43,26 +46,38 @@ describe('constants', () => {
               icon: 'default'
             }
           }
-    expect(DEFAULT_PROFILES).toEqual(expectedDefaultProfiles)
+    expect(DEFAULT_PROFILES).toEqual(expectedProfiles)
   })
 
-  it('should have the correct default folder', () => {
+  it('should have the correct DEFAULT_FOLDER', () => {
     expect(DEFAULT_FOLDER).toBe('$CWD')
   })
 
-  it('should have the correct default setting runner shortcut', () => {
+  it('should have the correct DEFAULT_HISTORY_ENABLED', () => {
+    expect(DEFAULT_HISTORY_ENABLED).toBe(true)
+  })
+
+  it('should have the correct DEFAULT_HISTORY_MAX_ITEMS', () => {
+    expect(DEFAULT_HISTORY_MAX_ITEMS).toBe(100)
+  })
+
+  it('should have the correct DEFAULT_HISTORY_SAVE_RESULT', () => {
+    expect(DEFAULT_HISTORY_SAVE_RESULT).toBe(true)
+  })
+
+  it('should have the correct DEFAULT_SETTING_RUNNER_SHORTCUT', () => {
     expect(DEFAULT_SETTING_RUNNER_SHORTCUT).toBe('`+CommandOrControl')
   })
 
-  it('should have the correct default setting commander mode toggle shortcut', () => {
+  it('should have the correct DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT', () => {
     expect(DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT).toBe('`+Shift+CommandOrControl')
   })
 
-  it('should have the correct default setting for commander mode', () => {
+  it('should have the correct DEFAULT_SETTING_IS_COMMANDER_MODE', () => {
     expect(DEFAULT_SETTING_IS_COMMANDER_MODE).toBe(true)
   })
 
-  it('should have the correct default setting for commander mode bounds', () => {
+  it('should have the correct DEFAULT_SETTING_COMMANDER_MODE_BOUNDS', () => {
     expect(DEFAULT_SETTING_COMMANDER_MODE_BOUNDS).toEqual({
       screen: 0,
       x: 0,
@@ -72,7 +87,7 @@ describe('constants', () => {
     })
   })
 
-  it('should have the correct default setting for runner bounds', () => {
+  it('should have the correct DEFAULT_SETTING_RUNNER_BOUNDS', () => {
     expect(DEFAULT_SETTING_RUNNER_BOUNDS).toEqual({
       screen: 'PRIMARY',
       x: 'SCREEN:-.5',
@@ -82,10 +97,15 @@ describe('constants', () => {
     })
   })
 
-  it('should have the correct default settings', () => {
+  it('should have the correct DEFAULT_SETTINGS', () => {
     expect(DEFAULT_SETTINGS).toEqual({
       defaultProfile: DEFAULT_PROFILE,
       profiles: DEFAULT_PROFILES,
+      history: {
+        enabled: DEFAULT_HISTORY_ENABLED,
+        maxItems: DEFAULT_HISTORY_MAX_ITEMS,
+        saveResult: DEFAULT_HISTORY_SAVE_RESULT
+      },
       runner: {
         shortcut: DEFAULT_SETTING_RUNNER_SHORTCUT,
         bounds: DEFAULT_SETTING_RUNNER_BOUNDS,

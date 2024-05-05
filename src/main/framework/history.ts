@@ -1,4 +1,4 @@
-import { pathExists, readJSON, writeFile, writeJson } from 'fs-extra'
+import { pathExists, readJSON, writeFile } from 'fs-extra'
 import { Command } from './runtime'
 
 export interface HistoricalExecution {
