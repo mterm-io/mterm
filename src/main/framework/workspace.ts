@@ -7,7 +7,7 @@ import { remove } from 'lodash'
 import { app, BrowserWindowConstructorOptions } from 'electron'
 import { setWindowValueFromPath } from '../util'
 import { Runtime } from './runtime'
-import { DEFAULT_FOLDER, DEFAULT_HISTORY_ENABLED } from '../../constants'
+import { DEFAULT_FOLDER, DEFAULT_HISTORY_ENABLED, DEFAULT_HISTORY_MAX_ITEMS } from '../../constants'
 import { Commands } from './commands'
 import { Store } from './store'
 import { History } from './history'
@@ -166,7 +166,9 @@ export class Workspace {
   async persist(): Promise<void> {
     const saveHistory = this.settings.get<boolean>('history.enabled', DEFAULT_HISTORY_ENABLED)
     if (saveHistory) {
-      await this.history.write()
+      const maxHistory = this.settings.get<number>('history.maxItems', DEFAULT_HISTORY_MAX_ITEMS)
+
+      await this.history.write(maxHistory)
     }
   }
 

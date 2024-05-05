@@ -14,9 +14,13 @@ export interface HistoricalExecution {
   code: number
 }
 
+// so why save two seperate histories?
+// new execution is the history that is still pending writing
+// this gives us the ability to easily scroll without exposing all the data to the front all at once
 export class History {
-  public execution: HistoricalExecution[] = []
-
+  public priorExecution: HistoricalExecution[] = []
+  public newExecution: HistoricalExecution[] = []
+  public scrollIndex: number = 0
   constructor(public location: string) {}
 
   async load(): Promise<void> {
@@ -26,15 +30,11 @@ export class History {
 
       await writeFile(this.location, prettyJSON, 'utf-8')
     } else {
-      this.execution = await readJSON(this.location)
+      this.priorExecution = await readJSON(this.location)
     }
   }
-  append(command: Command, start: number, profile: string, saveResult: boolean, max: number): void {
-    if (this.execution.length + 1 > max) {
-      this.execution.shift()
-    }
-
-    this.execution.push({
+  append(command: Command, start: number, profile: string, saveResult: boolean): void {
+    this.newExecution.push({
       prompt: command.prompt,
       aborted: command.aborted,
       result: saveResult ? command.result.stream.map((o) => o.raw) : undefined,
@@ -48,7 +48,25 @@ export class History {
     })
   }
 
-  async write(): Promise<void> {
-    await writeFile(this.location, JSON.stringify(this.execution, null, 2))
+  async write(max: number): Promise<void> {
+    const history: Array<HistoricalExecution> = [...this.priorExecution, ...this.newExecution]
+
+    history.sort((historyA, historyB) => historyA.when.start - historyB.when.start)
+
+    const historyFinalList =
+      max > history.length ? history.slice(history.length - max, max) : history
+
+    await writeFile(this.location, JSON.stringify(historyFinalList, null, 2))
+  }
+
+  rewind(): HistoricalExecution | undefined {
+    if (this.scrollIndex >= this.priorExecution.length) {
+      return
+    }
+    const historicalItem = this.priorExecution[this.priorExecution.length - 1 - this.scrollIndex]
+
+    this.scrollIndex++
+
+    return historicalItem
   }
 }

@@ -24,6 +24,7 @@ import {
   DEFAULT_SETTING_IS_COMMANDER_MODE
 } from '../../constants'
 import Convert from 'ansi-to-html'
+import { HistoricalExecution } from './history'
 
 const convert = new Convert()
 const DOMPurify = createDOMPurify(new JSDOM('').window)
@@ -89,6 +90,55 @@ export function attach({ app, workspace }: BootstrapContext): void {
       command.aborted = true
     }
     command.complete = true
+
+    return true
+  })
+
+  ipcMain.handle('history.try-scroll-next', async (_, runtimeId): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+    const enabled: boolean = workspace.settings.get<boolean>(
+      'history.enabled',
+      DEFAULT_HISTORY_ENABLED
+    )
+    if (!enabled) {
+      return false
+    }
+
+    const rewind: HistoricalExecution | undefined = workspace.history.rewind()
+    if (rewind === undefined) {
+      return false
+    }
+
+    const command: Command = {
+      prompt: rewind.prompt,
+      error: rewind.error,
+      aborted: rewind.aborted,
+      runtime: runtimeId,
+      id: short.generate(),
+      complete: true,
+      result: {
+        code: rewind.code,
+        stream: !rewind.result
+          ? []
+          : rewind.result.map((raw) => {
+              let text = raw.toString()
+
+              text = DOMPurify.sanitize(raw)
+              text = convert.toHtml(text)
+
+              return {
+                error: rewind.error,
+                raw,
+                text: text
+              }
+            })
+      }
+    }
+
+    runtime.history.push(command)
 
     return true
   })
@@ -281,7 +331,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
       command.error = result.code !== 0
 
       if (history.enabled) {
-        workspace.history.append(command, start, profileKey, history.results, history.max)
+        workspace.history.append(command, start, profileKey, history.results)
       }
     }
 

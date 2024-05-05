@@ -122,6 +122,18 @@ export default function Runner(): ReactElement {
     if (e.code === 'ArrowUp') {
       if (runtime && historyIndex < runtime.history.length - 1) {
         applyHistoryIndex(historyIndex + 1)
+      } else {
+        window.electron.ipcRenderer
+          .invoke('history.try-scroll-next', runtime?.id)
+          .then((isHistoricalScroll: boolean) => {
+            if (isHistoricalScroll) {
+              applyHistoryIndex(historyIndex + 1)
+
+              return reloadRuntimesFromBackend()
+            }
+
+            return Promise.resolve()
+          })
       }
     }
 
