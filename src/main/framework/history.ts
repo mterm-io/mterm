@@ -1,0 +1,48 @@
+import { pathExists, readJSON, writeFile, writeJson } from 'fs-extra'
+import { Command } from './runtime'
+
+export interface HistoricalExecution {
+  prompt: string
+  result?: string
+  error: boolean
+  aborted: boolean
+  profile: string
+  when: number
+  code: number
+}
+
+export class History {
+  public execution: HistoricalExecution[] = []
+
+  constructor(public location: string) {}
+
+  async load(): Promise<void> {
+    const isExist = await pathExists(this.location)
+    if (!isExist) {
+      const prettyJSON = JSON.stringify([], null, 2)
+
+      await writeFile(this.location, prettyJSON, 'utf-8')
+    } else {
+      this.execution = await readJSON(this.location)
+    }
+  }
+  append(command: Command, profile: string, saveResult: boolean, max: number): void {
+    if (this.execution.length + 1 > max) {
+      this.execution.shift()
+    }
+
+    this.execution.push({
+      prompt: command.prompt,
+      aborted: command.aborted,
+      result: saveResult ? command.result.stream.map((o) => o.raw).join('\n') : undefined,
+      error: command.error,
+      profile,
+      when: Date.now(),
+      code: command.result.code
+    })
+  }
+
+  async write(): Promise<void> {
+    await writeJson(this.location, this.execution)
+  }
+}

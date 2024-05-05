@@ -10,6 +10,7 @@ import { Runtime } from './runtime'
 import { DEFAULT_FOLDER } from '../../constants'
 import { Commands } from './commands'
 import { Store } from './store'
+import { History } from './history'
 
 export function resolveFolderPathForMTERM(folder: string): string {
   folder = folder.replace('~', homedir())
@@ -21,6 +22,7 @@ export function resolveFolderPathForMTERM(folder: string): string {
 }
 export class Workspace {
   public store: Store
+  public history: History
   public settings: Settings
   public commands: Commands
   public isAppQuiting: boolean = false
@@ -38,6 +40,7 @@ export class Workspace {
 
     this.commands = new Commands(join(this.folder), join(app.getAppPath(), './resources/commands'))
     this.settings = new Settings(join(this.folder, 'settings.json'), defaultSettings)
+    this.history = new History(join(this.folder, '.history'))
     this.store = new Store(join(this.folder, '.mterm-store'))
   }
 
