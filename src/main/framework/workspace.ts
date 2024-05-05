@@ -7,9 +7,10 @@ import { remove } from 'lodash'
 import { app, BrowserWindowConstructorOptions } from 'electron'
 import { setWindowValueFromPath } from '../util'
 import { Runtime } from './runtime'
-import { DEFAULT_FOLDER } from '../../constants'
+import { DEFAULT_FOLDER, DEFAULT_HISTORY_ENABLED, DEFAULT_HISTORY_MAX_ITEMS } from '../../constants'
 import { Commands } from './commands'
 import { Store } from './store'
+import { History } from './history'
 
 export function resolveFolderPathForMTERM(folder: string): string {
   folder = folder.replace('~', homedir())
@@ -21,6 +22,7 @@ export function resolveFolderPathForMTERM(folder: string): string {
 }
 export class Workspace {
   public store: Store
+  public history: History
   public settings: Settings
   public commands: Commands
   public isAppQuiting: boolean = false
@@ -38,6 +40,7 @@ export class Workspace {
 
     this.commands = new Commands(join(this.folder), join(app.getAppPath(), './resources/commands'))
     this.settings = new Settings(join(this.folder, 'settings.json'), defaultSettings)
+    this.history = new History(join(this.folder, '.history'))
     this.store = new Store(join(this.folder, '.mterm-store'))
   }
 
@@ -159,6 +162,16 @@ export class Workspace {
       }
     }
   }
+
+  async persist(): Promise<void> {
+    const saveHistory = this.settings.get<boolean>('history.enabled', DEFAULT_HISTORY_ENABLED)
+    if (saveHistory) {
+      const maxHistory = this.settings.get<number>('history.maxItems', DEFAULT_HISTORY_MAX_ITEMS)
+
+      await this.history.write(maxHistory)
+    }
+  }
+
   /**
    * Applies the updated settings to all the windows in the workspace.
    *

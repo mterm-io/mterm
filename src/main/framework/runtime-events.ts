@@ -16,11 +16,15 @@ import { execute } from './runtime-executor'
 import createDOMPurify from 'dompurify'
 import { JSDOM } from 'jsdom'
 import {
+  DEFAULT_HISTORY_ENABLED,
+  DEFAULT_HISTORY_MAX_ITEMS,
+  DEFAULT_HISTORY_SAVE_RESULT,
   DEFAULT_PROFILE,
   DEFAULT_PROFILES,
   DEFAULT_SETTING_IS_COMMANDER_MODE
 } from '../../constants'
 import Convert from 'ansi-to-html'
+import { HistoricalExecution } from './history'
 
 const convert = new Convert()
 const DOMPurify = createDOMPurify(new JSDOM('').window)
@@ -86,6 +90,55 @@ export function attach({ app, workspace }: BootstrapContext): void {
       command.aborted = true
     }
     command.complete = true
+
+    return true
+  })
+
+  ipcMain.handle('history.try-scroll-next', async (_, runtimeId): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+    const enabled: boolean = workspace.settings.get<boolean>(
+      'history.enabled',
+      DEFAULT_HISTORY_ENABLED
+    )
+    if (!enabled) {
+      return false
+    }
+
+    const rewind: HistoricalExecution | undefined = workspace.history.rewind()
+    if (rewind === undefined) {
+      return false
+    }
+
+    const command: Command = {
+      prompt: rewind.prompt,
+      error: rewind.error,
+      aborted: rewind.aborted,
+      runtime: runtimeId,
+      id: short.generate(),
+      complete: true,
+      result: {
+        code: rewind.code,
+        stream: !rewind.result
+          ? []
+          : rewind.result.map((raw) => {
+              let text = raw.toString()
+
+              text = DOMPurify.sanitize(raw)
+              text = convert.toHtml(text)
+
+              return {
+                error: rewind.error,
+                raw,
+                text: text
+              }
+            })
+      }
+    }
+
+    runtime.history.push(command)
 
     return true
   })
@@ -253,12 +306,34 @@ export function attach({ app, workspace }: BootstrapContext): void {
       profileKey = workspace.settings.get<string>('defaultProfile', DEFAULT_PROFILE)
     }
 
+    const history = {
+      enabled: workspace.settings.get<boolean>('history.enabled', DEFAULT_HISTORY_ENABLED),
+      results: workspace.settings.get<boolean>('history.saveResult', DEFAULT_HISTORY_SAVE_RESULT),
+      max: workspace.settings.get<number>('history.maxItems', DEFAULT_HISTORY_MAX_ITEMS)
+    }
+
     const profiles = workspace.settings.get<ProfileMap>('profiles', DEFAULT_PROFILES)
     const profile: Profile = profiles[profileKey]
 
     const result: Result = command.result
+    const start = Date.now()
 
     let finalize: boolean = true
+
+    const finish = (code: number): void => {
+      if (command.aborted || command.complete) {
+        return
+      }
+
+      result.code = code
+
+      command.complete = true
+      command.error = result.code !== 0
+
+      if (history.enabled) {
+        workspace.history.append(command, start, profileKey, history.results)
+      }
+    }
 
     try {
       const out = (text: string, error: boolean = false): void => {
@@ -289,16 +364,6 @@ export function attach({ app, workspace }: BootstrapContext): void {
           _.sender.send('runtime.commandEvent', streamEvent)
         }
       }
-      const finish = (code: number): void => {
-        if (command.aborted || command.complete) {
-          return
-        }
-
-        result.code = code
-
-        command.complete = true
-        command.error = result.code !== 0
-      }
 
       if (!profile) {
         throw `Profile ${profileKey} does not exist, provided by runtime as = ${runtimeTarget.profile}`
@@ -322,12 +387,14 @@ export function attach({ app, workspace }: BootstrapContext): void {
         text: `${e}`,
         raw: `${e}`
       })
-      result.code = 1
+      finish(1)
     }
 
     if (finalize) {
       command.complete = true
       command.error = result.code !== 0
+
+      finish(result.code)
     }
 
     return command

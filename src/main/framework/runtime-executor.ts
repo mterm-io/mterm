@@ -27,6 +27,7 @@ export async function execute(context: ExecuteContext): Promise<void | boolean> 
     if (systemCommand.command === cmd || systemCommand?.alias?.includes(cmd)) {
       await systemCommand.task(context, ...args)
 
+      finish(0)
       return
     }
   }

@@ -64,7 +64,16 @@ export async function boostrap(context: BootstrapContext): Promise<void> {
       }
     })
 
+    await workspace.history.load()
     await workspace.commands.load(workspace.settings)
+
+    setInterval(
+      () =>
+        workspace.persist().catch((error) => {
+          console.error(error)
+        }),
+      workspace.settings.get<number>('workspace.persistInterval', 5000)
+    )
   } catch (e) {
     console.error(e)
 
