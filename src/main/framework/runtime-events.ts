@@ -16,6 +16,9 @@ import { execute } from './runtime-executor'
 import createDOMPurify from 'dompurify'
 import { JSDOM } from 'jsdom'
 import {
+  DEFAULT_HISTORY_ENABLED,
+  DEFAULT_HISTORY_MAX_ITEMS,
+  DEFAULT_HISTORY_SAVE_RESULT,
   DEFAULT_PROFILE,
   DEFAULT_PROFILES,
   DEFAULT_SETTING_IS_COMMANDER_MODE
@@ -253,10 +256,17 @@ export function attach({ app, workspace }: BootstrapContext): void {
       profileKey = workspace.settings.get<string>('defaultProfile', DEFAULT_PROFILE)
     }
 
+    const history = {
+      enabled: workspace.settings.get<boolean>('history.enabled', DEFAULT_HISTORY_ENABLED),
+      results: workspace.settings.get<boolean>('history.saveResult', DEFAULT_HISTORY_SAVE_RESULT),
+      max: workspace.settings.get<number>('history.maxItems', DEFAULT_HISTORY_MAX_ITEMS)
+    }
+
     const profiles = workspace.settings.get<ProfileMap>('profiles', DEFAULT_PROFILES)
     const profile: Profile = profiles[profileKey]
 
     const result: Result = command.result
+    const start = Date.now()
 
     let finalize: boolean = true
 
@@ -270,7 +280,9 @@ export function attach({ app, workspace }: BootstrapContext): void {
       command.complete = true
       command.error = result.code !== 0
 
-      console.log('FINISH', command.prompt)
+      if (history.enabled) {
+        workspace.history.append(command, start, profileKey, history.results, history.max)
+      }
     }
 
     try {

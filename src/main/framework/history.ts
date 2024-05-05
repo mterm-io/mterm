@@ -3,7 +3,7 @@ import { Command } from './runtime'
 
 export interface HistoricalExecution {
   prompt: string
-  result?: string
+  result?: string[]
   error: boolean
   aborted: boolean
   profile: string
@@ -37,7 +37,7 @@ export class History {
     this.execution.push({
       prompt: command.prompt,
       aborted: command.aborted,
-      result: saveResult ? command.result.stream.map((o) => o.raw).join('\n') : undefined,
+      result: saveResult ? command.result.stream.map((o) => o.raw) : undefined,
       error: command.error,
       profile,
       when: {
@@ -49,6 +49,6 @@ export class History {
   }
 
   async write(): Promise<void> {
-    await writeJson(this.location, this.execution)
+    await writeFile(this.location, JSON.stringify(this.execution, null, 2))
   }
 }
