@@ -23,8 +23,13 @@
     "build:linux": "electron-vite build && electron-builder --linux"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "^6.2.2",
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
+    "@uiw/codemirror-extensions-color": "^4.22.0",
+    "@uiw/codemirror-extensions-hyper-link": "^4.22.0",
+    "@uiw/codemirror-theme-vscode": "^4.22.0",
+    "@uiw/react-codemirror": "^4.22.0",
     "ansi-to-html": "^0.7.2",
     "dompurify": "^3.1.0",
     "electron-context-menu": "^3.6.1",

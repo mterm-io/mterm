@@ -73,6 +73,7 @@ export class Runtime {
   public history: Command[] = []
   public prompt: string = ''
   public commandFocus: string = ''
+  public resultEdit: string = ''
   public appearance: {
     icon: string
     title: string

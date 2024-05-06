@@ -50,7 +50,18 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
       return {
         target: isTarget,
-        result,
+        result: runtime.resultEdit
+          ? {
+              code: 0,
+              stream: [
+                {
+                  text: runtime.resultEdit,
+                  raw: runtime.resultEdit,
+                  error: false
+                }
+              ]
+            }
+          : result,
         ...runtime,
         history,
         appearance: {
@@ -61,6 +72,48 @@ export function attach({ app, workspace }: BootstrapContext): void {
       }
     })
   }
+
+  ipcMain.handle(
+    'runtime.set-result',
+    async (_, runtimeId: string, commandId: string, result: string): Promise<boolean> => {
+      const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+      if (!runtime) {
+        return false
+      }
+
+      if (!commandId) {
+        runtime.resultEdit = result
+      } else {
+        const command = runtime.history.find((c) => c.id === commandId)
+        if (!command || !command.complete) {
+          return false
+        }
+
+        command.result = {
+          code: command.result.code,
+          stream: [
+            {
+              text: result,
+              raw: result,
+              error: command.error
+            }
+          ]
+        }
+      }
+
+      return false
+    }
+  )
+
+  ipcMain.handle('runtime.reset-focus', async (_, runtimeId: string): Promise<boolean> => {
+    const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+    if (!runtime) {
+      return false
+    }
+
+    runtime.resultEdit = ''
+    return true
+  })
 
   ipcMain.handle('runner.isCommanderMode', async (): Promise<boolean> => {
     return workspace.settings.get<boolean>(
@@ -266,6 +319,8 @@ export function attach({ app, workspace }: BootstrapContext): void {
     if (!runtime) {
       throw `Runtime '${runtimeId}' does not exist`
     }
+
+    runtime.resultEdit = ''
 
     const id = short.generate()
 

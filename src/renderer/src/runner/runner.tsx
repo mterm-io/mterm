@@ -1,13 +1,17 @@
 import { ChangeEvent, ReactElement, useEffect, useRef, useState } from 'react'
 import { Command, Runtime } from './runtime'
 import { ContextMenu, ContextMenuItem, ContextMenuTrigger } from 'rctx-contextmenu'
-
+import CodeMirror from '@uiw/react-codemirror'
+import { vscodeDark } from '@uiw/codemirror-theme-vscode'
+import { color } from '@uiw/codemirror-extensions-color'
+import { hyperLink } from '@uiw/codemirror-extensions-hyper-link'
+import { javascript } from '@codemirror/lang-javascript'
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
   const [pendingTitles, setPendingTitles] = useState<object>({})
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
-  const [rawMode, setRawMode] = useState<boolean>(false)
+  const [editMode, setEditMode] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const reloadRuntimesFromBackend = async (): Promise<void> => {
     const isCommanderMode = await window.electron.ipcRenderer.invoke('runner.isCommanderMode')
@@ -102,7 +106,9 @@ export default function Runner(): ReactElement {
   }
 
   const applyHistoryIndex = (index: number): void => {
-    setHistoryIndex(index)
+    window.electron.ipcRenderer.invoke('runtime.reset-focus', runtime?.id).then(() => {
+      setHistoryIndex(index)
+    })
   }
 
   const onHistoryItemClicked = (historyIndex: number): void => {
@@ -173,6 +179,14 @@ export default function Runner(): ReactElement {
     }
   }
 
+  const onResultChange = (runtimeId: string, commandId: string, value: string): void => {
+    window.electron.ipcRenderer
+      .invoke('runtime.set-result', runtimeId, commandId, value)
+      .then(() => {
+        return reloadRuntimesFromBackend()
+      })
+  }
+
   // useEffect(() => {
   //   inputRef.current?.focus()
   //
@@ -222,12 +236,18 @@ export default function Runner(): ReactElement {
       <pre dangerouslySetInnerHTML={{ __html: resultText }}></pre>
     </div>
   )
-  if (rawMode) {
+  if (editMode) {
     const resultTextRaw = result.stream.map((record) => record.raw).join('')
     output = (
-      <div className="runner-result-content">
-        <pre>{resultTextRaw}</pre>
-      </div>
+      <CodeMirror
+        value={resultTextRaw}
+        extensions={[color, hyperLink, javascript()]}
+        theme={vscodeDark}
+        onChange={(value) =>
+          onResultChange(runtime.id, historicalExecution ? historicalExecution.id : '', value)
+        }
+        basicSetup={{ foldGutter: true }}
+      />
     )
   }
 
@@ -320,14 +340,14 @@ export default function Runner(): ReactElement {
           </div>
           <div className="runner-info">
             <div
-              onClick={() => setRawMode((rawMode) => !rawMode)}
-              className={`toggle-button ${rawMode ? 'toggle-button-on' : ''}`}
+              onClick={() => setEditMode((rawMode) => !rawMode)}
+              className={`toggle-button ${editMode ? 'toggle-button-on' : ''}`}
             >
               <div className="toggle-button-slider">
                 <div className="toggle-button-spacer"></div>
                 <div className="toggle-button-circle"></div>
               </div>
-              raw
+              {'<\\>'}
             </div>
             <div className="runner-context-folder">{runtime.folder}</div>
           </div>
