@@ -34,7 +34,7 @@ jobs:
       - name: install
         uses: borales/actions-yarn@v4
         with:
-          cmd: install
+          cmd: install --frozen-lockfile
       - name: build
         uses: borales/actions-yarn@v4
         env:
@@ -52,7 +52,7 @@ jobs:
       - name: install
         uses: borales/actions-yarn@v4
         with:
-          cmd: install
+          cmd: install --frozen-lockfile
       - name: build
         uses: borales/actions-yarn@v4
         env:
@@ -70,7 +70,7 @@ jobs:
       - name: install
         uses: borales/actions-yarn@v4
         with:
-          cmd: install
+          cmd: install --frozen-lockfile
       - name: build
         uses: borales/actions-yarn@v4
         with:
