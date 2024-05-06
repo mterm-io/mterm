@@ -16,6 +16,7 @@ export class Settings {
 
   set<T>(path: string, value: T): void {
     setFromPath(this.properties, path, value)
+    setFromPath(this.overrides, path, value)
   }
 
   async save(): Promise<void> {

@@ -79,7 +79,7 @@ export default {
 
       context.out(`value '${path}' set and saved`)
 
-      await context.workspace.reload(RunnerWindow)
+      await context.workspace.applySettings(RunnerWindow)
     }
   }
 }
