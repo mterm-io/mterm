@@ -106,6 +106,21 @@ body {
   overflow: hidden
 }
 
+.runner-editor {
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-rows: auto auto 10px;
+}
+
+
+.runner-editor-header {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: auto auto;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
 .runner-context-folder {
   color: #59dcec;
   text-align: right;

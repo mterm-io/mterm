@@ -188,6 +188,12 @@ export default function Runner(): ReactElement {
       })
   }
 
+  const onEditFileChange = (runtimeId: string, commandId: string, value: string): void => {
+    window.electron.ipcRenderer.invoke('runtime.set-edit', runtimeId, commandId, value).then(() => {
+      return reloadRuntimesFromBackend()
+    })
+  }
+
   // useEffect(() => {
   //   inputRef.current?.focus()
   //
@@ -229,7 +235,6 @@ export default function Runner(): ReactElement {
     return <p>Loading</p>
   }
 
-  const editFile = historicalExecution ? historicalExecution.result : runtime.result
   const result = historicalExecution ? historicalExecution.result : runtime.result
   const resultText = result.stream.map((record) => record.text).join('')
 
@@ -250,6 +255,31 @@ export default function Runner(): ReactElement {
         }
         basicSetup={{ foldGutter: true }}
       />
+    )
+  }
+
+  if (result.edit) {
+    output = (
+      <div className={'runner-editor'}>
+        <div className={'runner-editor-header'}>
+          <div className={'runner-editor-header-path'}> Editing {result.edit.path}</div>
+          <div className={'runner-editor-header-result'}>
+            <pre dangerouslySetInnerHTML={{ __html: resultText }}></pre>
+          </div>
+        </div>
+        <div className={'runner-editor-widget'}>
+          <CodeMirror
+            value={result.edit.content}
+            extensions={[color, hyperLink, javascript()]}
+            theme={vscodeDark}
+            height="100%"
+            onChange={(value) =>
+              onEditFileChange(runtime.id, historicalExecution ? historicalExecution.id : '', value)
+            }
+            basicSetup={{ foldGutter: true }}
+          />
+        </div>
+      </div>
     )
   }
 

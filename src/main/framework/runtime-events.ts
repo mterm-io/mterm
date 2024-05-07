@@ -75,6 +75,30 @@ export function attach({ app, workspace }: BootstrapContext): void {
   }
 
   ipcMain.handle(
+    'runtime.set-edit',
+    async (_, runtimeId: string, commandId: string, result: string): Promise<boolean> => {
+      const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+      if (!runtime) {
+        return false
+      }
+
+      if (!commandId) {
+        commandId = runtime.commandFocus
+      }
+
+      const command = runtime.history.find((c) => c.id === commandId)
+      if (!command || !command.result.edit) {
+        return false
+      }
+
+      command.result.edit.content = result
+      command.result.edit.modified = true
+
+      return false
+    }
+  )
+
+  ipcMain.handle(
     'runtime.set-result',
     async (_, runtimeId: string, commandId: string, result: string): Promise<boolean> => {
       const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
