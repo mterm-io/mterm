@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.32-beta](https://github.com/mterm-io/mterm/compare/v1.0.31-beta...v1.0.32-beta) (2024-05-07)
+
+
+### Bug Fixes
+
+* .runner-history-running animation, resolves [#7](https://github.com/mterm-io/mterm/issues/7) ([e2ca009](https://github.com/mterm-io/mterm/commit/e2ca00990c5437ca3f27e96f0fc130277f342455))
+* add code editor option to result. resolves  [#26](https://github.com/mterm-io/mterm/issues/26) ([8c99f76](https://github.com/mterm-io/mterm/commit/8c99f76ed073a39355be65a2223803bd9dfe28e2))
+* add file editing 💯  ([#99](https://github.com/mterm-io/mterm/issues/99)) ([b8b46fd](https://github.com/mterm-io/mterm/commit/b8b46fd354defea98711f67c9a444d1f64acd27c))
+* add history scrolling when runner closes ([dc6647f](https://github.com/mterm-io/mterm/commit/dc6647f4b414fc681a43b60a8014f5ad6005e257))
+* input onblur focus resolves [#3](https://github.com/mterm-io/mterm/issues/3) ([#86](https://github.com/mterm-io/mterm/issues/86)) ([b4f722e](https://github.com/mterm-io/mterm/commit/b4f722ecb9840663cb6f975d7e5c5d7acf9f9b42))
+* prettier config for vscode in windows ([#87](https://github.com/mterm-io/mterm/issues/87)) ([ece2357](https://github.com/mterm-io/mterm/commit/ece2357ab95f0a6bad75f0893f1d318838dbdf57))
+* settings cli now properly sets overrides, resolves [#90](https://github.com/mterm-io/mterm/issues/90) ([e4e34c0](https://github.com/mterm-io/mterm/commit/e4e34c055fc0477b8b125c1d8e0f70852f44deec))
+* settings cli provided ([f435af1](https://github.com/mterm-io/mterm/commit/f435af1a6e3c9324b4c7a1e9aedaeb45d33bf719))
+* update funding ([#85](https://github.com/mterm-io/mterm/issues/85)) ([9e0bbe7](https://github.com/mterm-io/mterm/commit/9e0bbe71ca87142136b73ff080ead017795d63d1))
+* use frozen lockfile on ci/cd build. resolves [#32](https://github.com/mterm-io/mterm/issues/32) ([fd4e536](https://github.com/mterm-io/mterm/commit/fd4e53670cb570a176595f9562171246cdb6516c))
+
 ## [1.0.31-beta](https://github.com/mterm-io/mterm/compare/v1.0.30-beta...v1.0.31-beta) (2024-04-29)
 
 
