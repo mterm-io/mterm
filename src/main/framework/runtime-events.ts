@@ -173,13 +173,6 @@ export function attach({ app, workspace }: BootstrapContext): void {
       runtime: runtimeId,
       id: short.generate(),
       complete: true,
-      edit: rewind.edit
-        ? {
-            path: rewind.edit,
-            content: (await readFile(rewind.edit)).toString(),
-            modified: false
-          }
-        : undefined,
       result: {
         code: rewind.code,
         stream: !rewind.result
@@ -440,13 +433,18 @@ export function attach({ app, workspace }: BootstrapContext): void {
         command,
         async edit(path: string) {
           const file = await readFile(path)
-          this.command.edit = {
-            path,
-            modified: false,
-            content: file.toString()
+
+          this.command.result = {
+            code: 0,
+            stream: [],
+            edit: {
+              path,
+              modified: false,
+              content: file.toString()
+            }
           }
 
-          _.sender.send('runtime.commandEvent')
+          _.sender.send('runtime.commandEvent', this.command.result)
         },
         out,
         finish

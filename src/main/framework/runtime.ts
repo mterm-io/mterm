@@ -12,6 +12,7 @@ export interface ResultStream {
 export interface Result {
   code: number
   stream: ResultStream[]
+  edit?: EditFile
 }
 
 export interface ResultStreamEvent {
@@ -28,7 +29,6 @@ export interface EditFile {
 export interface Command {
   prompt: string
   result: Result
-  edit?: EditFile
   runtime: string
   complete: boolean
   aborted: boolean
@@ -40,7 +40,6 @@ export interface Command {
 export interface CommandViewModel {
   prompt: string
   result: Result
-  edit?: EditFile
   runtime: string
   aborted: boolean
   complete: boolean

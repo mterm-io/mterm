@@ -229,6 +229,7 @@ export default function Runner(): ReactElement {
     return <p>Loading</p>
   }
 
+  const editFile = historicalExecution ? historicalExecution.result : runtime.result
   const result = historicalExecution ? historicalExecution.result : runtime.result
   const resultText = result.stream.map((record) => record.text).join('')
 
