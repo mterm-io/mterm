@@ -37,10 +37,7 @@ export async function boostrap(context: BootstrapContext): Promise<void> {
     }
   })
 
-  autoUpdater
-    .checkForUpdatesAndNotify()
-    .then((r) => console.log(r))
-    .catch(console.error)
+  autoUpdater.checkForUpdatesAndNotify().catch(console.error)
 
   attach(context)
 

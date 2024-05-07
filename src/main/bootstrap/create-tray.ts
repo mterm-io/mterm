@@ -71,6 +71,4 @@ export async function createTray(context: BootstrapContext): Promise<void> {
 
   tray.setToolTip('MTERM')
   tray.setContextMenu(menu)
-
-  console.log(tray)
 }
