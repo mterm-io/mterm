@@ -1,6 +1,7 @@
 import { resolveFolderPathForMTERM, Workspace } from './workspace'
 import short from 'short-uuid'
 import { ChildProcessWithoutNullStreams } from 'node:child_process'
+import { resolve } from 'path'
 
 export interface ResultStream {
   error: boolean
@@ -80,6 +81,15 @@ export class Runtime {
   } = {
     icon: '',
     title: 'mterm [$idx]'
+  }
+
+  resolve(path: string): string {
+    let location = resolve(this.folder, path)
+    if (path.startsWith('~')) {
+      location = resolveFolderPathForMTERM(path)
+    }
+
+    return location
   }
 }
 
