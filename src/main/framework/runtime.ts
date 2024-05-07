@@ -28,7 +28,7 @@ export interface EditFile {
 export interface Command {
   prompt: string
   result: Result
-  edit: EditFile
+  edit?: EditFile
   runtime: string
   complete: boolean
   aborted: boolean
@@ -40,7 +40,7 @@ export interface Command {
 export interface CommandViewModel {
   prompt: string
   result: Result
-  edit: EditFile
+  edit?: EditFile
   runtime: string
   aborted: boolean
   complete: boolean
@@ -106,7 +106,7 @@ export interface ExecuteContext {
   workspace: Workspace
   runtime: Runtime
   command: Command
-  edit: (path: string, callback: (content: string) => void) => void
+  edit: (path: string, callback: (content: string) => void) => Promise<void>
   out: (text: string, error?: boolean) => void
   finish: (code: number) => void
 }

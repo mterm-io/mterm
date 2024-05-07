@@ -7,6 +7,7 @@ export interface HistoricalExecution {
   error: boolean
   aborted: boolean
   profile: string
+  edit?: string
   when: {
     start: number
     finish: number
@@ -40,6 +41,7 @@ export class History {
       result: saveResult ? command.result.stream.map((o) => o.raw) : undefined,
       error: command.error,
       profile,
+      edit: command?.edit?.path,
       when: {
         start,
         finish: Date.now()

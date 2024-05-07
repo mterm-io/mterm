@@ -1,7 +1,6 @@
 import { ExecuteContext } from '../runtime'
 import { pathExists, stat } from 'fs-extra'
 async function exit(context: ExecuteContext): Promise<void> {
-  context.out('edit that file')
   const [, ...args] = context.command.prompt.split(' ')
   const path: string = context.runtime.resolve(args[0] || '.')
 
@@ -19,7 +18,7 @@ async function exit(context: ExecuteContext): Promise<void> {
     return
   }
 
-  context.edit(path, (event: string) => {
+  await context.edit(path, (event: string) => {
     console.log('OH LAWD ', event)
   })
 }
