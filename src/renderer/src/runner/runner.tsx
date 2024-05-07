@@ -13,6 +13,11 @@ export default function Runner(): ReactElement {
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
   const [editMode, setEditMode] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  const [isMultiLine, setIsMultiLine] = useState<boolean>(false)
+  const [multiLineArgs, setMultiLineArgs] = useState<string>('')
+
   const reloadRuntimesFromBackend = async (): Promise<void> => {
     const isCommanderMode = await window.electron.ipcRenderer.invoke('runner.isCommanderMode')
     const runtimesFetch: Runtime[] = await window.electron.ipcRenderer.invoke('runtimes')
@@ -68,7 +73,7 @@ export default function Runner(): ReactElement {
 
     await reloadRuntimesFromBackend()
   }
-  const handlePromptChange = (event: ChangeEvent<HTMLInputElement>): void => {
+  const handlePromptChange = (event: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>): void => {
     const value = event.target.value
     if (historyIndex !== -1) {
       applyHistoryIndex(-1)
@@ -116,9 +121,27 @@ export default function Runner(): ReactElement {
     applyHistoryIndex(historyIndex)
   }
 
+  const normalizeMultilineArgs = () => {
+    return multiLineArgs ? ' ' + multiLineArgs.split('\n').map((line) => line.trim()).join(' ') : '';
+  }
+
+  
+
   const handleKeyDown = (e): void => {
-    if (e.key === 'Enter') {
-      execute(runtime).catch((error) => console.error(error))
+    if (e.key === 'Enter' && e.shiftKey && !isMultiLine) {
+      e.preventDefault();
+      setIsMultiLine(true);
+    }
+    if (e.code === 'Backslash' || e.code === 'Backquote') {
+      e.preventDefault();
+      isMultiLine ? setIsMultiLine(false) : setIsMultiLine(true);
+    }
+
+    if (e.key === 'Enter' && !e.shiftKey) {
+      runtime ? runtime.prompt +=  normalizeMultilineArgs() : '';
+      execute(runtime).catch((error) => console.error(error));
+      setMultiLineArgs('');
+      setIsMultiLine(false);
     }
     if (e.code === 'ArrowDown') {
       if (runtime && historyIndex > -1) {
@@ -200,6 +223,27 @@ export default function Runner(): ReactElement {
       })
     }
   }
+
+  
+  // useEffect(() => {
+  //   if (isMultiLine) {
+  //     textAreaRef.current?.focus();
+  //   } else {
+  //     inputRef.current?.focus();
+  //   }
+  // })
+
+  useEffect(() => {
+    if (!isMultiLine){
+      historicalExecution ? 
+        historicalExecution.prompt += normalizeMultilineArgs() : 
+        (runtime ? runtime.prompt += normalizeMultilineArgs() : '' );
+      setMultiLineArgs('');
+      inputRef.current?.focus();
+      return;
+    }
+    textAreaRef.current?.focus();
+  }, [isMultiLine]);
 
   // useEffect(() => {
   //   inputRef.current?.focus()
@@ -352,16 +396,24 @@ export default function Runner(): ReactElement {
         </div>
         <div className="runner-main">
           <div className="runner-input-container">
-            <div className="runner-input">
+          <div className="runner-input">
               <input
                 ref={inputRef}
-                autoFocus
-                className="runner-input-field"
                 placeholder=">"
+                className={`runner-input-field ${isMultiLine ? 'multi-line' : ''}`}
                 onChange={handlePromptChange}
                 onKeyDown={handleKeyDown}
                 value={historicalExecution ? historicalExecution.prompt : runtime.prompt}
               />
+              {isMultiLine ? <textarea
+                ref={textAreaRef}
+                placeholder='>>'
+                className={`runner-textarea-field ${isMultiLine ? 'multi-line' : ''}`}
+                onChange={(e) => setMultiLineArgs(e.target.value)}
+                onKeyDown={handleKeyDown}
+                value={multiLineArgs} /> :
+                ''
+              }
             </div>
           </div>
           <div className={`runner-result ${result.code !== 0 ? '' : ''}`}>{output}</div>
