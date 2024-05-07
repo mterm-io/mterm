@@ -19,9 +19,16 @@ export interface ResultStreamEvent {
   command: string
   entry: ResultStream
 }
+
+export interface EditFile {
+  path: string
+  modified: boolean
+  content: string
+}
 export interface Command {
   prompt: string
   result: Result
+  edit: EditFile
   runtime: string
   complete: boolean
   aborted: boolean
@@ -33,6 +40,7 @@ export interface Command {
 export interface CommandViewModel {
   prompt: string
   result: Result
+  edit: EditFile
   runtime: string
   aborted: boolean
   complete: boolean
@@ -98,6 +106,7 @@ export interface ExecuteContext {
   workspace: Workspace
   runtime: Runtime
   command: Command
+  edit: (path: string, callback: (content: string) => void) => void
   out: (text: string, error?: boolean) => void
   finish: (code: number) => void
 }
