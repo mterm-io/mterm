@@ -244,6 +244,7 @@ export default function Runner(): ReactElement {
 
   const result = historicalExecution ? historicalExecution.result : runtime.result
   const resultText = result.stream.map((record) => record.text).join('')
+  const resultTextRaw = result.stream.map((record) => record.raw).join('')
 
   let output = (
     <div className="runner-result-content">
@@ -251,7 +252,6 @@ export default function Runner(): ReactElement {
     </div>
   )
   if (editMode) {
-    const resultTextRaw = result.stream.map((record) => record.raw).join('')
     output = (
       <CodeMirror
         value={resultTextRaw}
@@ -275,7 +275,7 @@ export default function Runner(): ReactElement {
             {result.edit.modified ? '*' : ''}
           </div>
           <div className={'runner-editor-header-result'}>
-            <pre dangerouslySetInnerHTML={{ __html: resultText }}></pre>
+            <pre>{resultTextRaw}</pre>
           </div>
         </div>
         <div className={'runner-editor-widget'}>

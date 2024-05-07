@@ -463,10 +463,12 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
     try {
       const out = (text: string, error: boolean = false): void => {
-        if (!command.result.edit && (command.aborted || command.complete)) {
-          return
+        const isFinished = command.aborted || command.complete
+        if (isFinished) {
+          if (!command.result.edit) {
+            return
+          }
         }
-
         const raw = text.toString()
 
         text = DOMPurify.sanitize(raw)
@@ -504,15 +506,11 @@ export function attach({ app, workspace }: BootstrapContext): void {
         async edit(path: string, callback: (text: string) => void) {
           const file = await readFile(path)
 
-          this.command.result = {
-            code: 0,
-            stream: [],
-            edit: {
-              path,
-              modified: false,
-              content: file.toString(),
-              callback
-            }
+          this.command.result.edit = {
+            path,
+            modified: false,
+            content: file.toString(),
+            callback
           }
 
           _.sender.send('runtime.commandEvent')
