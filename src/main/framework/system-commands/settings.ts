@@ -22,6 +22,15 @@ export default {
       context.out(`settings reloaded`)
     } else if (task === 'open') {
       await shell.openPath(context.workspace.settings.location)
+    } else if (task === 'edit') {
+      await context.edit(context.workspace.settings.location, async () => {
+        context.out('Saved settings! Reloading..\n')
+
+        await context.workspace.settings.load()
+        await context.workspace.applySettings(RunnerWindow)
+
+        context.out('Settings reloaded\n')
+      })
     } else if (task === 'get') {
       if (!key) {
         context.out('no key provided to :settings get', true)

@@ -1,6 +1,6 @@
 import { ExecuteContext } from '../runtime'
 import { pathExists, stat } from 'fs-extra'
-import { RunnerWindow } from '../../window/windows/runner'
+
 async function exit(context: ExecuteContext): Promise<void> {
   const [, ...args] = context.command.prompt.split(' ')
   const path: string = context.runtime.resolve(args[0] || '.')
@@ -20,10 +20,7 @@ async function exit(context: ExecuteContext): Promise<void> {
   }
 
   await context.edit(path, async () => {
-    context.out('Settings reloaded\n')
-
-    await context.workspace.settings.load()
-    await context.workspace.applySettings(RunnerWindow)
+    context.out('Saved changes!\n')
   })
 }
 
