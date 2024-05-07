@@ -25,7 +25,7 @@ import {
 } from '../../constants'
 import Convert from 'ansi-to-html'
 import { HistoricalExecution } from './history'
-import { readFile } from 'fs-extra'
+import { readFile, writeFile } from 'fs-extra'
 
 const convert = new Convert()
 const DOMPurify = createDOMPurify(new JSDOM('').window)
@@ -36,7 +36,15 @@ export function attach({ app, workspace }: BootstrapContext): void {
       const focus = runtime.history.find((cmd) => cmd.id === runtime.commandFocus)
 
       const result = focus
-        ? focus.result
+        ? {
+            ...focus.result,
+            edit: focus.result.edit
+              ? {
+                  ...focus.result.edit,
+                  callback: undefined
+                }
+              : undefined
+          }
         : {
             code: 0,
             stream: []
@@ -45,7 +53,17 @@ export function attach({ app, workspace }: BootstrapContext): void {
       const history: CommandViewModel[] = runtime.history.map((historyItem) => {
         return {
           ...historyItem,
-          process: undefined
+          process: undefined,
+          result: {
+            ...historyItem.result,
+            edit: historyItem.result.edit
+              ? {
+                  content: historyItem.result.edit.content,
+                  path: historyItem.result.edit.path,
+                  modified: historyItem.result.edit.modified
+                }
+              : undefined
+          }
         }
       })
 
@@ -94,7 +112,34 @@ export function attach({ app, workspace }: BootstrapContext): void {
       command.result.edit.content = result
       command.result.edit.modified = true
 
-      return false
+      return true
+    }
+  )
+
+  ipcMain.handle(
+    'runtime.save-edit',
+    async (_, runtimeId: string, commandId: string): Promise<boolean> => {
+      const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
+      if (!runtime) {
+        return false
+      }
+
+      if (!commandId) {
+        commandId = runtime.commandFocus
+      }
+
+      const command = runtime.history.find((c) => c.id === commandId)
+      if (!command || !command.result.edit) {
+        return false
+      }
+
+      command.result.edit.modified = false
+
+      await writeFile(command.result.edit.path, command.result.edit.content)
+
+      await command.result.edit.callback(command.result.edit.content)
+
+      return true
     }
   )
 
@@ -126,7 +171,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
         }
       }
 
-      return false
+      return true
     }
   )
 
@@ -357,7 +402,8 @@ export function attach({ app, workspace }: BootstrapContext): void {
       aborted: false,
       result: {
         code: 0,
-        stream: []
+        stream: [],
+        edit: undefined
       },
       runtime: runtime.id
     }
@@ -370,7 +416,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
     return command
   })
 
-  ipcMain.handle('runtime.execute', async (_, { id, runtime }: Command): Promise<Command> => {
+  ipcMain.handle('runtime.execute', async (_, { id, runtime }: Command): Promise<boolean> => {
     const runtimeTarget = workspace.runtimes.find((r) => r.id === runtime)
     if (!runtimeTarget) {
       throw `Runtime '${runtime}' does not exist`
@@ -417,7 +463,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
     try {
       const out = (text: string, error: boolean = false): void => {
-        if (command.aborted || command.complete) {
+        if (!command.result.edit && (command.aborted || command.complete)) {
           return
         }
 
@@ -455,7 +501,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
         workspace,
         runtime: runtimeTarget,
         command,
-        async edit(path: string) {
+        async edit(path: string, callback: (text: string) => void) {
           const file = await readFile(path)
 
           this.command.result = {
@@ -464,11 +510,12 @@ export function attach({ app, workspace }: BootstrapContext): void {
             edit: {
               path,
               modified: false,
-              content: file.toString()
+              content: file.toString(),
+              callback
             }
           }
 
-          _.sender.send('runtime.commandEvent', this.command.result)
+          _.sender.send('runtime.commandEvent')
         },
         out,
         finish
@@ -492,7 +539,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
       finish(result.code)
     }
 
-    return command
+    return true
   })
 
   ipcMain.handle('runtimes', async (): Promise<RuntimeModel[]> => {

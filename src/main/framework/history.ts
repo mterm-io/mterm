@@ -41,7 +41,7 @@ export class History {
       result: saveResult ? command.result.stream.map((o) => o.raw) : undefined,
       error: command.error,
       profile,
-      edit: command?.edit?.path,
+      edit: command?.result?.edit?.path,
       when: {
         start,
         finish: Date.now()

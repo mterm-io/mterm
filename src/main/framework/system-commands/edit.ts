@@ -18,8 +18,8 @@ async function exit(context: ExecuteContext): Promise<void> {
     return
   }
 
-  await context.edit(path, (event: string) => {
-    console.log('OH LAWD ', event)
+  await context.edit(path, () => {
+    context.out('Settings reloaded')
   })
 }
 

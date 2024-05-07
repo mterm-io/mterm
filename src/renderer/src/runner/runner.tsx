@@ -193,6 +193,13 @@ export default function Runner(): ReactElement {
       return reloadRuntimesFromBackend()
     })
   }
+  const onEditFileKeyDown = (runtimeId: string, commandId: string, e): void => {
+    if (e.code === 'KeyS' && e.ctrlKey) {
+      window.electron.ipcRenderer.invoke('runtime.save-edit', runtimeId, commandId).then(() => {
+        return reloadRuntimesFromBackend()
+      })
+    }
+  }
 
   // useEffect(() => {
   //   inputRef.current?.focus()
@@ -262,7 +269,11 @@ export default function Runner(): ReactElement {
     output = (
       <div className={'runner-editor'}>
         <div className={'runner-editor-header'}>
-          <div className={'runner-editor-header-path'}> Editing {result.edit.path}</div>
+          <div className={'runner-editor-header-path'}>
+            {' '}
+            Editing {result.edit.path}
+            {result.edit.modified ? '*' : ''}
+          </div>
           <div className={'runner-editor-header-result'}>
             <pre dangerouslySetInnerHTML={{ __html: resultText }}></pre>
           </div>
@@ -275,6 +286,9 @@ export default function Runner(): ReactElement {
             height="100%"
             onChange={(value) =>
               onEditFileChange(runtime.id, historicalExecution ? historicalExecution.id : '', value)
+            }
+            onKeyDown={(e) =>
+              onEditFileKeyDown(runtime.id, historicalExecution ? historicalExecution.id : '', e)
             }
             basicSetup={{ foldGutter: true }}
           />
@@ -367,6 +381,7 @@ export default function Runner(): ReactElement {
                 onClick={() => onHistoryItemClicked(index)}
               >
                 {command.prompt}
+                {command.result?.edit?.modified ? ' *' : ''}
               </div>
             ))}
           </div>
