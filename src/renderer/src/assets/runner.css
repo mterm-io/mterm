@@ -21,22 +21,29 @@ body {
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-columns: 100px;
+  grid-template-columns: auto;
   grid-template-rows: auto;
   justify-items: center;
   align-items: center;
-  justify-content: space-evenly;
+}
+
+.runner-input {
+  width: 100%
 }
 
 .runner-input-field {
   height: 50px;
   text-align: center;
+  width: 100%;
   font-size: 20px;
   background: transparent;
   border: 0;
   font-family: "Roboto Mono", monospace
 }
 
+.runner-input-field {
+  color: #cac7c7
+}
 .runner-input-field:focus {
   border: 0;
   outline: none;
