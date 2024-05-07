@@ -12,12 +12,13 @@ import Version from './system-commands/version'
 import Vault from './system-commands/vault'
 import Workspace from './system-commands/workspace'
 import Settings from './system-commands/settings'
+import Edit from './system-commands/edit'
 
 const systemCommands: Array<{
   command: string
   alias?: string[]
   task: (context: ExecuteContext, ...args: string[]) => Promise<void> | void
-}> = [Reload, Exit, History, Cd, Tab, Test, Clear, Version, Vault, Workspace, Settings]
+}> = [Reload, Exit, History, Cd, Tab, Test, Clear, Version, Vault, Workspace, Settings, Edit]
 export async function execute(context: ExecuteContext): Promise<void | boolean> {
   const { platform, workspace, runtime, command, out, finish } = context
   const [cmd, ...args] = command.prompt.split(' ')

@@ -7,6 +7,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mterm-io_mterm&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=mterm-io_mterm)
 [![release](https://github.com/mterm-io/mterm/actions/workflows/release.yml/badge.svg)](https://github.com/mterm-io/mterm/actions/workflows/release.yml)
 
+![image](https://github.com/mterm-io/mterm/assets/7341502/6eb47f43-1ab5-41c5-9c0e-5eb61ce575bf)
 ![image](https://github.com/mterm-io/mterm/assets/7341502/27bcad62-6891-4b49-80b5-e5a17e0562ab)
 
 **mterm** is a cross-platform command-line terminal that proxies the underlying command-line interpreters, such as [powershell](https://learn.microsoft.com/en-us/powershell/), [sh](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html) or [wsl](https://ubuntu.com/desktop/wsl). commands are executed in the background and results streamed to the foreground.
@@ -128,21 +129,23 @@ here is an example `~/mterm/settings.json` -
 
 mterm provided a few system commands to help control the terminal and settings. mterm settings will always start with `:` (a colon) unless the intention is to override a system command. for example, because `clear` needs to be handled in a special way for mterm windows + tabs, it is overriden in mterm.
 
-| Command                      | Alias  | Purpose                                                                     |
-|------------------------------|--------|-----------------------------------------------------------------------------|
-| `clear`                      | `cls`  | Clear the current terminal output                                           |
-| `cd`                         |        | Navigate the file tree on the host machine                                  |
-| `:exit`                      | `exit` | Exit the current tab, or mterm if only 1 tab is open                        |
-| `:history`                   |        | Print out terminal history for debugging in a JSON format                   |
-| `:reload`                    |        | Reload settings, the ui, and commands without restarting                    |
-| `:tab`                       |        | Open a new tab                                                              |
-| `:test`                      |        | Sample command that executes after 10 seconds. Helpful for debugging        |
-| `:vault`                     |        | Open the secret management tool, the mterm vault                            |
-| `:version`                   | `:v`   | Print the current mterm version                                             |
-| `:workspace`                 |        | Open the mterm workspace folder on disk: `~/mterm`                          |
-| `:settings`                  |        | Open the mterm settings gui to manage `~/mterm/settings.json`               |
-| `:settings reload`           |        | Reload `~/mterm/settings.json` and all ui etc associated with the settings  |
-| `:settings {get\|set} {key}` |        | Set the setting key matching the path in `~/mterm/settings.json` and reload |
+| Command                      | Alias  | Purpose                                                                                |
+|------------------------------|--------|----------------------------------------------------------------------------------------|
+| `clear`                      | `cls`  | Clear the current terminal output                                                      |
+| `cd`                         |        | Navigate the file tree on the host machine                                             |
+| `:exit`                      | `exit` | Exit the current tab, or mterm if only 1 tab is open                                   |
+| `:edit`                      | `edit` | Open the in-terminal editor with the file provided. Hit `Ctrl+S` to save in the editor |
+| `:history`                   |        | Print out terminal history for debugging in a JSON format                              |
+| `:reload`                    |        | Reload settings, the ui, and commands without restarting                               |
+| `:tab`                       |        | Open a new tab                                                                         |
+| `:test`                      |        | Sample command that executes after 10 seconds. Helpful for debugging                   |
+| `:vault`                     |        | Open the secret management tool, the mterm vault                                       |
+| `:version`                   | `:v`   | Print the current mterm version                                                        |
+| `:workspace`                 |        | Open the mterm workspace folder on disk: `~/mterm`                                     |
+| `:settings`                  |        | Open the mterm settings gui to manage `~/mterm/settings.json`                          |
+| `:settings edit`             |        | Open the `~/mterm/settings.json` in the terminal editor with hot reloading             |
+| `:settings reload`           |        | Reload `~/mterm/settings.json` and all ui etc associated with the settings             |
+| `:settings {get\|set} {key}` |        | Set the setting key matching the path in `~/mterm/settings.json` and reload            |
 
 ### Commands
 
@@ -211,6 +214,15 @@ export function who() {
 ````
 
 ![image](https://github.com/mterm-io/mterm/assets/7341502/76b26a62-33ea-4883-b07c-677f99ab3355)
+
+### Editor
+
+mterm provides an editor with `:edit <FILE>` or `edit <FILE>` commands -
+
+![image](https://github.com/mterm-io/mterm/assets/7341502/25db8038-7a86-419c-a5d7-777b97025ec7)
+
+hit `control + s` within the file editor to save this
+
 
 ### Other Notes
 

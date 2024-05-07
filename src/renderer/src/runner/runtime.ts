@@ -7,6 +7,7 @@ export interface ResultStream {
 export interface Result {
   code: number
   stream: ResultStream[]
+  edit?: EditFile
 }
 
 export interface ResultStreamEvent {
@@ -22,6 +23,12 @@ export interface Command {
   runtime: string
   error: boolean
   id: string
+}
+
+export interface EditFile {
+  path: string
+  content: string
+  modified: boolean
 }
 export interface Runtime {
   id: string

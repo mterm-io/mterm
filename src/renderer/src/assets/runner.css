@@ -21,22 +21,29 @@ body {
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-columns: 100px;
+  grid-template-columns: auto;
   grid-template-rows: auto;
   justify-items: center;
   align-items: center;
-  justify-content: space-evenly;
+}
+
+.runner-input {
+  width: 100%
 }
 
 .runner-input-field {
   height: 50px;
   text-align: center;
+  width: 100%;
   font-size: 20px;
   background: transparent;
   border: 0;
   font-family: "Roboto Mono", monospace
 }
 
+.runner-input-field {
+  color: #cac7c7
+}
 .runner-input-field:focus {
   border: 0;
   outline: none;
@@ -106,6 +113,42 @@ body {
   overflow: hidden
 }
 
+.runner-editor {
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-rows: auto auto 10px;
+}
+
+
+.runner-editor-header {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: auto auto;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.runner-editor-header-result {
+  max-height: 15px;
+  overflow-y: auto
+}
+.runner-editor-header-result::-webkit-scrollbar {
+  width: 15px;
+}
+.runner-editor-header-result::-webkit-scrollbar-corner {
+  background: rgba(0,0,0,0);
+}
+.runner-editor-header-result::-webkit-scrollbar-thumb {
+  background-color: #294794;
+  border-radius: 6px;
+  border: 4px solid rgba(0,0,0,0);
+  background-clip: content-box;
+  min-width: 32px;
+  min-height: 32px;
+}
+.runner-editor-header-result pre {
+  margin: 0
+}
 .runner-context-folder {
   color: #59dcec;
   text-align: right;

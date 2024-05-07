@@ -1,6 +1,7 @@
 import { resolveFolderPathForMTERM, Workspace } from './workspace'
 import short from 'short-uuid'
 import { ChildProcessWithoutNullStreams } from 'node:child_process'
+import { resolve } from 'path'
 
 export interface ResultStream {
   error: boolean
@@ -11,12 +12,29 @@ export interface ResultStream {
 export interface Result {
   code: number
   stream: ResultStream[]
+  edit?: EditFile
+}
+
+export interface ResultViewModel {
+  code: number
+  stream: ResultStream[]
+  edit?: EditFileViewModel
 }
 
 export interface ResultStreamEvent {
   runtime: string
   command: string
   entry: ResultStream
+}
+
+export interface EditFileViewModel {
+  path: string
+  modified: boolean
+  content: string
+}
+
+export interface EditFile extends EditFileViewModel {
+  callback: (text: string) => Promise<void> | void
 }
 export interface Command {
   prompt: string
@@ -31,7 +49,7 @@ export interface Command {
 
 export interface CommandViewModel {
   prompt: string
-  result: Result
+  result: ResultViewModel
   runtime: string
   aborted: boolean
   complete: boolean
@@ -54,7 +72,7 @@ export interface RuntimeModel {
   id: string
   prompt: string
   profile: string
-  result: Result
+  result: ResultViewModel
   target: boolean
   folder: string
   history: CommandViewModel[]
@@ -81,6 +99,15 @@ export class Runtime {
     icon: '',
     title: 'mterm [$idx]'
   }
+
+  resolve(path: string): string {
+    let location = resolve(this.folder, path)
+    if (path.startsWith('~')) {
+      location = resolveFolderPathForMTERM(path)
+    }
+
+    return location
+  }
 }
 
 export interface ExecuteContext {
@@ -88,6 +115,7 @@ export interface ExecuteContext {
   workspace: Workspace
   runtime: Runtime
   command: Command
+  edit: (path: string, callback: (content: string) => void) => Promise<void>
   out: (text: string, error?: boolean) => void
   finish: (code: number) => void
 }
