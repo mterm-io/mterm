@@ -48,6 +48,7 @@ export default function Runner(): ReactElement {
       'default'
     )
 
+    applyHistoryIndex(-1)
     await reloadRuntimesFromBackend()
 
     // renderer -> "backend"
