@@ -139,7 +139,6 @@ export class ExecuteContext {
   }
 
   finish(code: number): void {
-    console.log(this.command)
     if (this.command.aborted || this.command.complete) {
       return
     }
