@@ -1,17 +1,28 @@
 import { Workspace } from './workspace'
-import { Command, ResultStreamEvent, Runtime } from './runtime'
+import { Command, ResultContentEvent, ResultStreamEvent, Runtime } from './runtime'
 import { WebContents } from 'electron'
 import { readFile } from 'fs-extra'
 import short from 'short-uuid'
 import { ResultStream } from './result-stream'
 
 export interface RuntimeContentHandle {
+  id: string
   update(html: string): void
+  on(event: string, handler: RuntimeContentEventCallback): void
 }
+
+export interface RuntimeContentEvent {
+  event: string
+}
+
+export type RuntimeContentEventCallback = (event: RuntimeContentEvent) => Promise<void> | void
 
 export class ExecuteContext {
   public readonly start: number = Date.now()
   public readonly id: string = short.generate()
+
+  public readonly events: ResultContentEvent[] = []
+  private readonly eventHandlers = new Map<string, RuntimeContentEventCallback>()
 
   constructor(
     public readonly platform: string,
@@ -52,15 +63,46 @@ export class ExecuteContext {
   }
 
   content(html: string): RuntimeContentHandle {
-    const R = this.out(html, false)
+    const contextId = this.id
+    const commandId = this.command.id
+
+    const id = short.generate()
+    const events = this.events
+    const container = (html: string): string => `<span id="${id}">${html}</span>`
+
+    const R = this.out(container(html), false)
     const sender = this.sender
+    const eventHandlers = this.eventHandlers
     return {
+      id,
       update(newHTML: string): void {
         if (R !== null) {
-          R.setText(newHTML)
+          R.setText(container(newHTML))
 
           sender.send('runtime.commandEvent')
         }
+      },
+      on(event: string, callback: RuntimeContentEventCallback): void {
+        const eventHandlerId = short.generate()
+
+        eventHandlers.set(eventHandlerId, callback)
+
+        events.push({
+          event,
+          commandId,
+          contextId,
+          contentId: id,
+          handlerId: eventHandlerId
+        })
+
+        sender.send('runtime.observe', {
+          contextId,
+          contentId: id,
+          eventHandlerId,
+          event
+        })
+
+        sender.send('runtime.commandEvent')
       }
     }
   }

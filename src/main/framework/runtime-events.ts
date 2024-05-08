@@ -6,6 +6,8 @@ import {
   Profile,
   ProfileMap,
   Result,
+  ResultContentEvent,
+  ResultViewModel,
   Runtime,
   RuntimeModel
 } from './runtime'
@@ -25,6 +27,9 @@ import { ExecuteContext } from './execute-context'
 import { ResultStream } from './result-stream'
 
 export function attach({ app, workspace }: BootstrapContext): void {
+  const eventListForCommand = (command: Command): ResultContentEvent[] => {
+    return command?.context?.events || []
+  }
   const runtimeList = (): RuntimeModel[] => {
     return workspace.runtimes.map((runtime, index) => {
       const isTarget = index === workspace.runtimeIndex
@@ -33,6 +38,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
       const result = focus
         ? {
             ...focus.result,
+            events: eventListForCommand(focus),
             edit: focus.result.edit
               ? {
                   ...focus.result.edit,
@@ -42,15 +48,18 @@ export function attach({ app, workspace }: BootstrapContext): void {
           }
         : {
             code: 0,
-            stream: []
+            stream: [],
+            events: []
           }
 
       const history: CommandViewModel[] = runtime.history.map((historyItem) => {
         return {
           ...historyItem,
           process: undefined,
+          context: undefined,
           result: {
             ...historyItem.result,
+            events: eventListForCommand(historyItem),
             edit: historyItem.result.edit
               ? {
                   content: historyItem.result.edit.content,
@@ -65,16 +74,16 @@ export function attach({ app, workspace }: BootstrapContext): void {
       return {
         target: isTarget,
         result: runtime.resultEdit
-          ? {
+          ? ({
               code: 0,
-              stream: [new ResultStream(runtime.resultEdit)]
-            }
+              stream: [new ResultStream(runtime.resultEdit)],
+              events: []
+            } as ResultViewModel)
           : result,
         ...runtime,
         history,
         appearance: {
           ...runtime.appearance,
-
           title: runtime.appearance.title.replace('$idx', `${index}`)
         }
       }
@@ -428,8 +437,12 @@ export function attach({ app, workspace }: BootstrapContext): void {
       }
     )
 
+    // attach context to command
+    command.context = context
+
     try {
       if ((await execute(context)) === false) {
+        // do we "finish"? unless told false by the executor we always finish
         finalize = false
       }
     } catch (e) {
@@ -437,6 +450,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
       context.finish(1)
     }
 
+    // the "finish"
     if (finalize) {
       command.complete = true
       command.error = result.code !== 0

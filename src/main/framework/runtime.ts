@@ -3,17 +3,26 @@ import short from 'short-uuid'
 import { ChildProcessWithoutNullStreams } from 'node:child_process'
 import { resolve } from 'path'
 import { ResultStream } from './result-stream'
+import { ExecuteContext } from './execute-context'
 
 export interface Result {
   code: number
   stream: ResultStream[]
   edit?: EditFile
 }
+export interface ResultContentEvent {
+  event: string
 
+  commandId: string
+  contextId: string
+  contentId: string
+  handlerId: string
+}
 export interface ResultViewModel {
   code: number
   stream: ResultStream[]
   edit?: EditFileViewModel
+  events: ResultContentEvent[]
 }
 
 export interface ResultStreamEvent {
@@ -40,6 +49,7 @@ export interface Command {
   error: boolean
   id: string
   process?: ChildProcessWithoutNullStreams
+  context?: ExecuteContext
 }
 
 export interface CommandViewModel {

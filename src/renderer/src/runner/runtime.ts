@@ -7,9 +7,18 @@ export interface ResultStream {
 export interface Result {
   code: number
   stream: ResultStream[]
+  events: ResultContentEvent[]
   edit?: EditFile
 }
 
+export interface ResultContentEvent {
+  event: string
+
+  commandId: string
+  contextId: string
+  contentId: string
+  handlerId: string
+}
 export interface ResultStreamEvent {
   runtime: string
   command: string
