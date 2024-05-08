@@ -67,6 +67,8 @@ export class ExecuteContext {
     const runtimeId = this.runtime.id
     const commandId = this.command.id
 
+    const command = this.command
+
     const id = short.generate()
     const events = this.events
     const container = (html: string): string => `<span id="${id}">${html}</span>`
@@ -77,7 +79,7 @@ export class ExecuteContext {
     return {
       id,
       update(newHTML: string): void {
-        if (R !== null) {
+        if (R !== null && !command.aborted && !command.complete) {
           R.setText(container(newHTML))
 
           sender.send('runtime.commandEvent')
@@ -111,6 +113,9 @@ export class ExecuteContext {
 
   async fireEvent(eventName: string, handlerId: string): Promise<void> {
     const event = this.eventHandlers.get(handlerId)
+    if (this.command.aborted || this.command.complete) {
+      return
+    }
     if (!event) {
       return
     }
