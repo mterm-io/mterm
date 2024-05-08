@@ -1,7 +1,7 @@
-import { ExecuteContext } from '../runtime'
 import { RunnerWindow } from '../../window/windows/runner'
 import { shell } from 'electron'
 import { parseInt } from 'lodash'
+import { ExecuteContext } from '../execute-context'
 
 export default {
   command: ':settings',

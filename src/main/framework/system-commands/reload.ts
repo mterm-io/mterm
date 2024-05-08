@@ -1,5 +1,5 @@
-import { ExecuteContext } from '../runtime'
 import { RunnerWindow } from '../../window/windows/runner'
+import { ExecuteContext } from '../execute-context'
 
 async function reload(context: ExecuteContext): Promise<void> {
   await context.workspace.load()

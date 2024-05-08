@@ -6,8 +6,6 @@ import {
   Profile,
   ProfileMap,
   Result,
-  ResultStream,
-  ResultStreamEvent,
   Runtime,
   RuntimeModel
 } from './runtime'
@@ -25,7 +23,8 @@ import {
 } from '../../constants'
 import Convert from 'ansi-to-html'
 import { HistoricalExecution } from './history'
-import { readFile, writeFile } from 'fs-extra'
+import { writeFile } from 'fs-extra'
+import { ExecuteContext } from './execute-context'
 
 const convert = new Convert()
 const DOMPurify = createDOMPurify(new JSDOM('').window)
@@ -197,6 +196,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
     if (!runtime) {
       return false
     }
+
     const command = runtime.history.find((c) => c.id === commandId)
     if (!command) {
       return false
@@ -432,93 +432,31 @@ export function attach({ app, workspace }: BootstrapContext): void {
       profileKey = workspace.settings.get<string>('defaultProfile', DEFAULT_PROFILE)
     }
 
-    const history = {
-      enabled: workspace.settings.get<boolean>('history.enabled', DEFAULT_HISTORY_ENABLED),
-      results: workspace.settings.get<boolean>('history.saveResult', DEFAULT_HISTORY_SAVE_RESULT),
-      max: workspace.settings.get<number>('history.maxItems', DEFAULT_HISTORY_MAX_ITEMS)
-    }
-
     const profiles = workspace.settings.get<ProfileMap>('profiles', DEFAULT_PROFILES)
     const profile: Profile = profiles[profileKey]
 
     const result: Result = command.result
-    const start = Date.now()
 
     let finalize: boolean = true
 
-    const finish = (code: number): void => {
-      if (command.aborted || command.complete) {
-        return
+    console.log(command)
+
+    const context = new ExecuteContext(
+      profile.platform,
+      _.sender,
+      workspace,
+      runtimeTarget,
+      command,
+      profileKey,
+      {
+        enabled: workspace.settings.get<boolean>('history.enabled', DEFAULT_HISTORY_ENABLED),
+        results: workspace.settings.get<boolean>('history.saveResult', DEFAULT_HISTORY_SAVE_RESULT),
+        max: workspace.settings.get<number>('history.maxItems', DEFAULT_HISTORY_MAX_ITEMS)
       }
-
-      result.code = code
-
-      command.complete = true
-      command.error = result.code !== 0
-
-      if (history.enabled) {
-        workspace.history.append(command, start, profileKey, history.results)
-      }
-    }
+    )
 
     try {
-      const out = (text: string, error: boolean = false): void => {
-        const isFinished = command.aborted || command.complete
-        if (isFinished) {
-          if (!command.result.edit) {
-            return
-          }
-        }
-        const raw = text.toString()
-
-        text = DOMPurify.sanitize(raw)
-        text = convert.toHtml(text)
-
-        const streamEntry: ResultStream = {
-          text,
-          error,
-          raw
-        }
-
-        result.stream.push(streamEntry)
-
-        const streamEvent: ResultStreamEvent = {
-          entry: streamEntry,
-          runtime: runtime,
-          command: id
-        }
-
-        if (!_.sender.isDestroyed()) {
-          _.sender.send('runtime.commandEvent', streamEvent)
-        }
-      }
-
-      if (!profile) {
-        throw `Profile ${profileKey} does not exist, provided by runtime as = ${runtimeTarget.profile}`
-      }
-
-      const platform = profile.platform
-      const finalizeConfirm = await execute({
-        platform,
-        workspace,
-        runtime: runtimeTarget,
-        command,
-        async edit(path: string, callback: (text: string) => void) {
-          const file = await readFile(path)
-
-          this.command.result.edit = {
-            path,
-            modified: false,
-            content: file.toString(),
-            callback
-          }
-
-          _.sender.send('runtime.commandEvent')
-        },
-        out,
-        finish
-      })
-      if (finalizeConfirm !== undefined && finalizeConfirm === false) {
+      if ((await execute(context)) === false) {
         finalize = false
       }
     } catch (e) {
@@ -527,14 +465,14 @@ export function attach({ app, workspace }: BootstrapContext): void {
         text: `${e}`,
         raw: `${e}`
       })
-      finish(1)
+      context.finish(1)
     }
 
     if (finalize) {
       command.complete = true
       command.error = result.code !== 0
 
-      finish(result.code)
+      context.finish(result.code)
     }
 
     return true

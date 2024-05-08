@@ -1,5 +1,5 @@
-import { ExecuteContext } from '../runtime'
 import { app } from 'electron'
+import { ExecuteContext } from '../execute-context'
 
 export default {
   command: ':version',

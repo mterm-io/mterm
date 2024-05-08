@@ -5,13 +5,14 @@ import short from 'short-uuid'
 import { runInNewContext } from 'node:vm'
 import * as tryRequire from 'try-require'
 import { compile } from '../vendor/webpack'
-import { ExecuteContext } from './runtime'
 import { Settings } from './settings'
+import { ExecuteContext } from './execute-context'
 
+export type FrontendHook = () => Promise<void> | void
 export class Commands {
   public lib: object = {}
   public state: Map<string, object> = new Map<string, object>()
-
+  public handlers: Map<string, FrontendHook> = new Map<string, FrontendHook>()
   constructor(
     private workingDirectory: string,
     private templateDirectory: string

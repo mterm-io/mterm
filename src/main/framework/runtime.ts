@@ -1,4 +1,4 @@
-import { resolveFolderPathForMTERM, Workspace } from './workspace'
+import { resolveFolderPathForMTERM } from './workspace'
 import short from 'short-uuid'
 import { ChildProcessWithoutNullStreams } from 'node:child_process'
 import { resolve } from 'path'
@@ -110,12 +110,6 @@ export class Runtime {
   }
 }
 
-export interface ExecuteContext {
-  platform: string
-  workspace: Workspace
-  runtime: Runtime
-  command: Command
-  edit: (path: string, callback: (content: string) => void) => Promise<void>
-  out: (text: string, error?: boolean) => void
-  finish: (code: number) => void
+export interface RuntimeHTMLHandle {
+  update(html: string): void
 }

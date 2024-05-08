@@ -1,5 +1,5 @@
-import { ExecuteContext } from '../runtime'
 import { app } from 'electron'
+import { ExecuteContext } from '../execute-context'
 
 async function exit(context: ExecuteContext): Promise<void> {
   if (!context.workspace.removeRuntime(context.runtime)) {

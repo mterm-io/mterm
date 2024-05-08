@@ -1,4 +1,4 @@
-import { ExecuteContext } from '../runtime'
+import { ExecuteContext } from '../execute-context'
 
 export default {
   command: 'clear',
