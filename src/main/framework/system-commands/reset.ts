@@ -19,6 +19,10 @@ async function reset(context: ExecuteContext): Promise<boolean> {
     M.update(`<span>${`${minute++}`.padStart(2, '0')}</span>`)
   }, 1000 * 60)
 
+  M.on('click', () => {
+    second = 0
+  })
+
   return false
 }
 

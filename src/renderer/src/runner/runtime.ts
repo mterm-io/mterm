@@ -14,6 +14,7 @@ export interface Result {
 export interface ResultContentEvent {
   event: string
 
+  runtimeId: string
   commandId: string
   contextId: string
   contentId: string

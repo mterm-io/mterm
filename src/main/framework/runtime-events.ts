@@ -115,6 +115,24 @@ export function attach({ app, workspace }: BootstrapContext): void {
   )
 
   ipcMain.handle(
+    'runtime.run-context-event',
+    async (_, event: ResultContentEvent): Promise<boolean> => {
+      const runtime = workspace.runtimes.find((r) => r.id === event.runtimeId)
+      if (!runtime) {
+        return false
+      }
+      const command = runtime.history.find((c) => c.id === event.commandId)
+      if (!command) {
+        return false
+      }
+
+      await command?.context?.fireEvent(event.event, event.handlerId)
+
+      return true
+    }
+  )
+
+  ipcMain.handle(
     'runtime.save-edit',
     async (_, runtimeId: string, commandId: string): Promise<boolean> => {
       const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
