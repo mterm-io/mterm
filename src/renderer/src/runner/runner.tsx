@@ -207,7 +207,9 @@ export default function Runner(): ReactElement {
       return
     }
     const eventList =
-      historyIndex === -1 ? runtime.result.events : runtime.history[historyIndex].result.events
+      (historyIndex === -1
+        ? runtime.result.events
+        : runtime.history[historyIndex]?.result?.events) || []
 
     const eventMap = eventList.map((o) => o.event)
     const eventMapSet = new Set<string>()
