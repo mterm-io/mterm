@@ -1,17 +1,23 @@
 import { ExecuteContext } from '../execute-context'
 
 async function reset(context: ExecuteContext): Promise<boolean> {
-  context.out('Oh lawd')
+  context.out('Time: ')
 
-  const okay = context.content(`
-    <h1>Hello</h1>
-  `)
+  let minute = 0
+  let second = 0
 
-  setTimeout(() => {
-    okay.update(`
-      <h1>Goodbye</h1>
-    `)
-  }, 5000)
+  const M = context.content(`<span>00</span>`)
+
+  context.out(':')
+
+  const S = context.content(`<span>00</span>`)
+
+  setInterval(() => {
+    S.update(`<span>${`${second++}`.padStart(2, '0')}</span>`)
+  }, 1000)
+  setInterval(() => {
+    M.update(`<span>${`${minute++}`.padStart(2, '0')}</span>`)
+  }, 1000 * 60)
 
   return false
 }

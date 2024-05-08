@@ -61,7 +61,6 @@ export class ExecuteContext {
 
           sender.send('runtime.commandEvent')
         }
-        console.log('NEW HTML', newHTML)
       }
     }
   }

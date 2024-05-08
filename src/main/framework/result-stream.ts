@@ -6,6 +6,7 @@ export class ResultStream {
     public raw: string,
     public error: boolean = false
   ) {
+    this.raw = this.raw.toString()
     this.text = sanitizeOutput(raw)
   }
 
