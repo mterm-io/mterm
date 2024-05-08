@@ -202,15 +202,22 @@ export default function Runner(): ReactElement {
   }
 
   useEffect(() => {
+    const runtime = runtimeList.find((r) => r.target)
+    if (!runtime) {
+      return
+    }
+    const eventList =
+      historyIndex === -1 ? runtime.result.events : runtime.history[historyIndex].result.events
+
+    const eventMap = eventList.map((o) => o.event)
+    const eventMapSet = new Set<string>()
+
+    for (const event of eventMap) {
+      eventMapSet.add(event)
+    }
+
     const checkAndSendEventForContent = (event): void => {
       const element = event.target
-
-      const runtime = runtimeList.find((r) => r.target)
-      if (!runtime) {
-        return
-      }
-      const eventList =
-        historyIndex === -1 ? runtime.result.events : runtime.history[historyIndex].result.events
 
       const matchingEvents = eventList.filter(
         (backendEvent) =>
@@ -225,14 +232,16 @@ export default function Runner(): ReactElement {
       })
     }
 
-    const clickEvent = (event): void => {
-      checkAndSendEventForContent(event)
-    }
+    const eventListName = Array.from(eventMapSet.values())
 
-    document.addEventListener('click', clickEvent)
+    eventListName.forEach((eventName) =>
+      document.addEventListener(eventName, checkAndSendEventForContent)
+    )
 
     return () => {
-      document.removeEventListener('click', clickEvent)
+      eventListName.forEach((eventName) =>
+        document.removeEventListener(eventName, checkAndSendEventForContent)
+      )
     }
   }, [historyIndex, runtimeList])
 
