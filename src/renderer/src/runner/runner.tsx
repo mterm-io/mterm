@@ -1,18 +1,14 @@
-import { ChangeEvent, ReactElement, useEffect, useRef, useState } from 'react'
-import { Command, Runtime } from './runtime'
-import { ContextMenu, ContextMenuItem, ContextMenuTrigger } from 'rctx-contextmenu'
-import CodeMirror from '@uiw/react-codemirror'
-import { vscodeDark } from '@uiw/codemirror-theme-vscode'
-import { color } from '@uiw/codemirror-extensions-color'
-import { hyperLink } from '@uiw/codemirror-extensions-hyper-link'
-import { javascript } from '@codemirror/lang-javascript'
+import React, { ChangeEvent, ReactElement, useEffect, useState, useRef } from 'react'
+import { Command, ResultStreamEvent, Runtime } from './runtime'
+
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
-  const [pendingTitles, setPendingTitles] = useState<object>({})
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
-  const [editMode, setEditMode] = useState<boolean>(false)
+  const [rawMode, setRawMode] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const historyRefs = useRef<Array<React.RefObject<HTMLDivElement>>>([])
+
   const reloadRuntimesFromBackend = async (): Promise<void> => {
     const isCommanderMode = await window.electron.ipcRenderer.invoke('runner.isCommanderMode')
     const runtimesFetch: Runtime[] = await window.electron.ipcRenderer.invoke('runtimes')
@@ -22,9 +18,14 @@ export default function Runner(): ReactElement {
   }
 
   window.electron.ipcRenderer.removeAllListeners('runtime.commandEvent')
-  window.electron.ipcRenderer.on('runtime.commandEvent', async () => {
-    await reloadRuntimesFromBackend()
-  })
+  window.electron.ipcRenderer.on(
+    'runtime.commandEvent',
+    async (_, streamEntry: ResultStreamEvent) => {
+      console.log(streamEntry)
+
+      await reloadRuntimesFromBackend()
+    }
+  )
 
   const setPrompt = (prompt: string): void => {
     setRuntimes((runtimes) => {
@@ -40,6 +41,10 @@ export default function Runner(): ReactElement {
   const runtime = runtimeList.find((runtime) => runtime.target)
   const historicalExecution = historyIndex != -1 ? runtime?.history[historyIndex] : undefined
 
+  historyRefs.current = runtime?.history
+    ? runtime.history.map((_, i) => historyRefs.current[i] ?? React.createRef())
+    : []
+
   const execute = async (runtime): Promise<void> => {
     const command: Command = await window.electron.ipcRenderer.invoke(
       'runtime.prepareExecute',
@@ -48,7 +53,6 @@ export default function Runner(): ReactElement {
       'default'
     )
 
-    applyHistoryIndex(-1)
     await reloadRuntimesFromBackend()
 
     // renderer -> "backend"
@@ -70,6 +74,7 @@ export default function Runner(): ReactElement {
   }
   const handlePromptChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
+    console.log(event)
     if (historyIndex !== -1) {
       applyHistoryIndex(-1)
     }
@@ -77,15 +82,6 @@ export default function Runner(): ReactElement {
     setPrompt(value)
 
     window.electron.ipcRenderer.send('runtime.prompt', value)
-  }
-
-  const handleTitleChange = (id: string, event: ChangeEvent<HTMLInputElement>): void => {
-    const value = event.target.value
-
-    setPendingTitles((titles) => ({
-      ...titles,
-      [id]: value
-    }))
   }
 
   const selectRuntime = (runtimeIndex: number): void => {
@@ -107,9 +103,17 @@ export default function Runner(): ReactElement {
   }
 
   const applyHistoryIndex = (index: number): void => {
-    window.electron.ipcRenderer.invoke('runtime.reset-focus', runtime?.id).then(() => {
-      setHistoryIndex(index)
-    })
+    setHistoryIndex(index)
+
+    // scroll to history index
+    const element = historyRefs.current[index]?.current
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'start'
+      })
+    }
   }
 
   const onHistoryItemClicked = (historyIndex: number): void => {
@@ -129,18 +133,6 @@ export default function Runner(): ReactElement {
     if (e.code === 'ArrowUp') {
       if (runtime && historyIndex < runtime.history.length - 1) {
         applyHistoryIndex(historyIndex + 1)
-      } else {
-        window.electron.ipcRenderer
-          .invoke('history.try-scroll-next', runtime?.id)
-          .then((isHistoricalScroll: boolean) => {
-            if (isHistoricalScroll) {
-              applyHistoryIndex(historyIndex + 1)
-
-              return reloadRuntimesFromBackend()
-            }
-
-            return Promise.resolve()
-          })
       }
     }
 
@@ -149,90 +141,30 @@ export default function Runner(): ReactElement {
     }
   }
 
-  const handleTabAction = (runtime: Runtime, action: string): void => {
-    switch (action) {
-      case 'rename':
-        {
-          setPendingTitles((titles) => ({
-            ...titles,
-            [runtime.id]: runtime.appearance.title
-          }))
+  useEffect(() => {
+    inputRef.current?.focus()
+
+    // Conditionally handle keydown of letter or arrow to refocus input
+    const handleGlobalKeyDown = (event): void => {
+      if (
+        /^[a-zA-Z]$/.test(event.key) ||
+        event.key === 'ArrowUp' ||
+        event.key === 'ArrowDown' ||
+        (!event.shiftKey && !event.ctrlKey && !event.altKey)
+      ) {
+        if (document.activeElement !== inputRef.current) {
+          inputRef.current?.focus()
         }
-        break
-      default: {
-        window.electron.ipcRenderer.invoke(`runtime.${action}`, runtime.id).then(() => {
-          return reloadRuntimesFromBackend()
-        })
+        handleKeyDown(event)
       }
     }
-  }
 
-  const handleTabTitleKeyDown = (id: string, e): void => {
-    if (e.key === 'Enter') {
-      const titleToSave = pendingTitles[id] || ''
-      if (titleToSave.trim().length > 0) {
-        // something to save
-        window.electron.ipcRenderer.invoke('runtime.rename', id, titleToSave).then(() => {
-          return reloadRuntimesFromBackend()
-        })
-      }
-      setPendingTitles((titles) => ({ ...titles, [id]: null }))
+    document.addEventListener('keydown', handleGlobalKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleGlobalKeyDown)
     }
-  }
-
-  const onResultChange = (runtimeId: string, commandId: string, value: string): void => {
-    window.electron.ipcRenderer
-      .invoke('runtime.set-result', runtimeId, commandId, value)
-      .then(() => {
-        return reloadRuntimesFromBackend()
-      })
-  }
-
-  const onEditFileChange = (runtimeId: string, commandId: string, value: string): void => {
-    window.electron.ipcRenderer.invoke('runtime.set-edit', runtimeId, commandId, value).then(() => {
-      return reloadRuntimesFromBackend()
-    })
-  }
-  const onEditFileKeyDown = (runtimeId: string, commandId: string, e): void => {
-    if (e.code === 'KeyS' && e.ctrlKey) {
-      window.electron.ipcRenderer.invoke('runtime.save-edit', runtimeId, commandId).then(() => {
-        return reloadRuntimesFromBackend()
-      })
-    }
-  }
-
-  // useEffect(() => {
-  //   inputRef.current?.focus()
-  //
-  //   if (Object.values(pendingTitles).filter((title) => title !== null).length > 0) {
-  //     //editing session in progress
-  //     return
-  //   }
-  //
-  //   // Conditionally handle keydown of letter or arrow to refocus input
-  //   const handleGlobalKeyDown = (event): void => {
-  //     // if pending a title? ignore this key event: user is probably editing the window title
-  //     // and does not care for input
-  //
-  //     if (
-  //       /^[a-zA-Z]$/.test(event.key) ||
-  //       event.key === 'ArrowUp' ||
-  //       event.key === 'ArrowDown' ||
-  //       (!event.shiftKey && !event.ctrlKey && !event.altKey)
-  //     ) {
-  //       if (document.activeElement !== inputRef.current) {
-  //         inputRef.current?.focus()
-  //       }
-  //       handleKeyDown(event)
-  //     }
-  //   }
-  //
-  //   document.addEventListener('keydown', handleGlobalKeyDown)
-  //
-  //   return () => {
-  //     document.removeEventListener('keydown', handleGlobalKeyDown)
-  //   }
-  // }, [])
+  }, [])
 
   useEffect(() => {
     reloadRuntimesFromBackend().catch((error) => console.error(error))
@@ -244,55 +176,17 @@ export default function Runner(): ReactElement {
 
   const result = historicalExecution ? historicalExecution.result : runtime.result
   const resultText = result.stream.map((record) => record.text).join('')
-  const resultTextRaw = result.stream.map((record) => record.raw).join('')
 
   let output = (
     <div className="runner-result-content">
       <pre dangerouslySetInnerHTML={{ __html: resultText }}></pre>
     </div>
   )
-  if (editMode) {
+  if (rawMode) {
+    const resultTextRaw = result.stream.map((record) => record.raw).join('')
     output = (
-      <CodeMirror
-        value={resultTextRaw}
-        extensions={[color, hyperLink, javascript()]}
-        theme={vscodeDark}
-        onChange={(value) =>
-          onResultChange(runtime.id, historicalExecution ? historicalExecution.id : '', value)
-        }
-        basicSetup={{ foldGutter: true }}
-      />
-    )
-  }
-
-  if (result.edit) {
-    output = (
-      <div className={'runner-editor'}>
-        <div className={'runner-editor-header'}>
-          <div className={'runner-editor-header-path'}>
-            {' '}
-            Editing {result.edit.path}
-            {result.edit.modified ? '*' : ''}
-          </div>
-          <div className={'runner-editor-header-result'}>
-            <pre>{resultTextRaw}</pre>
-          </div>
-        </div>
-        <div className={'runner-editor-widget'}>
-          <CodeMirror
-            value={result.edit.content}
-            extensions={[color, hyperLink, javascript()]}
-            theme={vscodeDark}
-            height="100%"
-            onChange={(value) =>
-              onEditFileChange(runtime.id, historicalExecution ? historicalExecution.id : '', value)
-            }
-            onKeyDown={(e) =>
-              onEditFileKeyDown(runtime.id, historicalExecution ? historicalExecution.id : '', e)
-            }
-            basicSetup={{ foldGutter: true }}
-          />
-        </div>
+      <div className="runner-result-content">
+        <pre>{resultTextRaw}</pre>
       </div>
     )
   }
@@ -304,47 +198,13 @@ export default function Runner(): ReactElement {
       >
         <div className="runner-tabs">
           {runtimeList.map((runtime, index: number) => (
-            <ContextMenuTrigger key={index} id={`tab-context-menu-${index}`}>
-              <div
-                onClick={() => selectRuntime(index)}
-                className={`runner-tabs-title ${runtime.target ? 'runner-tabs-title-active' : undefined}`}
-              >
-                <div>
-                  {pendingTitles[runtime.id] !== null && pendingTitles[runtime.id] !== undefined ? (
-                    <input
-                      type="text"
-                      onKeyDown={(e) => handleTabTitleKeyDown(runtime.id, e)}
-                      onChange={(e) => handleTitleChange(runtime.id, e)}
-                      value={pendingTitles[runtime.id]}
-                    />
-                  ) : (
-                    runtime.appearance.title
-                  )}
-                </div>
-
-                <ContextMenu
-                  id={`tab-context-menu-${index}`}
-                  hideOnLeave={false}
-                  className="tab-context-menu"
-                >
-                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'close')}>
-                    Close
-                  </ContextMenuItem>
-                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'close-others')}>
-                    Close Others
-                  </ContextMenuItem>
-                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'close-right')}>
-                    Close (right)
-                  </ContextMenuItem>
-                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'duplicate')}>
-                    Duplicate
-                  </ContextMenuItem>
-                  <ContextMenuItem onClick={() => handleTabAction(runtime, 'rename')}>
-                    Rename
-                  </ContextMenuItem>
-                </ContextMenu>
-              </div>
-            </ContextMenuTrigger>
+            <div
+              key={index}
+              onClick={() => selectRuntime(index)}
+              className={`runner-tabs-title ${runtime.target ? 'runner-tabs-title-active' : undefined}`}
+            >
+              <div>{runtime.appearance.title}</div>
+            </div>
           ))}
           <div className="runner-spacer" onClick={onAddRuntimeClick}>
             +
@@ -371,6 +231,7 @@ export default function Runner(): ReactElement {
             {runtime.history.map((command, index) => (
               <div
                 key={index}
+                ref={historyRefs.current[index]}
                 className={`runner-history-item ${historyIndex === index ? 'runner-history-selected' : ''} ${
                   command.complete
                     ? command.aborted
@@ -381,20 +242,19 @@ export default function Runner(): ReactElement {
                 onClick={() => onHistoryItemClicked(index)}
               >
                 {command.prompt}
-                {command.result?.edit?.modified ? ' *' : ''}
               </div>
             ))}
           </div>
           <div className="runner-info">
             <div
-              onClick={() => setEditMode((rawMode) => !rawMode)}
-              className={`toggle-button ${editMode ? 'toggle-button-on' : ''}`}
+              onClick={() => setRawMode((rawMode) => !rawMode)}
+              className={`toggle-button ${rawMode ? 'toggle-button-on' : ''}`}
             >
               <div className="toggle-button-slider">
                 <div className="toggle-button-spacer"></div>
                 <div className="toggle-button-circle"></div>
               </div>
-              {'<\\>'}
+              raw
             </div>
             <div className="runner-context-folder">{runtime.folder}</div>
           </div>
