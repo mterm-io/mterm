@@ -2,12 +2,7 @@ import { resolveFolderPathForMTERM } from './workspace'
 import short from 'short-uuid'
 import { ChildProcessWithoutNullStreams } from 'node:child_process'
 import { resolve } from 'path'
-
-export interface ResultStream {
-  error: boolean
-  text: string
-  raw: string
-}
+import { ResultStream } from './result-stream'
 
 export interface Result {
   code: number
@@ -108,8 +103,4 @@ export class Runtime {
 
     return location
   }
-}
-
-export interface RuntimeHTMLHandle {
-  update(html: string): void
 }

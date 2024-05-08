@@ -1,16 +1,18 @@
 import { Workspace } from './workspace'
-import { Command, ResultStream, ResultStreamEvent, Runtime, RuntimeHTMLHandle } from './runtime'
+import { Command, ResultStreamEvent, Runtime } from './runtime'
 import { WebContents } from 'electron'
-import createDOMPurify from 'dompurify'
-import { JSDOM } from 'jsdom'
-import Convert from 'ansi-to-html'
 import { readFile } from 'fs-extra'
+import short from 'short-uuid'
+import { ResultStream } from './result-stream'
 
-const convert = new Convert()
-const DOMPurify = createDOMPurify(new JSDOM('').window)
+export interface RuntimeContentHandle {
+  update(html: string): void
+}
 
 export class ExecuteContext {
-  public start: number = Date.now()
+  public readonly start: number = Date.now()
+  public readonly id: string = short.generate()
+
   constructor(
     public readonly platform: string,
     public readonly sender: WebContents,
@@ -25,23 +27,14 @@ export class ExecuteContext {
     }
   ) {}
 
-  out(text: string, error: boolean = false): void {
+  out(text: string, error: boolean = false): ResultStream | null {
     const isFinished = this.command.aborted || this.command.complete
     if (isFinished) {
       if (!this.command.result.edit) {
-        return
+        return null
       }
     }
-    const raw = text.toString()
-
-    text = DOMPurify.sanitize(raw)
-    text = convert.toHtml(text)
-
-    const streamEntry: ResultStream = {
-      text,
-      error,
-      raw
-    }
+    const streamEntry = new ResultStream(text, error)
 
     this.command.result.stream.push(streamEntry)
 
@@ -54,12 +47,20 @@ export class ExecuteContext {
     if (!this.sender.isDestroyed()) {
       this.sender.send('runtime.commandEvent', streamEvent)
     }
+
+    return streamEntry
   }
 
-  ui(html: string): RuntimeHTMLHandle {
-    this.out(html, false)
+  content(html: string): RuntimeContentHandle {
+    const R = this.out(html, false)
+    const sender = this.sender
     return {
       update(newHTML: string): void {
+        if (R !== null) {
+          R.setText(newHTML)
+
+          sender.send('runtime.commandEvent')
+        }
         console.log('NEW HTML', newHTML)
       }
     }

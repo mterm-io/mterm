@@ -1,7 +1,12 @@
 import { toNumber } from 'lodash'
 import { RunnerBounds } from './model'
 import { BrowserWindow, Display, screen } from 'electron'
+import createDOMPurify from 'dompurify'
+import { JSDOM } from 'jsdom'
+import Convert from 'ansi-to-html'
 
+const convert = new Convert()
+const DOMPurify = createDOMPurify(new JSDOM('').window)
 export function getBoundaryValue(
   value: string | number,
   containerLength: number,
@@ -69,4 +74,11 @@ export function setWindowValueFromPath(window: BrowserWindow, prop: string, valu
       console.error('No handler for = ', prop)
       break
   }
+}
+
+export function sanitizeOutput(text: string | Buffer): string {
+  text = DOMPurify.sanitize(text.toString())
+  text = convert.toHtml(text)
+
+  return text
 }

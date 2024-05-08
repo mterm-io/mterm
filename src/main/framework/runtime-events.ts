@@ -11,8 +11,6 @@ import {
 } from './runtime'
 import short from 'short-uuid'
 import { execute } from './runtime-executor'
-import createDOMPurify from 'dompurify'
-import { JSDOM } from 'jsdom'
 import {
   DEFAULT_HISTORY_ENABLED,
   DEFAULT_HISTORY_MAX_ITEMS,
@@ -21,13 +19,11 @@ import {
   DEFAULT_PROFILES,
   DEFAULT_SETTING_IS_COMMANDER_MODE
 } from '../../constants'
-import Convert from 'ansi-to-html'
 import { HistoricalExecution } from './history'
 import { writeFile } from 'fs-extra'
 import { ExecuteContext } from './execute-context'
+import { ResultStream } from './result-stream'
 
-const convert = new Convert()
-const DOMPurify = createDOMPurify(new JSDOM('').window)
 export function attach({ app, workspace }: BootstrapContext): void {
   const runtimeList = (): RuntimeModel[] => {
     return workspace.runtimes.map((runtime, index) => {
@@ -71,13 +67,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
         result: runtime.resultEdit
           ? {
               code: 0,
-              stream: [
-                {
-                  text: runtime.resultEdit,
-                  raw: runtime.resultEdit,
-                  error: false
-                }
-              ]
+              stream: [new ResultStream(runtime.resultEdit)]
             }
           : result,
         ...runtime,
@@ -160,13 +150,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
         command.result = {
           code: command.result.code,
-          stream: [
-            {
-              text: result,
-              raw: result,
-              error: command.error
-            }
-          ]
+          stream: [new ResultStream(result, command.error)]
         }
       }
 
@@ -247,16 +231,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
         stream: !rewind.result
           ? []
           : rewind.result.map((raw) => {
-              let text = raw.toString()
-
-              text = DOMPurify.sanitize(raw)
-              text = convert.toHtml(text)
-
-              return {
-                error: rewind.error,
-                raw,
-                text: text
-              }
+              return new ResultStream(raw, rewind.error)
             })
       }
     }
@@ -439,8 +414,6 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
     let finalize: boolean = true
 
-    console.log(command)
-
     const context = new ExecuteContext(
       profile.platform,
       _.sender,
@@ -460,11 +433,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
         finalize = false
       }
     } catch (e) {
-      result.stream.push({
-        error: true,
-        text: `${e}`,
-        raw: `${e}`
-      })
+      result.stream.push(new ResultStream(`${e}`, true))
       context.finish(1)
     }
 
