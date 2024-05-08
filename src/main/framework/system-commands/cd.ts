@@ -1,5 +1,5 @@
-import { ExecuteContext } from '../runtime'
 import { pathExists, stat } from 'fs-extra'
+import { ExecuteContext } from '../execute-context'
 
 export default {
   command: 'cd',

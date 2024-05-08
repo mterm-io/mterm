@@ -1,7 +1,7 @@
-import { ExecuteContext } from '../runtime'
 import { pathExists, stat } from 'fs-extra'
+import { ExecuteContext } from '../execute-context'
 
-async function exit(context: ExecuteContext): Promise<void> {
+async function edit(context: ExecuteContext): Promise<void> {
   const [, ...args] = context.command.prompt.split(' ')
   const path: string = context.runtime.resolve(args[0] || '.')
 
@@ -27,5 +27,5 @@ async function exit(context: ExecuteContext): Promise<void> {
 export default {
   command: ':edit',
   alias: ['edit'],
-  task: exit
+  task: edit
 }
