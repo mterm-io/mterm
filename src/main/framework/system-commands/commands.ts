@@ -1,5 +1,4 @@
 import { ExecuteContext } from '../execute-context'
-import { RunnerWindow } from '../../window/windows/runner'
 
 export default {
   command: ':commands',
