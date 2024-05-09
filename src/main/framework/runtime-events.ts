@@ -470,9 +470,6 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
     // the "finish"
     if (finalize) {
-      command.complete = true
-      command.error = result.code !== 0
-
       context.finish(result.code)
     }
 
