@@ -5,13 +5,12 @@ import short from 'short-uuid'
 import { runInNewContext } from 'node:vm'
 import * as tryRequire from 'try-require'
 import { compile } from '../vendor/webpack'
-import { ExecuteContext } from './runtime'
 import { Settings } from './settings'
-
+import { ExecuteContext } from './execute-context'
 export class Commands {
   public lib: object = {}
+  public commandFileLocation: string = ''
   public state: Map<string, object> = new Map<string, object>()
-
   constructor(
     private workingDirectory: string,
     private templateDirectory: string
@@ -98,13 +97,14 @@ export class Commands {
     }
 
     const packageJson = await readJson(join(this.workingDirectory, 'package.json'))
-    const commandFileLocation = join(this.workingDirectory, packageJson.main)
+
+    this.commandFileLocation = join(this.workingDirectory, packageJson.main)
 
     const id = short.generate()
     const temp = join(tmpdir(), `mterm-${id}`)
     await mkdirs(temp)
 
-    await compile(commandFileLocation, temp, join(this.workingDirectory, 'node_modules'))
+    await compile(this.commandFileLocation, temp, join(this.workingDirectory, 'node_modules'))
 
     const jsFile: Buffer = await readFile(join(temp, 'commands.js'))
 

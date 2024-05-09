@@ -1,4 +1,5 @@
-import { ExecuteContext } from '../runtime'
+import { ExecuteContext } from '../execute-context'
+
 export default {
   command: ':test',
   async task(context: ExecuteContext): Promise<void> {

@@ -1,5 +1,5 @@
-import { ExecuteContext } from '../runtime'
 import { shell } from 'electron'
+import { ExecuteContext } from '../execute-context'
 
 export default {
   command: ':workspace',

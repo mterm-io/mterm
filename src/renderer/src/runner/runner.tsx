@@ -250,38 +250,51 @@ export default function Runner(): ReactElement {
     textAreaRef.current?.focus()
   }, [isMultiLine])
 
-  // useEffect(() => {
-  //   inputRef.current?.focus()
-  //
-  //   if (Object.values(pendingTitles).filter((title) => title !== null).length > 0) {
-  //     //editing session in progress
-  //     return
-  //   }
-  //
-  //   // Conditionally handle keydown of letter or arrow to refocus input
-  //   const handleGlobalKeyDown = (event): void => {
-  //     // if pending a title? ignore this key event: user is probably editing the window title
-  //     // and does not care for input
-  //
-  //     if (
-  //       /^[a-zA-Z]$/.test(event.key) ||
-  //       event.key === 'ArrowUp' ||
-  //       event.key === 'ArrowDown' ||
-  //       (!event.shiftKey && !event.ctrlKey && !event.altKey)
-  //     ) {
-  //       if (document.activeElement !== inputRef.current) {
-  //         inputRef.current?.focus()
-  //       }
-  //       handleKeyDown(event)
-  //     }
-  //   }
-  //
-  //   document.addEventListener('keydown', handleGlobalKeyDown)
-  //
-  //   return () => {
-  //     document.removeEventListener('keydown', handleGlobalKeyDown)
-  //   }
-  // }, [])
+  useEffect(() => {
+    const runtime = runtimeList.find((r) => r.target)
+    if (!runtime) {
+      return
+    }
+    const eventList =
+      (historyIndex === -1
+        ? runtime.result.events
+        : runtime.history[historyIndex]?.result?.events) || []
+
+    const eventMap = eventList.map((o) => o.event)
+    const eventMapSet = new Set<string>()
+
+    for (const event of eventMap) {
+      eventMapSet.add(event)
+    }
+
+    const checkAndSendEventForContent = (event): void => {
+      const element = event.target
+
+      const matchingEvents = eventList.filter(
+        (backendEvent) =>
+          [element.parentElement.id, element.id].includes(backendEvent.contentId) &&
+          event.type === backendEvent.event
+      )
+
+      matchingEvents.forEach((eventToFire) => {
+        window.electron.ipcRenderer.invoke('runtime.run-context-event', eventToFire).then(() => {
+          return reloadRuntimesFromBackend()
+        })
+      })
+    }
+
+    const eventListName = Array.from(eventMapSet.values())
+
+    eventListName.forEach((eventName) =>
+      document.addEventListener(eventName, checkAndSendEventForContent)
+    )
+
+    return () => {
+      eventListName.forEach((eventName) =>
+        document.removeEventListener(eventName, checkAndSendEventForContent)
+      )
+    }
+  }, [historyIndex, runtimeList])
 
   useEffect(() => {
     reloadRuntimesFromBackend().catch((error) => console.error(error))

@@ -1,24 +1,29 @@
-import { resolveFolderPathForMTERM, Workspace } from './workspace'
+import { resolveFolderPathForMTERM } from './workspace'
 import short from 'short-uuid'
 import { ChildProcessWithoutNullStreams } from 'node:child_process'
 import { resolve } from 'path'
-
-export interface ResultStream {
-  error: boolean
-  text: string
-  raw: string
-}
+import { ResultStream } from './result-stream'
+import { ExecuteContext } from './execute-context'
 
 export interface Result {
   code: number
   stream: ResultStream[]
   edit?: EditFile
 }
+export interface ResultContentEvent {
+  event: string
 
+  runtimeId: string
+  commandId: string
+  contextId: string
+  contentId: string
+  handlerId: string
+}
 export interface ResultViewModel {
   code: number
   stream: ResultStream[]
   edit?: EditFileViewModel
+  events: ResultContentEvent[]
 }
 
 export interface ResultStreamEvent {
@@ -45,6 +50,7 @@ export interface Command {
   error: boolean
   id: string
   process?: ChildProcessWithoutNullStreams
+  context?: ExecuteContext
 }
 
 export interface CommandViewModel {
@@ -108,14 +114,4 @@ export class Runtime {
 
     return location
   }
-}
-
-export interface ExecuteContext {
-  platform: string
-  workspace: Workspace
-  runtime: Runtime
-  command: Command
-  edit: (path: string, callback: (content: string) => void) => Promise<void>
-  out: (text: string, error?: boolean) => void
-  finish: (code: number) => void
 }

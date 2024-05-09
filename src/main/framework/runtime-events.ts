@@ -6,15 +6,13 @@ import {
   Profile,
   ProfileMap,
   Result,
-  ResultStream,
-  ResultStreamEvent,
+  ResultContentEvent,
+  ResultViewModel,
   Runtime,
   RuntimeModel
 } from './runtime'
 import short from 'short-uuid'
 import { execute } from './runtime-executor'
-import createDOMPurify from 'dompurify'
-import { JSDOM } from 'jsdom'
 import {
   DEFAULT_HISTORY_ENABLED,
   DEFAULT_HISTORY_MAX_ITEMS,
@@ -23,13 +21,15 @@ import {
   DEFAULT_PROFILES,
   DEFAULT_SETTING_IS_COMMANDER_MODE
 } from '../../constants'
-import Convert from 'ansi-to-html'
 import { HistoricalExecution } from './history'
-import { readFile, writeFile } from 'fs-extra'
+import { writeFile } from 'fs-extra'
+import { ExecuteContext } from './execute-context'
+import { ResultStream } from './result-stream'
 
-const convert = new Convert()
-const DOMPurify = createDOMPurify(new JSDOM('').window)
 export function attach({ app, workspace }: BootstrapContext): void {
+  const eventListForCommand = (command: Command): ResultContentEvent[] => {
+    return command?.context?.events || []
+  }
   const runtimeList = (): RuntimeModel[] => {
     return workspace.runtimes.map((runtime, index) => {
       const isTarget = index === workspace.runtimeIndex
@@ -38,6 +38,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
       const result = focus
         ? {
             ...focus.result,
+            events: eventListForCommand(focus),
             edit: focus.result.edit
               ? {
                   ...focus.result.edit,
@@ -47,15 +48,18 @@ export function attach({ app, workspace }: BootstrapContext): void {
           }
         : {
             code: 0,
-            stream: []
+            stream: [],
+            events: []
           }
 
       const history: CommandViewModel[] = runtime.history.map((historyItem) => {
         return {
           ...historyItem,
           process: undefined,
+          context: undefined,
           result: {
             ...historyItem.result,
+            events: eventListForCommand(historyItem),
             edit: historyItem.result.edit
               ? {
                   content: historyItem.result.edit.content,
@@ -70,22 +74,16 @@ export function attach({ app, workspace }: BootstrapContext): void {
       return {
         target: isTarget,
         result: runtime.resultEdit
-          ? {
+          ? ({
               code: 0,
-              stream: [
-                {
-                  text: runtime.resultEdit,
-                  raw: runtime.resultEdit,
-                  error: false
-                }
-              ]
-            }
+              stream: [new ResultStream(runtime.resultEdit)],
+              events: []
+            } as ResultViewModel)
           : result,
         ...runtime,
         history,
         appearance: {
           ...runtime.appearance,
-
           title: runtime.appearance.title.replace('$idx', `${index}`)
         }
       }
@@ -111,6 +109,24 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
       command.result.edit.content = result
       command.result.edit.modified = true
+
+      return true
+    }
+  )
+
+  ipcMain.handle(
+    'runtime.run-context-event',
+    async (_, event: ResultContentEvent): Promise<boolean> => {
+      const runtime = workspace.runtimes.find((r) => r.id === event.runtimeId)
+      if (!runtime) {
+        return false
+      }
+      const command = runtime.history.find((c) => c.id === event.commandId)
+      if (!command) {
+        return false
+      }
+
+      await command?.context?.fireEvent(event.event, event.handlerId)
 
       return true
     }
@@ -161,13 +177,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
         command.result = {
           code: command.result.code,
-          stream: [
-            {
-              text: result,
-              raw: result,
-              error: command.error
-            }
-          ]
+          stream: [new ResultStream(result, command.error)]
         }
       }
 
@@ -197,6 +207,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
     if (!runtime) {
       return false
     }
+
     const command = runtime.history.find((c) => c.id === commandId)
     if (!command) {
       return false
@@ -247,16 +258,7 @@ export function attach({ app, workspace }: BootstrapContext): void {
         stream: !rewind.result
           ? []
           : rewind.result.map((raw) => {
-              let text = raw.toString()
-
-              text = DOMPurify.sanitize(raw)
-              text = convert.toHtml(text)
-
-              return {
-                error: rewind.error,
-                raw,
-                text: text
-              }
+              return new ResultStream(raw, rewind.error)
             })
       }
     }
@@ -432,109 +434,46 @@ export function attach({ app, workspace }: BootstrapContext): void {
       profileKey = workspace.settings.get<string>('defaultProfile', DEFAULT_PROFILE)
     }
 
-    const history = {
-      enabled: workspace.settings.get<boolean>('history.enabled', DEFAULT_HISTORY_ENABLED),
-      results: workspace.settings.get<boolean>('history.saveResult', DEFAULT_HISTORY_SAVE_RESULT),
-      max: workspace.settings.get<number>('history.maxItems', DEFAULT_HISTORY_MAX_ITEMS)
-    }
-
     const profiles = workspace.settings.get<ProfileMap>('profiles', DEFAULT_PROFILES)
     const profile: Profile = profiles[profileKey]
 
     const result: Result = command.result
-    const start = Date.now()
 
     let finalize: boolean = true
 
-    const finish = (code: number): void => {
-      if (command.aborted || command.complete) {
-        return
+    const context = new ExecuteContext(
+      profile.platform,
+      _.sender,
+      workspace,
+      runtimeTarget,
+      command,
+      profileKey,
+      {
+        enabled: workspace.settings.get<boolean>('history.enabled', DEFAULT_HISTORY_ENABLED),
+        results: workspace.settings.get<boolean>('history.saveResult', DEFAULT_HISTORY_SAVE_RESULT),
+        max: workspace.settings.get<number>('history.maxItems', DEFAULT_HISTORY_MAX_ITEMS)
       }
+    )
 
-      result.code = code
-
-      command.complete = true
-      command.error = result.code !== 0
-
-      if (history.enabled) {
-        workspace.history.append(command, start, profileKey, history.results)
-      }
-    }
+    // attach context to command
+    command.context = context
 
     try {
-      const out = (text: string, error: boolean = false): void => {
-        const isFinished = command.aborted || command.complete
-        if (isFinished) {
-          if (!command.result.edit) {
-            return
-          }
-        }
-        const raw = text.toString()
-
-        text = DOMPurify.sanitize(raw)
-        text = convert.toHtml(text)
-
-        const streamEntry: ResultStream = {
-          text,
-          error,
-          raw
-        }
-
-        result.stream.push(streamEntry)
-
-        const streamEvent: ResultStreamEvent = {
-          entry: streamEntry,
-          runtime: runtime,
-          command: id
-        }
-
-        if (!_.sender.isDestroyed()) {
-          _.sender.send('runtime.commandEvent', streamEvent)
-        }
-      }
-
-      if (!profile) {
-        throw `Profile ${profileKey} does not exist, provided by runtime as = ${runtimeTarget.profile}`
-      }
-
-      const platform = profile.platform
-      const finalizeConfirm = await execute({
-        platform,
-        workspace,
-        runtime: runtimeTarget,
-        command,
-        async edit(path: string, callback: (text: string) => void) {
-          const file = await readFile(path)
-
-          this.command.result.edit = {
-            path,
-            modified: false,
-            content: file.toString(),
-            callback
-          }
-
-          _.sender.send('runtime.commandEvent')
-        },
-        out,
-        finish
-      })
-      if (finalizeConfirm !== undefined && finalizeConfirm === false) {
+      if ((await execute(context)) === false) {
+        // do we "finish"? unless told false by the executor we always finish
         finalize = false
       }
     } catch (e) {
-      result.stream.push({
-        error: true,
-        text: `${e}`,
-        raw: `${e}`
-      })
-      finish(1)
+      result.stream.push(new ResultStream(`${e}`, true))
+      context.finish(1)
     }
 
+    // the "finish"
     if (finalize) {
       command.complete = true
       command.error = result.code !== 0
 
-      finish(result.code)
+      context.finish(result.code)
     }
 
     return true
