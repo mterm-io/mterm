@@ -13,7 +13,7 @@ export default function Runner(): ReactElement {
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
   const [editMode, setEditMode] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
   const [isMultiLine, setIsMultiLine] = useState<boolean>(false)
   const [multiLineArgs, setMultiLineArgs] = useState<string>('')
@@ -73,7 +73,9 @@ export default function Runner(): ReactElement {
 
     await reloadRuntimesFromBackend()
   }
-  const handlePromptChange = (event: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>): void => {
+  const handlePromptChange = (
+    event: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>
+  ): void => {
     const value = event.target.value
     if (historyIndex !== -1) {
       applyHistoryIndex(-1)
@@ -133,14 +135,17 @@ export default function Runner(): ReactElement {
 
   const handleKeyDown = (e): void => {
     if (e.key === 'Enter' && e.shiftKey && !isMultiLine) {
-      e.preventDefault();
-      setIsMultiLine(true);
+      e.preventDefault()
+      setIsMultiLine(true)
     }
     if (e.code === 'Backslash' || e.code === 'Backquote') {
-      e.preventDefault();
-      isMultiLine ? setIsMultiLine(false) : setIsMultiLine(true);
+      e.preventDefault()
+      isMultiLine ? setIsMultiLine(false) : setIsMultiLine(true)
     }
-
+    if (e.code === 'Backspace' && isMultiLine && !multiLineArgs) {
+      e.preventDefault()
+      setIsMultiLine(false)
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       runtime ? (runtime.prompt += normalizeMultilineArgs()) : ''
       execute(runtime).catch((error) => console.error(error))
@@ -228,16 +233,8 @@ export default function Runner(): ReactElement {
     }
   }
 
-  // useEffect(() => {
-  //   if (isMultiLine) {
-  //     textAreaRef.current?.focus();
-  //   } else {
-  //     inputRef.current?.focus();
-  //   }
-  // })
-
   useEffect(() => {
-    if (!isMultiLine){
+    if (!isMultiLine) {
       historicalExecution
         ? (historicalExecution.prompt += normalizeMultilineArgs())
         : runtime
