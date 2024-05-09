@@ -50,7 +50,10 @@ export async function compile(
             stats
               .toJson()
               .errors?.map((o) => o.message)
-              .reduce((errorText, errorEntry) => `${errorText}\n${errorEntry}`, '')
+              .reduce(
+                (errorText, errorEntry) => `${errorText}\n${errorEntry.split('TS').join('\nTS')}`,
+                ''
+              )
           )
         } else {
           resolve()

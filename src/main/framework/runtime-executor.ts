@@ -16,6 +16,7 @@ import Settings from './system-commands/settings'
 import Edit from './system-commands/edit'
 import Reset from './system-commands/reset'
 import Commands from './system-commands/commands'
+import Restart from './system-commands/restart'
 
 const systemCommands: Array<{
   command: string
@@ -35,7 +36,8 @@ const systemCommands: Array<{
   Settings,
   Edit,
   Reset,
-  Commands
+  Commands,
+  Restart
 ]
 export async function execute(context: ExecuteContext): Promise<void | boolean> {
   const [cmd, ...args] = context.command.prompt.split(' ')
