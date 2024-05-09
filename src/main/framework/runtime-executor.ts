@@ -1,5 +1,7 @@
 import { spawn } from 'node:child_process'
 
+import { ExecuteContext } from './execute-context'
+
 import Reload from './system-commands/reload'
 import Exit from './system-commands/exit'
 import History from './system-commands/history'
@@ -13,13 +15,28 @@ import Workspace from './system-commands/workspace'
 import Settings from './system-commands/settings'
 import Edit from './system-commands/edit'
 import Reset from './system-commands/reset'
-import { ExecuteContext } from './execute-context'
+import Commands from './system-commands/commands'
 
 const systemCommands: Array<{
   command: string
   alias?: string[]
   task: (context: ExecuteContext, ...args: string[]) => Promise<void> | void
-}> = [Reload, Exit, History, Cd, Tab, Test, Clear, Version, Vault, Workspace, Settings, Edit, Reset]
+}> = [
+  Reload,
+  Exit,
+  History,
+  Cd,
+  Tab,
+  Test,
+  Clear,
+  Version,
+  Vault,
+  Workspace,
+  Settings,
+  Edit,
+  Reset,
+  Commands
+]
 export async function execute(context: ExecuteContext): Promise<void | boolean> {
   const [cmd, ...args] = context.command.prompt.split(' ')
 
