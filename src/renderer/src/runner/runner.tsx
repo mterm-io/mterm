@@ -1,4 +1,4 @@
-import { ChangeEvent, ReactElement, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, ReactElement, useEffect, useRef, useState, RefObject, createRef } from 'react'
 import { Command, Runtime } from './runtime'
 import { ContextMenu, ContextMenuItem, ContextMenuTrigger } from 'rctx-contextmenu'
 import CodeMirror from '@uiw/react-codemirror'
@@ -13,6 +13,8 @@ export default function Runner(): ReactElement {
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
   const [editMode, setEditMode] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const historyRefs = useRef<Array<RefObject<HTMLDivElement>>>([])
+
   const reloadRuntimesFromBackend = async (): Promise<void> => {
     const isCommanderMode = await window.electron.ipcRenderer.invoke('runner.isCommanderMode')
     const runtimesFetch: Runtime[] = await window.electron.ipcRenderer.invoke('runtimes')
@@ -39,6 +41,10 @@ export default function Runner(): ReactElement {
 
   const runtime = runtimeList.find((runtime) => runtime.target)
   const historicalExecution = historyIndex != -1 ? runtime?.history[historyIndex] : undefined
+
+  historyRefs.current = runtime?.history
+    ? runtime.history.map((_, i) => historyRefs.current[i] ?? createRef())
+    : []
 
   const execute = async (runtime): Promise<void> => {
     const command: Command = await window.electron.ipcRenderer.invoke(
@@ -109,6 +115,15 @@ export default function Runner(): ReactElement {
   const applyHistoryIndex = (index: number): void => {
     window.electron.ipcRenderer.invoke('runtime.reset-focus', runtime?.id).then(() => {
       setHistoryIndex(index)
+      // scroll to history index
+      const element = historyRefs.current[index]?.current
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'start'
+        })
+      }
     })
   }
 
@@ -384,6 +399,7 @@ export default function Runner(): ReactElement {
             {runtime.history.map((command, index) => (
               <div
                 key={index}
+                ref={historyRefs.current[index]}
                 className={`runner-history-item ${historyIndex === index ? 'runner-history-selected' : ''} ${
                   command.complete
                     ? command.aborted
