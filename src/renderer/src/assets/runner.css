@@ -28,14 +28,20 @@ body {
 }
 
 .runner-input {
-  /* height: 100%; */
+  height: 100%;
   padding: 10px;
   display: flex;
   flex-wrap: wrap;
-  align-content: flex-start;
-  flex-direction: column;
   max-height: 100%;
+  align-content: stretch;
+  justify-content: space-around;
+  flex-direction: column;
+}
 
+.multiline-input-container {
+  display:flex;
+  align-items:flex-end;
+  height: 50%;
 }
 
 .runner-input-field,
@@ -44,7 +50,7 @@ body {
   background: transparent;
   border: 0;
   font-family: "Roboto Mono", monospace;
-
+  flex-grow: 1;
 }
 
 .runner-input-field {
@@ -57,7 +63,7 @@ body {
 }
 
 .runner-textarea-field {
-  width: 100%;
+  max-width:100%;
   text-align: left;
   padding-left: 20px;
   flex: 1 1 auto;
@@ -304,13 +310,13 @@ body {
   grid-template-columns: 15px auto;
 }
 
-.runner-result::-webkit-scrollbar {
+.multi-line::-webkit-scrollbar, .runner-result::-webkit-scrollbar {
   width: 15px;
 }
-.runner-result::-webkit-scrollbar-corner {
+.multi-line::-webkit-scrollbar-corner, .runner-result::-webkit-scrollbar-corner {
   background: rgba(0,0,0,0);
 }
-.runner-result::-webkit-scrollbar-thumb {
+.multi-line::-webkit-scrollbar-thumb, .runner-result::-webkit-scrollbar-thumb {
   background-color: #294794;
   border-radius: 6px;
   border: 4px solid rgba(0,0,0,0);

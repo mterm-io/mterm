@@ -121,11 +121,15 @@ export default function Runner(): ReactElement {
     applyHistoryIndex(historyIndex)
   }
 
-  const normalizeMultilineArgs = () => {
-    return multiLineArgs ? ' ' + multiLineArgs.split('\n').map((line) => line.trim()).join(' ') : '';
+  const normalizeMultilineArgs = (): string => {
+    return multiLineArgs
+      ? ' ' +
+          multiLineArgs
+            .split('\n')
+            .map((line) => line.trim())
+            .join(' ')
+      : ''
   }
-
-  
 
   const handleKeyDown = (e): void => {
     if (e.key === 'Enter' && e.shiftKey && !isMultiLine) {
@@ -138,10 +142,10 @@ export default function Runner(): ReactElement {
     }
 
     if (e.key === 'Enter' && !e.shiftKey) {
-      runtime ? runtime.prompt +=  normalizeMultilineArgs() : '';
-      execute(runtime).catch((error) => console.error(error));
-      setMultiLineArgs('');
-      setIsMultiLine(false);
+      runtime ? (runtime.prompt += normalizeMultilineArgs()) : ''
+      execute(runtime).catch((error) => console.error(error))
+      setMultiLineArgs('')
+      setIsMultiLine(false)
     }
     if (e.code === 'ArrowDown') {
       if (runtime && historyIndex > -1) {
@@ -224,7 +228,6 @@ export default function Runner(): ReactElement {
     }
   }
 
-  
   // useEffect(() => {
   //   if (isMultiLine) {
   //     textAreaRef.current?.focus();
@@ -235,15 +238,17 @@ export default function Runner(): ReactElement {
 
   useEffect(() => {
     if (!isMultiLine){
-      historicalExecution ? 
-        historicalExecution.prompt += normalizeMultilineArgs() : 
-        (runtime ? runtime.prompt += normalizeMultilineArgs() : '' );
-      setMultiLineArgs('');
-      inputRef.current?.focus();
-      return;
+      historicalExecution
+        ? (historicalExecution.prompt += normalizeMultilineArgs())
+        : runtime
+          ? (runtime.prompt += normalizeMultilineArgs())
+          : ''
+      setMultiLineArgs('')
+      inputRef.current?.focus()
+      return
     }
-    textAreaRef.current?.focus();
-  }, [isMultiLine]);
+    textAreaRef.current?.focus()
+  }, [isMultiLine])
 
   // useEffect(() => {
   //   inputRef.current?.focus()
@@ -396,24 +401,30 @@ export default function Runner(): ReactElement {
         </div>
         <div className="runner-main">
           <div className="runner-input-container">
-          <div className="runner-input">
-              <input
-                ref={inputRef}
-                placeholder=">"
-                className={`runner-input-field ${isMultiLine ? 'multi-line' : ''}`}
-                onChange={handlePromptChange}
-                onKeyDown={handleKeyDown}
-                value={historicalExecution ? historicalExecution.prompt : runtime.prompt}
-              />
-              {isMultiLine ? <textarea
-                ref={textAreaRef}
-                placeholder='>>'
-                className={`runner-textarea-field ${isMultiLine ? 'multi-line' : ''}`}
-                onChange={(e) => setMultiLineArgs(e.target.value)}
-                onKeyDown={handleKeyDown}
-                value={multiLineArgs} /> :
+            <div className="runner-input">
+              <div className={isMultiLine ? 'multiline-input-container' : ''}>
+                <input
+                  ref={inputRef}
+                  placeholder=">"
+                  className={`runner-input-field ${isMultiLine ? 'multi-line' : ''}`}
+                  onChange={handlePromptChange}
+                  onKeyDown={handleKeyDown}
+                  value={historicalExecution ? historicalExecution.prompt : runtime.prompt}
+                />
+              </div>
+
+              {isMultiLine ? (
+                <textarea
+                  ref={textAreaRef}
+                  placeholder=">>"
+                  className={`runner-textarea-field ${isMultiLine ? 'multi-line' : ''}`}
+                  onChange={(e) => setMultiLineArgs(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  value={multiLineArgs}
+                />
+              ) : (
                 ''
-              }
+              )}
             </div>
           </div>
           <div className={`runner-result ${result.code !== 0 ? '' : ''}`}>{output}</div>
