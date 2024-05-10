@@ -38,6 +38,30 @@ export class ExecuteContext {
     public prompt: Prompt = new Prompt(command.prompt)
   ) {}
 
+  copyForPrompt(prompt: string): ExecuteContext {
+    const context = new ExecuteContext(
+      this.platform,
+      this.sender,
+      this.workspace,
+      this.runtime,
+      {
+        ...this.command,
+        result: {
+          code: 0,
+          stream: [],
+          edit: undefined
+        }
+      },
+      this.profile,
+      this.history,
+      new Prompt(prompt)
+    )
+
+    context.command.context = context
+
+    return context
+  }
+
   async resolve(text: string): Promise<string> {
     return await process(this, text)
   }

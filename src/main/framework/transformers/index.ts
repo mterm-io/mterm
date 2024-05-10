@@ -2,11 +2,13 @@ import { ExecuteContext } from '../execute-context'
 
 import { get } from './get'
 import { split } from './split'
+import { run } from './run'
 
 export const TRANSFORMER_REGEX = /:(\w+)(?:\(([^()]*(?:\([^()]*\)[^()]*)*)\))?/g
 export const TRANSFORMERS = {
   get,
-  split
+  split,
+  run
 }
 
 export type transformer = (context: ExecuteContext, ...args: string[]) => Promise<string> | string
