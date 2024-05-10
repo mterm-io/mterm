@@ -1,5 +1,5 @@
 import { Workspace } from './workspace'
-import { Command, ResultContentEvent, ResultStreamEvent, Runtime } from './runtime'
+import { Command, Prompt, ResultContentEvent, ResultStreamEvent, Runtime } from './runtime'
 import { WebContents } from 'electron'
 import { readFile } from 'fs-extra'
 import short from 'short-uuid'
@@ -20,7 +20,6 @@ export type RuntimeContentEventCallback = (event: RuntimeContentEvent) => Promis
 export class ExecuteContext {
   public readonly start: number = Date.now()
   public readonly id: string = short.generate()
-
   public readonly events: ResultContentEvent[] = []
   private readonly eventHandlers = new Map<string, RuntimeContentEventCallback>()
 
@@ -35,7 +34,8 @@ export class ExecuteContext {
       enabled: boolean
       results: boolean
       max: number
-    }
+    },
+    public prompt: Prompt = new Prompt(command.prompt)
   ) {}
 
   out(text: string, error: boolean = false): ResultStream | null {

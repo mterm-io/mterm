@@ -40,18 +40,21 @@ const systemCommands: Array<{
   Restart
 ]
 export async function execute(context: ExecuteContext): Promise<void | boolean> {
-  const [cmd, ...args] = context.command.prompt.split(' ')
-
   // check for system commands
   for (const systemCommand of systemCommands) {
-    if (systemCommand.command === cmd || systemCommand?.alias?.includes(cmd)) {
-      return systemCommand.task(context, ...args)
+    if (
+      systemCommand.command === context.prompt.cmd ||
+      systemCommand?.alias?.includes(context.prompt.cmd)
+    ) {
+      return systemCommand.task(context, ...context.prompt.args)
     }
   }
 
   // check for user commands
-  if (context.workspace.commands.has(cmd)) {
-    let result = await Promise.resolve(context.workspace.commands.run(context, cmd, ...args))
+  if (context.workspace.commands.has(context.prompt.cmd)) {
+    let result = await Promise.resolve(
+      context.workspace.commands.run(context, context.prompt.cmd, ...context.prompt.args)
+    )
 
     if (!result) {
       // nothing was replied with, assume this is a run that will happen in time
@@ -70,7 +73,7 @@ export async function execute(context: ExecuteContext): Promise<void | boolean> 
   const [platformProgram, ...platformProgramArgs] = context.platform.split(' ')
 
   const argsClean = platformProgramArgs.map(
-    (arg: string) => `${arg.replace('$ARGS', context.command.prompt)}`
+    (arg: string) => `${arg.replace('$ARGS', context.prompt.value)}`
   )
 
   const childSpawn = spawn(platformProgram, argsClean, {

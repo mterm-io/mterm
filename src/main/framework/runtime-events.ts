@@ -25,6 +25,7 @@ import { HistoricalExecution } from './history'
 import { writeFile } from 'fs-extra'
 import { ExecuteContext } from './execute-context'
 import { ResultStream } from './result-stream'
+import { transform } from './transformers'
 
 export function attach({ app, workspace }: BootstrapContext): void {
   const eventListForCommand = (command: Command): ResultContentEvent[] => {
@@ -454,6 +455,9 @@ export function attach({ app, workspace }: BootstrapContext): void {
         max: workspace.settings.get<number>('history.maxItems', DEFAULT_HISTORY_MAX_ITEMS)
       }
     )
+
+    // run transformers
+    context.prompt.value = await transform(context)
 
     // attach context to command
     command.context = context
