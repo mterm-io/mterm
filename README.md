@@ -186,6 +186,9 @@ export async function query(): Promise<{
 
 > Note the return type is optional, just added above to highlight the typescript engine provided
 
+### Transformers
+Sometimes we need to "transform" data. mterm provides `transformers` in the form of operators in the prompt. These transformers simplify terminal activities by abstract common tasks that would otherwise be tedious to write out. They also provide a
+
 ### Secrets
 
 Environment variables are a bit unsafe. You set these and leave the host machine all the ability to read and share these. Wonderful for services and backends, not the safest for personal usage.

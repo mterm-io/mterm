@@ -4,13 +4,21 @@ import { get } from './get'
 import { split } from './split'
 import { run } from './run'
 import { echo } from './echo'
+import { upper } from './upper'
+import { lower } from './lower'
+import { title } from './title'
+import { snake } from './snake'
 
 export const TRANSFORMER_REGEX = /:(\w+)(?:\(([^()]*(?:\([^()]*\)[^()]*)*)\))?/g
 export const TRANSFORMERS = {
   get,
   split,
   run,
-  echo
+  echo,
+  upper,
+  lower,
+  title,
+  snake
 }
 
 export type transformer = (context: ExecuteContext, ...args: string[]) => Promise<string> | string
