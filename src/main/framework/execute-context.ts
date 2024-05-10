@@ -4,7 +4,7 @@ import { WebContents } from 'electron'
 import { readFile } from 'fs-extra'
 import short from 'short-uuid'
 import { ResultStream } from './result-stream'
-
+import { process } from './transformers'
 export interface RuntimeContentHandle {
   id: string
   update(html: string): void
@@ -38,6 +38,9 @@ export class ExecuteContext {
     public prompt: Prompt = new Prompt(command.prompt)
   ) {}
 
+  async resolve(text: string): Promise<string> {
+    return await process(this, text)
+  }
   out(text: string, error: boolean = false): ResultStream | null {
     const isFinished = this.command.aborted || this.command.complete
     if (isFinished) {
