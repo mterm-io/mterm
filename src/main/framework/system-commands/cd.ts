@@ -3,9 +3,7 @@ import { ExecuteContext } from '../execute-context'
 
 export default {
   command: 'cd',
-  async task(context: ExecuteContext): Promise<void> {
-    const [, ...args] = context.command.prompt.split(' ')
-
+  async task(context: ExecuteContext, ...args: string[]): Promise<void> {
     const path: string = context.runtime.resolve(args[0] || '.')
 
     const isLocationActive = await pathExists(path)

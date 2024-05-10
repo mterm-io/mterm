@@ -186,6 +186,164 @@ export async function query(): Promise<{
 
 > Note the return type is optional, just added above to highlight the typescript engine provided
 
+### Transformers
+Sometimes we need to change variables, execution results or perform an operation on strings.
+
+MTERM helps solve this by providing `transformers` as terminal operators. These transformers abstract away somewhat tedious actions in the terminal, they also provide common utilities within the scope of a prompt
+
+<img src="https://github.com/mterm-io/mterm/assets/7341502/d7a0cb6c-6c75-4183-9596-8b1295789d64" alt="drawing" width="250"/>
+
+For the prompt of
+```bash
+":snake(this is some text)"
+```
+
+We get the result
+```bash
+this_is_some_text
+```
+
+`snake` is a mterm transformer that takes a string and converts it to [snake case](https://en.wikipedia.org/wiki/Snake_case)
+
+
+Transformers can be used anywhere including from within transformers -
+
+```bash
+":upper(hmm) :lower(WOW) :snake(:lower(HMM WOW))"
+```
+
+Prints out -
+```bash
+HMM wow hmm_wow
+```
+
+#### Transformer Arguments
+
+Some transformers accept arguments. Arguments for transformers are seperated by `:` colon characters
+
+Here is the split transformer on a string -
+
+```bash
+":split(1,2,3,4:1:,)"
+```
+- `1,2,3,4` is the first argument, the split text
+- `1` is the index to return (a [split operation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/split) is an array, so return a value from this array)
+- `,` the final argument is the [delimiter](https://en.wikipedia.org/wiki/Delimiter)
+
+> one way to view this operation is `"1,2,3,4".split(',')[1]`
+
+Note you can use `"` quotes to wrap transformer arguments if there is a colon within the argument
+
+#### Transformers Provided
+
+Here are the provided transformers for use -
+
+##### echo
+> print out the argument, proxies the argument to the `echo` on the terminal
+
+`:echo` examples -
+```bash
+:echo(HELLO) -> "HELLO"
+:echo(:upper(hello)) -> "HELLO"
+```
+
+##### get
+> gets the argument from the [vault](#secrets), if not available gets the argument from the [environment variables](https://en.wikipedia.org/wiki/Environment_variable) from the host machine, if not available returns the fallback
+
+`:get` examples -
+```bash
+# e.g: Basic find
+#
+# assuming:
+## there is a env variable called PATH=PATH_FROM_SYSTEM
+:get(PATH) -> "PATH_FROM_SYSTEM"
+
+# e.g: Fallback keys
+#
+# assuming:
+## there is NOT a env variable called NOT_FOUND_A
+## there is NOT a env variable called NOT_FOUND_B
+## there is a env variable called FOUND_C=VALUE_OF_C
+:get(NOT_FOUND_A,NOT_FOUND_B,FOUND_C) -> "VALUE_OF_C"
+
+# e.g: Fallback variable
+#
+# assuming:
+## there is NOT a env variable called NOT_FOUND_A
+## there is a env variable called FOUND_C=VALUE_OF_C
+:get(NOT_FOUND_A:im the fallback) -> "im the fallback"
+:get(FOUND_C:im the fallback) -> "VALUE_OF_C"
+```
+
+##### lower
+> transforms the argument to lowercase
+
+`:lower` examples -
+```bash
+":lower(HELLO)" -> "hello"
+:echo(:lower(HELLO)) -> "hello"
+```
+
+##### run
+> runs the argument against the terminal and proxies the result
+
+`:run` examples -
+```bash
+
+# e.g: Run command
+#
+# assuming:
+# there is a `hello` function in `commands.ts`
+# the `hello` function is declared as const hello = (arg = 'fallback') => `Hello, ${arg}!`
+":run(hello)" -> "Hello, fallback!"
+":run(hello argument)" -> "Hello, argument!"
+
+# e.g: Run command within transformer
+#
+# assuming:
+# there is a `hello` function in `commands.ts`
+# the `hello` function is declared as const hello = (arg = 'fallback') => `Hello, ${arg}!`
+":lower(:run(hello))" -> "hello, fallback!"
+":lower(:run(hello)) :upper(:run(hello))" -> "hello, fallback! HELLO, FALLBACK!"
+```
+
+##### snake
+> transforms the argument to snakecase
+
+`:snake` examples -
+```bash
+":snake(HELLO WORLD)" -> "hello_world"
+```
+
+##### title
+> transforms the argument to [titlecase](https://en.wikipedia.org/wiki/Title_case)
+
+`:title` examples -
+```bash
+":title(hello world)" -> "Hello World"
+":title(hello_world)" -> "Hello World"
+```
+
+##### split
+> splits the provided argument, accepts the index or uses `0`, accepts the [delimiter](https://en.wikipedia.org/wiki/Delimiter) or uses `,`
+
+`:split` examples -
+```bash
+":split(hello,world)" -> "hello"
+":split(hello,world:1)" -> "world"
+":split(hello@world:1:@)" -> "world"
+
+:echo(":split(":get(xx,PATH)":0:;)") -> "FIRST_RESULT_IN_PATH"
+```
+
+##### upper
+> transforms the argument to uppercase
+
+`:title` examples -
+```bash
+":uppercase(hello world)" -> "HELLO WORLD"
+```
+
 ### Secrets
 
 Environment variables are a bit unsafe. You set these and leave the host machine all the ability to read and share these. Wonderful for services and backends, not the safest for personal usage.
