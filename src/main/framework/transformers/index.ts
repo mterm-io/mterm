@@ -27,41 +27,39 @@ export async function process(context: ExecuteContext, input: string): Promise<s
 
     // Check if the operation exists in the transformerMap
     if (operation in TRANSFORMERS) {
-      // Process the arguments recursively
-      const processedArgString = await process(context, argString)
-
-      // Split the processed argument string into individual arguments
-      const args = splitArgs(processedArgString)
+      // Split the argument string into individual arguments
+      const args = splitArgs(argString)
 
       // Resolve nested transformers
       const resolvedArgs = await Promise.all(
         args.map(async (arg) => {
           if (TRANSFORMER_REGEX.test(arg)) {
-            const R = await process(context, arg)
-            console.log(R, 'RUN ME')
-            return R
+            return await process(context, arg)
           }
           return arg
         })
       )
 
-      // Call the corresponding transformer function with the resolved arguments
+      // Join the resolved arguments back into a string
+      const resolvedArgString = resolvedArgs.join(':')
+
+      // Process the resolved argument string
+      const processedArgString = await process(context, resolvedArgString)
+
+      // Call the corresponding transformer function with the processed arguments
       const transformerFn = TRANSFORMERS[operation]
       let replacementString = ''
 
-      if (resolvedArgs.length === 0) {
+      const argList = splitArgsForCommand(processedArgString)
+
+      if (argList.length === 0) {
         replacementString = await transformerFn(context)
-      } else if (resolvedArgs.length === 1) {
-        replacementString = await transformerFn(context, resolvedArgs[0])
-      } else if (resolvedArgs.length === 2) {
-        replacementString = await transformerFn(context, resolvedArgs[0], resolvedArgs[1])
-      } else if (resolvedArgs.length === 3) {
-        replacementString = await transformerFn(
-          context,
-          resolvedArgs[0],
-          resolvedArgs[1],
-          resolvedArgs[2]
-        )
+      } else if (argList.length === 1) {
+        replacementString = await transformerFn(context, argList[0])
+      } else if (argList.length === 2) {
+        replacementString = await transformerFn(context, argList[0], argList[1])
+      } else if (argList.length === 3) {
+        replacementString = await transformerFn(context, argList[0], argList[1], argList[2])
       } else {
         // Handle cases with more than 3 arguments if needed
         // ...
@@ -126,6 +124,44 @@ function splitArgs(argString: string): string[] {
   }
 
   return args
+}
+
+// here we ignore arguments wrapped in quotes for consideration in split
+function splitArgsForCommand(str: string): string[] {
+  const result: string[] = []
+  let currentBlock = ''
+  let inQuotes = false
+
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i]
+
+    if (char === '"') {
+      if (!inQuotes) {
+        if (currentBlock !== '') {
+          result.push(currentBlock)
+          currentBlock = ''
+        }
+        inQuotes = true
+      } else {
+        inQuotes = false
+        result.push(currentBlock)
+        currentBlock = ''
+      }
+    } else if (char === ':' && !inQuotes) {
+      if (currentBlock !== '') {
+        result.push(currentBlock)
+        currentBlock = ''
+      }
+    } else {
+      currentBlock += char
+    }
+  }
+
+  if (currentBlock !== '') {
+    result.push(currentBlock)
+  }
+
+  return result
 }
 
 export async function transform(context: ExecuteContext): Promise<string> {
