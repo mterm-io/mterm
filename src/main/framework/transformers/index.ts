@@ -1,10 +1,12 @@
 import { ExecuteContext } from '../execute-context'
 
 import { get } from './get'
+import { split } from './split'
 
 export const TRANSFORMER_REGEX = /:(\w+)(?:\(([^()]*(?:\([^()]*\)[^()]*)*)\))?/g
 export const TRANSFORMERS = {
-  get
+  get,
+  split
 }
 
 export type transformer = (context: ExecuteContext, ...args: string[]) => Promise<string> | string
@@ -37,9 +39,17 @@ export async function process(context: ExecuteContext, input: string): Promise<s
         replacementString = await transformerFn(context, args[0])
       } else if (args.length === 2) {
         replacementString = await transformerFn(context, args[0], args[1])
+      } else if (args.length === 3) {
+        replacementString = await transformerFn(context, args[0], args[1], args[2])
       } else {
         // Handle cases with more than 2 arguments if needed
         // ...
+        // the problem here is: we can't (...args) or will get an infinite loop. transformers can only be so magical eh?
+      }
+
+      if (replacementString === undefined) {
+        // Handle the case when the transformer function returns undefined
+        replacementString = ''
       }
 
       result =
