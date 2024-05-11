@@ -11,6 +11,17 @@ export class Theme {
     public defaultThemeLocation: string
   ) {}
 
+  getProfileThemeLocation(profileKey: string): string {
+    const profiles = this.workspace.settings.get<ProfileMap>('profiles', DEFAULT_PROFILES)
+    if (profileKey === 'default') {
+      profileKey = this.workspace.settings.get<string>('defaultProfile', DEFAULT_PROFILE)
+    }
+    let theme = profiles[profileKey]?.theme
+    if (theme) {
+      theme = this.workspace.resolve(theme)
+    }
+    return theme
+  }
   async load(): Promise<void> {
     this.themes.clear()
     //get profiles

@@ -17,6 +17,7 @@ import Edit from './system-commands/edit'
 import Reset from './system-commands/reset'
 import Commands from './system-commands/commands'
 import Restart from './system-commands/restart'
+import Theme from './system-commands/theme'
 
 const systemCommands: Array<{
   command: string
@@ -37,7 +38,8 @@ const systemCommands: Array<{
   Edit,
   Reset,
   Commands,
-  Restart
+  Restart,
+  Theme
 ]
 export async function execute(context: ExecuteContext): Promise<void | boolean> {
   // check for system commands
