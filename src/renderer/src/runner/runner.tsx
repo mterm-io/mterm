@@ -266,6 +266,23 @@ export default function Runner(): ReactElement {
     reloadRuntimesFromBackend().catch((error) => console.error(error))
   }, [])
 
+  useEffect(() => {
+    let styleSheet = document.getElementById('theme')
+    if (!styleSheet) {
+      styleSheet = document.createElement('style')
+      styleSheet.setAttribute('id', 'theme')
+      document.head.appendChild(styleSheet)
+    }
+
+    window.electron.ipcRenderer
+      .invoke('runner.theme', runtimeList.find((o) => o.target)?.profile)
+      .then((theme) => {
+        styleSheet.innerText = theme
+      })
+
+    return () => {}
+  }, [runtimeList])
+
   if (!runtime) {
     return <p>Loading</p>
   }

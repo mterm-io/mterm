@@ -203,6 +203,10 @@ export function attach({ app, workspace }: BootstrapContext): void {
     )
   })
 
+  ipcMain.handle('runner.theme', async (_, profile): Promise<string> => {
+    return workspace.theme.get(profile)
+  })
+
   ipcMain.handle('runtime.kill', async (_, commandId, runtimeId): Promise<boolean> => {
     const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
     if (!runtime) {

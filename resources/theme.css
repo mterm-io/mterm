@@ -1,0 +1,129 @@
+/**
+ * Override themes for your terminal here
+ * See default here: https://github.com/mterm-io/mterm/blob/main/src/renderer/src/assets/runner.css
+ */
+
+/*
+ * prepend .runner-container__commander_mode
+ * to apply styles only for commander mode
+ */
+.runner-container {
+  background: rgba(27, 27, 31, 0.89);
+  color: white;
+}
+.runner-container__commander_mode .runner-result {
+}
+
+.runner-input-container {
+}
+
+.runner-input {
+}
+
+.runner-input-field {
+}
+
+.runner-input-field {
+}
+.runner-input-field:focus {
+}
+
+.runner-container {
+}
+
+.runner-tabs {
+}
+
+.runner-tabs-title {
+}
+
+.runner-tabs-title-active {
+}
+.runner-spacer {
+}
+
+.runner-context {
+}
+
+.runner-main {
+}
+
+.runner-editor {
+}
+
+
+.runner-editor-header {
+}
+
+.runner-editor-header-result {
+}
+.runner-editor-header-result::-webkit-scrollbar {
+}
+.runner-editor-header-result::-webkit-scrollbar-corner {
+}
+.runner-editor-header-result::-webkit-scrollbar-thumb {
+}
+.runner-editor-header-result pre {
+}
+.runner-context-folder {
+}
+
+.runner-history {
+}
+
+.runner-history::-webkit-scrollbar {
+}
+.runner-history::-webkit-scrollbar-corner {
+}
+.runner-history::-webkit-scrollbar-thumb {
+}
+.runner-history-item {
+}
+.runner-history-item:hover {
+}
+.runner-history-selected {
+}
+.runner-history-running {
+}
+.runner-history-complete {
+}
+.runner-history-aborted {
+}
+.runner-history-error {
+}
+
+.runner-history::-webkit-scrollbar-track {
+}
+
+.runner-result-error {
+}
+.runner-result {
+}
+
+.space {
+}
+.runner-info {
+}
+.toggle-button-slider {
+}
+.toggle-button-circle {
+}
+.toggle-button {
+}
+.toggle-button-spacer {
+}
+.toggle-button.toggle-button-on .toggle-button-slider {
+}
+
+.runner-result::-webkit-scrollbar {
+}
+.runner-result::-webkit-scrollbar-corner {
+}
+.runner-result::-webkit-scrollbar-thumb {
+}
+.contextmenu.tab-context-menu {
+}
+.tab-context-menu > .contextmenu__item {
+}
+.tab-context-menu > .contextmenu__item:hover {
+}

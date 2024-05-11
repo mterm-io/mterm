@@ -12,7 +12,13 @@ html,body {
   width: 100%;
   height: 100%;
 }
+
+
 body {
+  background: rgba(27, 27, 31, 0);
+}
+
+.runner-container {
   background: rgba(27, 27, 31, 0.89);
   color: white;
 }
