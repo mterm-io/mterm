@@ -92,7 +92,7 @@ describe('constants', () => {
       screen: 'PRIMARY',
       x: 'SCREEN:-.5',
       y: 'SCREEN:-.5',
-      w: 720,
+      w: 1020,
       h: 500
     })
   })
