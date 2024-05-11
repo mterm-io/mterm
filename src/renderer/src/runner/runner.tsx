@@ -328,7 +328,6 @@ export default function Runner(): ReactElement {
             value={result.edit.content}
             extensions={[color, hyperLink, javascript()]}
             theme={vscodeDark}
-            height="100%"
             onChange={(value) =>
               onEditFileChange(runtime.id, historicalExecution ? historicalExecution.id : '', value)
             }
@@ -396,53 +395,56 @@ export default function Runner(): ReactElement {
           </div>
         </div>
         <div className="runner-main">
-          <div className="runner-input-container">
-            <div className="runner-input">
-              <input
-                ref={inputRef}
-                autoFocus
-                className="runner-input-field"
-                placeholder=">"
-                onChange={handlePromptChange}
-                onKeyDown={handleKeyDown}
-                value={historicalExecution ? historicalExecution.prompt : runtime.prompt}
-              />
+          <div className="runner-main-left-side">
+            <div className="runner-input-container">
+              <div className="runner-input">
+                <input
+                  ref={inputRef}
+                  autoFocus
+                  className="runner-input-field"
+                  placeholder=">"
+                  onChange={handlePromptChange}
+                  onKeyDown={handleKeyDown}
+                  value={historicalExecution ? historicalExecution.prompt : runtime.prompt}
+                />
+              </div>
+            </div>
+            <div className="runner-history">
+              {runtime.history.map((command, index) => (
+                <div
+                  key={index}
+                  ref={historyRefs.current[index]}
+                  className={`runner-history-item ${historyIndex === index ? 'runner-history-selected' : ''} ${
+                    command.complete
+                      ? command.aborted
+                        ? 'runner-history-aborted'
+                        : 'runner-history-complete'
+                      : 'runner-history-running'
+                  } ${command.error ? 'runner-history-error' : ''}`}
+                  onClick={() => onHistoryItemClicked(index)}
+                >
+                  {command.prompt}
+                  {command.result?.edit?.modified ? ' *' : ''}
+                </div>
+              ))}
             </div>
           </div>
-          <div className={`runner-result ${result.code !== 0 ? '' : ''}`}>{output}</div>
-        </div>
-        <div className="runner-context">
-          <div className="runner-history">
-            {runtime.history.map((command, index) => (
+          <div className="runner-window-spacer"></div>
+          <div className="runner-main-right-side">
+            <div className={`runner-result ${result.code !== 0 ? '' : ''}`}>{output}</div>
+            <div className="runner-info">
               <div
-                key={index}
-                ref={historyRefs.current[index]}
-                className={`runner-history-item ${historyIndex === index ? 'runner-history-selected' : ''} ${
-                  command.complete
-                    ? command.aborted
-                      ? 'runner-history-aborted'
-                      : 'runner-history-complete'
-                    : 'runner-history-running'
-                } ${command.error ? 'runner-history-error' : ''}`}
-                onClick={() => onHistoryItemClicked(index)}
+                onClick={() => setEditMode((rawMode) => !rawMode)}
+                className={`toggle-button ${editMode ? 'toggle-button-on' : ''}`}
               >
-                {command.prompt}
-                {command.result?.edit?.modified ? ' *' : ''}
+                <div className="toggle-button-slider">
+                  <div className="toggle-button-spacer"></div>
+                  <div className="toggle-button-circle"></div>
+                </div>
+                {'<\\>'}
               </div>
-            ))}
-          </div>
-          <div className="runner-info">
-            <div
-              onClick={() => setEditMode((rawMode) => !rawMode)}
-              className={`toggle-button ${editMode ? 'toggle-button-on' : ''}`}
-            >
-              <div className="toggle-button-slider">
-                <div className="toggle-button-spacer"></div>
-                <div className="toggle-button-circle"></div>
-              </div>
-              {'<\\>'}
+              <div className="runner-context-folder">{runtime.folder}</div>
             </div>
-            <div className="runner-context-folder">{runtime.folder}</div>
           </div>
         </div>
       </div>

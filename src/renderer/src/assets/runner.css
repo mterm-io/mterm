@@ -60,7 +60,7 @@ body {
   height: 100%;
   width: 100%;
   display: grid;
-  grid-template-rows: 50px auto 50px;
+  grid-template-rows: 50px auto;
 }
 
 .runner-tabs {
@@ -101,30 +101,70 @@ body {
   cursor: pointer;
 }
 
-.runner-context {
+.runner-main-right-side {
   display: grid;
   align-items: center;
-  cursor: pointer;
-  padding-right: 20px;
+  grid-auto-flow: row;
+  grid-template-rows: auto 50px;
+  height: 100%;
+  overflow: auto;
+}
+.runner-info {
+  display: grid;
   grid-auto-flow: column;
   font-size: 70%;
-  grid-template-columns: auto 50%;
+  width: 100%;
+}
+.runner-result {
+  font-size: 12px;
+  display: grid;
+  align-items: center;
+}
+
+.runner-container__commander_mode .runner-result {
+  font-size: 16px;
+}
+
+.runner-main-left-side {
+   display: grid;
+   align-items: center;
+   padding-right: 20px;
+   grid-auto-flow: row;
+   grid-template-rows: auto 50px 10px;
+   height: 100%;
+ }
+
+.runner-history {
+  overflow-y: auto;
+  max-height: 50px;
+  font-size: 70%;
+}
+
+.runner-container__commander_mode .runner-main-left-side {
+  grid-template-rows: auto 100px 20px;
+}
+.runner-container__commander_mode .runner-history {
+  max-height: 100px;
 }
 
 .runner-main {
   display: grid;
   align-items: center;
   grid-auto-flow: column;
-  grid-template-columns: auto 50%;
+  grid-template-columns: 50% 5px auto;
   overflow: hidden
 }
 
 .runner-editor {
   display: grid;
   grid-auto-flow: row;
-  grid-template-rows: auto auto 10px;
+  max-height: 450px;
+  grid-template-rows: 40px auto 10px;
 }
-
+.runner-editor-widget {
+  max-height: 450px;
+  overflow: auto;
+}
 
 .runner-editor-header {
   display: grid;
@@ -160,11 +200,7 @@ body {
   text-align: right;
 }
 
-.runner-history {
-  overflow-y: auto;
-  max-height: 50px;
-  margin-bottom: 20px;
-}
+
 
 .runner-history::-webkit-scrollbar {
   width: 15px;
@@ -224,24 +260,15 @@ body {
 .runner-result-error {
   color: #ff6767
 }
-.runner-result {
-  font-size: 12px;
-  height: 100%;
-  overflow: auto;
-  display: grid;
-  align-items: center;
-}
-.runner-container__commander_mode .runner-result {
-  font-size: 16px;
-}
+
 .space {
   display: inline-block;
   width: 10px
 }
-.runner-info {
-  display: grid;
-  grid-auto-flow: column;
-  margin-left: 10px
+
+
+.runner-editor-header-path {
+  padding-left: 10px;
 }
 .toggle-button-slider {
   width: 30px;
@@ -301,5 +328,14 @@ body {
   padding: 2px 9px;
 }
 .tab-context-menu > .contextmenu__item:hover {
-  color: #2248a9;
+  color: #464545;
+}
+
+.runner-window-spacer {
+  background: #1e1e1e;
+  height: 100%;
+}
+
+.runner-window-spacer:hover {
+  cursor: col-resize;
 }
