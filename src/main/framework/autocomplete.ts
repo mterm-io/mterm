@@ -93,7 +93,7 @@ async function getPathMatches(
       const argNew = [...args]
       argNew[focusedBlock] = pathMatch
 
-      const { ext, name, dir } = parse(pathMatch)
+      const { ext, name } = parse(pathMatch)
       const prompt = argNew.join(' ')
 
       // Find all occurrences of pathMatch in the prompt
