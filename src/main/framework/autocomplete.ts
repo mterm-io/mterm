@@ -1,19 +1,306 @@
 import { Workspace } from './workspace'
 import { readdir } from 'fs-extra'
-import { join, parse } from 'path'
+import { isAbsolute, join, parse } from 'path'
+import { Runtime } from './runtime'
+import { HistoricalExecution } from './history'
 
-export interface HostProgram {
+export interface PathParts {
   path: string
   ext: string
   name: string
   base: string
 }
+
+export enum SuggestionEntryType {
+  HISTORY,
+  PATH,
+  PROGRAM
+}
+export interface SuggestionEntry {
+  type: SuggestionEntryType
+  prompt: string
+  parts: PathParts
+  cursor: number
+}
+export interface Suggestion {
+  prompt?: SuggestionEntry
+  list: SuggestionEntry[]
+}
+export function suggestion(
+  type: SuggestionEntryType,
+  prompt: string,
+  parts: PathParts
+): SuggestionEntry {
+  return {
+    type,
+    prompt,
+    parts,
+    cursor: -1 // end of line
+  }
+}
+
+export function toParts(path: string): PathParts {
+  const args = splitArgs(path)
+
+  const program = args[0]
+
+  const { name, ext, base } = parse(removeQuotesIfSurrounded(program))
+
+  return {
+    path,
+    name,
+    ext,
+    base
+  }
+}
+export function historyToSuggestion(history: HistoricalExecution): SuggestionEntry {
+  return suggestion(SuggestionEntryType.HISTORY, history.prompt, toParts(history.prompt))
+}
+
+export function partsToSuggestion(parts: PathParts): SuggestionEntry {
+  return suggestion(SuggestionEntryType.PROGRAM, parts.base, parts)
+}
+
+function removeQuotesIfSurrounded(input: string): string {
+  if (input.length >= 2 && input.startsWith('"') && input.endsWith('"')) {
+    return input.slice(1, -1)
+  }
+  return input
+}
+
+// expand path matches
+async function getPathMatches(
+  cursor: number,
+  args: string[],
+  focusedBlock: number,
+  runtime: Runtime
+) {
+  const argToExpand = args[focusedBlock]
+  const { dir, base } = parse(argToExpand)
+
+  function toSuggestionList(matches: string[]): SuggestionEntry[] {
+    return matches.map((pathMatch) => {
+      const argNew = [...args]
+      argNew[focusedBlock] = pathMatch
+
+      const { ext, name, base } = parse(pathMatch)
+      const prompt = argNew.join(' ')
+
+      // Find all occurrences of pathMatch in the prompt
+      const occurrences: number[] = []
+      let index = prompt.indexOf(pathMatch)
+      while (index !== -1) {
+        occurrences.push(index)
+        index = prompt.indexOf(pathMatch, index + 1)
+      }
+
+      // Find the occurrence nearest to the provided cursor
+      let computedCursor = prompt.length
+      for (const occurrence of occurrences) {
+        if (Math.abs(occurrence - cursor) < Math.abs(computedCursor - cursor)) {
+          computedCursor = occurrence + pathMatch.length
+        }
+      }
+
+      return {
+        type: SuggestionEntryType.PATH,
+        prompt,
+        cursor: computedCursor,
+        parts: {
+          ext,
+          name,
+          base,
+          path: pathMatch
+        }
+      }
+    })
+  }
+
+  const directoryToScan = isAbsolute(argToExpand) ? dir : join(runtime.folder, dir)
+
+  // travel up the file tree
+  try {
+    const paths = await readdir(directoryToScan)
+    const matches =
+      paths?.filter((child) => child.startsWith(base))?.map((child) => join(dir, child)) || []
+
+    return toSuggestionList(matches)
+  } catch (e) {
+    // user provided a bogus path maybe, or not readable
+    return []
+  }
+}
+/**
+ * Determines the index of the block where the cursor is located within the input string.
+ *
+ * @param {string} input - The input string to be analyzed.
+ * @param {number} cursor - The position of the cursor within the input string.
+ * @returns {number} The index of the block where the cursor is located.
+ *
+ * @description
+ * This function takes an input string and a cursor position as parameters and returns the index
+ * of the block where the cursor is located. The input string is split into blocks based on spaces,
+ * but spaces within quoted strings are preserved as part of the block.
+ *
+ * The function uses a regular expression to match and identify the blocks within the input string.
+ * It iterates over each matched block and checks if the cursor position falls within the start and
+ * end positions of the block. If the cursor is found within a block, the function returns the index
+ * of that block.
+ *
+ * If the cursor position is at the end of the input string, the function considers it to be within
+ * the last block and returns the index of the last block.
+ *
+ * If the cursor position is not found within any block, the function returns -1.
+ *
+ * @example
+ * // Returns 0
+ * getCursorBlock('"C:/Program filx" node --v', 15);
+ *
+ * @example
+ * // Returns 0
+ * getCursorBlock('"C:/Programx file" node --v', 11);
+ *
+ * @example
+ * // Returns 0
+ * getCursorBlock('"Cx:/Program fil" node --v', 2);
+ *
+ * @example
+ * // Returns 1
+ * getCursorBlock('"C:/Program files" nodex --v', 22);
+ *
+ * @example
+ * // Returns 2
+ * getCursorBlock('"C:/Program filx" node --vx', 26);
+ */
+function getCursorBlock(input: string, cursor: number): number {
+  const regex = /[^\s"]+|"([^"]*)"/gi
+  let match: RegExpExecArray | null
+  let blockIndex = 0
+
+  while ((match = regex.exec(input)) !== null) {
+    const blockStart = match.index
+    const blockEnd = blockStart + match[0].length
+
+    if (cursor >= blockStart && cursor <= blockEnd) {
+      return blockIndex
+    }
+
+    blockIndex++
+  }
+
+  // If the cursor is at the end of the input string
+  if (cursor === input.length) {
+    return blockIndex - 1
+  }
+
+  return -1 // Cursor position not found within any block
+}
+
+/**
+ * Splits a string into an array of substrings based on spaces, preserving spaces within quoted strings.
+ *
+ * @param {string} input - The input string to be split.
+ * @returns {string[]} An array of substrings split from the input string.
+ *
+ * @description
+ * This function takes an input string and splits it into an array of substrings based on spaces.
+ * However, it treats spaces within quoted strings as part of the substring and preserves them.
+ *
+ * The function uses a regular expression to match and identify the substrings within the input string.
+ * The regular expression has two parts:
+ * - `[^\s"]+`: Matches one or more characters that are not whitespace or double quotes.
+ * - `"([^"]*)"`: Matches a double-quoted string (excluding the quotes themselves).
+ *
+ * The function iterates over the input string using the `regex.exec()` method to find all the matches.
+ * For each match, it checks if the captured group (the content within quotes) exists. If it does, the
+ * function pushes the captured group surrounded by quotes to the `matches` array. Otherwise, it pushes
+ * the entire matched substring.
+ *
+ * After processing all the matches, the function returns the `matches` array containing the split substrings.
+ *
+ * @example
+ * const input = '"C:/Program files" node --v';
+ * const result = splitArgs(input);
+ * console.log(result);
+ * // Output: [""C:/Program files"", "node", "--v"]
+ *
+ * @example
+ * const input = 'git commit -m "Initial commit"';
+ * const result = splitArgs(input);
+ * console.log(result);
+ * // Output: ["git", "commit", "-m", ""Initial commit""]
+ *
+ * @example
+ * const input = 'echo "Hello, world!" | grep "Hello"';
+ * const result = splitArgs(input);
+ * console.log(result);
+ * // Output: ["echo", ""Hello, world!"", "|", "grep", ""Hello""]
+ */
+function splitArgs(input: string): string[] {
+  const regex = /[^\s"]+|"([^"]*)"/gi
+  const matches: string[] = []
+  let match: RegExpExecArray | null
+
+  while ((match = regex.exec(input)) !== null) {
+    matches.push(match[1] ? `"${match[1]}"` : match[0])
+  }
+
+  return matches
+}
+
 export class Autocomplete {
-  private programList: HostProgram[] = []
+  private programList: PathParts[] = []
   private solving: boolean = false
   constructor(private workspace: Workspace) {}
 
-  async complete() {}
+  async complete(prompt: string, cursor: number, runtime: Runtime): Promise<Suggestion> {
+    if (prompt.trim().length === 0) {
+      return {
+        prompt: undefined,
+        list: []
+      }
+    }
+    const historyMatches = this.workspace.history.priorExecution.filter((history) =>
+      history.prompt.startsWith(prompt)
+    )
+
+    historyMatches.push(
+      ...this.workspace.history.newExecution.filter((history) => history.prompt.startsWith(prompt))
+    )
+
+    const programMatches = this.programList.filter(
+      (program) => program.name.startsWith(prompt) || program.path.startsWith(prompt)
+    )
+
+    const args = splitArgs(prompt)
+
+    // this is the part of the prompt that user has the focus on right now
+    const focusedBlock = getCursorBlock(prompt, cursor)
+
+    const pathMatches = await getPathMatches(cursor, args, focusedBlock, runtime)
+
+    const list: SuggestionEntry[] = []
+
+    list.push(...programMatches.map(partsToSuggestion))
+    list.push(...historyMatches.map(historyToSuggestion))
+    list.push(...pathMatches)
+
+    const suggestion: Suggestion = {
+      prompt: undefined,
+      list
+    }
+
+    // historical executions always take presidency
+    if (historyMatches.length !== 0) {
+      suggestion.prompt = historyToSuggestion(historyMatches[0])
+    } else if (programMatches.length !== 0) {
+      suggestion.prompt = partsToSuggestion(programMatches[0])
+    } else if (pathMatches.length !== 0) {
+      suggestion.prompt = pathMatches[0]
+    }
+
+    return suggestion
+  }
 
   async solveFolder(pathFolder: string, extensions: string[]): Promise<void> {
     try {
