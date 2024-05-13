@@ -303,3 +303,96 @@ body {
 .tab-context-menu > .contextmenu__item:hover {
   color: #2248a9;
 }
+
+.runner-ac {
+  position: absolute;
+  left: 50%;
+  background: rgba(56, 54, 54, 0.38);
+  display: grid;
+  overflow: auto;
+  box-shadow: 10px 5px 5px #212121;
+  padding-right: 5px
+}
+
+.runner-ac-option {
+  padding-left: 10px;
+}
+
+.runner-input {
+  position: relative;
+}
+
+.runner-ac::-webkit-scrollbar {
+  width: 15px;
+}
+.runner-ac::-webkit-scrollbar-corner {
+  background: rgba(0,0,0,0);
+}
+.runner-ac::-webkit-scrollbar-thumb {
+  background-color: #294794;
+  border-radius: 6px;
+  border: 4px solid rgba(0,0,0,0);
+  background-clip: content-box;
+  min-width: 32px;
+  min-height: 32px;
+}
+.runner-ac-option {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  overflow: hidden;
+}
+.runner-ac-prompt {
+  overflow: hidden;
+  white-space: nowrap;
+  display: grid;
+  align-content: center;
+}
+.runner-ac-prompt-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 80%
+}
+.runner-ac-badge {
+  font-size: 60%;
+  display: grid;
+  align-content: center;
+  text-transform: uppercase;
+  grid-auto-flow: column;
+}
+
+.runner-ac-badge-text {
+  padding: 2px 8px;
+  border-radius: 50px;
+}
+
+
+.runner-ac-option-system .runner-ac-badge-text {
+  background-color: #2b8fb3;
+}
+
+.runner-ac-option-command .runner-ac-badge-text {
+  background-color: #6045da;
+}
+
+.runner-ac-option-program .runner-ac-badge-text {
+  background-color: #c09832;
+}
+
+.runner-ac-option-path .runner-ac-badge-text {
+  background-color: #d72c6b;
+}
+
+.runner-ac-option-history .runner-ac-badge-text {
+  background-color: #23682d;
+}
+
+.runner-ac-badge-text {
+  margin-right: 5px;
+}
+.runner-ac-badge-text.runner-ac-badge-text-tab {
+  background-color: #1a1a1a;
+}
+
+.runner-ac-option-selected {
+  background: rgba(41, 71, 148, 0.18);
+}

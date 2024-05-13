@@ -19,11 +19,12 @@ import Commands from './system-commands/commands'
 import Restart from './system-commands/restart'
 import Theme from './system-commands/theme'
 
-const systemCommands: Array<{
+export interface SystemCommand {
   command: string
   alias?: string[]
   task: (context: ExecuteContext, ...args: string[]) => Promise<void> | void
-}> = [
+}
+export const systemCommands: Array<SystemCommand> = [
   Reload,
   Exit,
   History,

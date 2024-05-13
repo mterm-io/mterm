@@ -6,12 +6,19 @@ import { vscodeDark } from '@uiw/codemirror-theme-vscode'
 import { color } from '@uiw/codemirror-extensions-color'
 import { hyperLink } from '@uiw/codemirror-extensions-hyper-link'
 import { javascript } from '@codemirror/lang-javascript'
+import RunnerAC from './runner-ac'
+import { Suggestion } from './autocomplete'
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
   const [pendingTitles, setPendingTitles] = useState<object>({})
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
   const [editMode, setEditMode] = useState<boolean>(false)
+  const [suggestion, setSuggestion] = useState<Suggestion>({
+    list: []
+  })
+  const [suggestionSelection, setSuggestionSelection] = useState<number>(0)
+
   const inputRef = useRef<HTMLInputElement>(null)
   const historyRefs = useRef<Array<RefObject<HTMLDivElement>>>([])
 
@@ -55,6 +62,10 @@ export default function Runner(): ReactElement {
     )
 
     applyHistoryIndex(-1)
+    setSuggestion({
+      list: []
+    })
+
     await reloadRuntimesFromBackend()
 
     // renderer -> "backend"
@@ -74,15 +85,25 @@ export default function Runner(): ReactElement {
 
     await reloadRuntimesFromBackend()
   }
+
+  const changePrompt = (prompt: string): void => {
+    setPrompt(prompt)
+
+    window.electron.ipcRenderer.send('runtime.prompt', prompt)
+
+    const cursor = inputRef?.current?.selectionEnd
+    window.electron.ipcRenderer.invoke('runtime.complete', prompt, cursor ?? -1).then((r) => {
+      setSuggestion(r)
+      setSuggestionSelection(0)
+    })
+  }
   const handlePromptChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
     if (historyIndex !== -1) {
       applyHistoryIndex(-1)
     }
 
-    setPrompt(value)
-
-    window.electron.ipcRenderer.send('runtime.prompt', value)
+    changePrompt(value)
   }
 
   const handleTitleChange = (id: string, event: ChangeEvent<HTMLInputElement>): void => {
@@ -138,12 +159,57 @@ export default function Runner(): ReactElement {
     if (e.code === 'ArrowDown') {
       if (runtime && historyIndex > -1) {
         applyHistoryIndex(historyIndex - 1)
+      } else if (historyIndex === -1) {
+        if (suggestionSelection < suggestion.list.length - 1) {
+          setSuggestionSelection(suggestionSelection + 1)
+        }
+      }
+    }
+
+    if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+      let cursor = inputRef?.current?.selectionEnd ?? -1
+
+      console.log(cursor, runtime?.prompt.length)
+
+      // the selectionEnd hasn't updated yet. add and go
+      if (e.code === 'ArrowLeft') {
+        cursor--
+      } else if (e.code === 'ArrowRight') {
+        cursor++
+      }
+
+      if (cursor <= 0) {
+        cursor = 0
+      } else if (cursor >= (runtime?.prompt?.length ?? 0)) {
+        cursor = runtime?.prompt?.length ?? 0
+      }
+
+      window.electron.ipcRenderer
+        .invoke('runtime.complete', runtime?.prompt, cursor ?? -1)
+        .then((r) => {
+          setSuggestion(r)
+          setSuggestionSelection(0)
+        })
+    }
+
+    if (e.code === 'Tab') {
+      e.preventDefault()
+      e.stopPropagation()
+
+      const suggestionEntry = suggestion.list[suggestionSelection]
+      if (suggestionEntry) {
+        changePrompt(suggestionEntry.prompt)
       }
     }
 
     if (e.code === 'ArrowUp') {
-      if (runtime && historyIndex < runtime.history.length - 1) {
+      if (suggestionSelection > 0) {
+        setSuggestionSelection(suggestionSelection - 1)
+      } else if (runtime && historyIndex < runtime.history.length - 1) {
         applyHistoryIndex(historyIndex + 1)
+        setSuggestion({
+          list: []
+        })
       } else {
         window.electron.ipcRenderer
           .invoke('history.try-scroll-next', runtime?.id)
@@ -407,6 +473,7 @@ export default function Runner(): ReactElement {
                 onKeyDown={handleKeyDown}
                 value={historicalExecution ? historicalExecution.prompt : runtime.prompt}
               />
+              <RunnerAC suggestion={suggestion} selection={suggestionSelection} />
             </div>
           </div>
           <div className={`runner-result ${result.code !== 0 ? '' : ''}`}>{output}</div>
