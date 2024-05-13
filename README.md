@@ -25,6 +25,13 @@ this means commands such as `ls`, `cd` or program commands such as `node -v` or 
 
 Head over to the [release page](https://github.com/mterm-io/mterm/releases/latest) to find the binary for your system type. mterm is evergreen and updates are automatically installed on your system as hey get released. Run `:v` to see your current mterm version.
 
+### Autocomplete
+
+Start typing, mterm will pick up your available: programs, [system commands](#system), [custom commands](#commands) and history
+
+Finally, hit tab to finish the completion -
+![image](./docs/assets/autocomplete.gif)
+
 ### Command Mode
 
 By default, **mterm** opens in command mode (you can change this in [settings](#settings)). A couple of notes about command mode -

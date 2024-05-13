@@ -93,7 +93,7 @@ async function getPathMatches(
       const argNew = [...args]
       argNew[focusedBlock] = pathMatch
 
-      const { ext, name, base } = parse(pathMatch)
+      const { ext, name, dir } = parse(pathMatch)
       const prompt = argNew.join(' ')
 
       // Find all occurrences of pathMatch in the prompt
@@ -132,6 +132,7 @@ async function getPathMatches(
   // travel up the file tree
   try {
     const paths = await readdir(directoryToScan)
+
     const matches =
       paths
         ?.filter((child) => child.startsWith(base))
