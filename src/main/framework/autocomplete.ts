@@ -58,7 +58,7 @@ export function historyToSuggestion(history: HistoricalExecution): SuggestionEnt
 }
 
 export function partsToSuggestion(parts: PathParts): SuggestionEntry {
-  return suggestion(SuggestionEntryType.PROGRAM, parts.base, parts)
+  return suggestion(SuggestionEntryType.PROGRAM, parts.name, parts)
 }
 
 function removeQuotesIfSurrounded(input: string): string {
@@ -122,7 +122,15 @@ async function getPathMatches(
   try {
     const paths = await readdir(directoryToScan)
     const matches =
-      paths?.filter((child) => child.startsWith(base))?.map((child) => join(dir, child)) || []
+      paths
+        ?.filter((child) => child.startsWith(base))
+        ?.map((child) => {
+          let prefix = ''
+          if (prefix === '' || prefix === '.') {
+            prefix = './'
+          }
+          return prefix + join(dir, child).replaceAll('\\', '/')
+        }) || []
 
     return toSuggestionList(matches)
   } catch (e) {
