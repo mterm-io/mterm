@@ -15,9 +15,10 @@ export default function Runner(): ReactElement {
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
   const [editMode, setEditMode] = useState<boolean>(false)
   const [suggestion, setSuggestion] = useState<Suggestion>({
-    prompt: undefined,
     list: []
   })
+  const [suggestionSelection, setSuggestionSelection] = useState<number>(0)
+
   const inputRef = useRef<HTMLInputElement>(null)
   const historyRefs = useRef<Array<RefObject<HTMLDivElement>>>([])
 
@@ -85,20 +86,24 @@ export default function Runner(): ReactElement {
     await reloadRuntimesFromBackend()
   }
 
+  const changePrompt = (prompt: string): void => {
+    setPrompt(prompt)
+
+    window.electron.ipcRenderer.send('runtime.prompt', prompt)
+
+    const cursor = inputRef?.current?.selectionEnd
+    window.electron.ipcRenderer.invoke('runtime.complete', prompt, cursor ?? -1).then((r) => {
+      setSuggestion(r)
+      setSuggestionSelection(0)
+    })
+  }
   const handlePromptChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
     if (historyIndex !== -1) {
       applyHistoryIndex(-1)
     }
 
-    setPrompt(value)
-
-    window.electron.ipcRenderer.send('runtime.prompt', value)
-
-    const cursor = inputRef?.current?.selectionEnd
-    window.electron.ipcRenderer.invoke('runtime.complete', value, cursor ?? -1).then((r) => {
-      setSuggestion(r)
-    })
+    changePrompt(value)
   }
 
   const handleTitleChange = (id: string, event: ChangeEvent<HTMLInputElement>): void => {
@@ -154,6 +159,10 @@ export default function Runner(): ReactElement {
     if (e.code === 'ArrowDown') {
       if (runtime && historyIndex > -1) {
         applyHistoryIndex(historyIndex - 1)
+      } else if (historyIndex === -1) {
+        if (suggestionSelection < suggestion.list.length - 1) {
+          setSuggestionSelection(suggestionSelection + 1)
+        }
       }
     }
 
@@ -179,6 +188,7 @@ export default function Runner(): ReactElement {
         .invoke('runtime.complete', runtime?.prompt, cursor ?? -1)
         .then((r) => {
           setSuggestion(r)
+          setSuggestionSelection(0)
         })
     }
 
@@ -186,15 +196,16 @@ export default function Runner(): ReactElement {
       e.preventDefault()
       e.stopPropagation()
 
-      const suggestionEntry = suggestion.prompt
+      const suggestionEntry = suggestion.list[suggestionSelection]
       if (suggestionEntry) {
-        setPrompt(suggestionEntry.prompt)
-        window.electron.ipcRenderer.send('runtime.prompt', suggestionEntry.prompt)
+        changePrompt(suggestionEntry.prompt)
       }
     }
 
     if (e.code === 'ArrowUp') {
-      if (runtime && historyIndex < runtime.history.length - 1) {
+      if (suggestionSelection > 0) {
+        setSuggestionSelection(suggestionSelection - 1)
+      } else if (runtime && historyIndex < runtime.history.length - 1) {
         applyHistoryIndex(historyIndex + 1)
         setSuggestion({
           list: []
@@ -462,7 +473,7 @@ export default function Runner(): ReactElement {
                 onKeyDown={handleKeyDown}
                 value={historicalExecution ? historicalExecution.prompt : runtime.prompt}
               />
-              <RunnerAC suggestion={suggestion} />
+              <RunnerAC suggestion={suggestion} selection={suggestionSelection} />
             </div>
           </div>
           <div className={`runner-result ${result.code !== 0 ? '' : ''}`}>{output}</div>

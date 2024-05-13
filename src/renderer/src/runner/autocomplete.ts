@@ -19,6 +19,5 @@ export interface SuggestionEntry {
   cursor: number
 }
 export interface Suggestion {
-  prompt?: SuggestionEntry
   list: SuggestionEntry[]
 }

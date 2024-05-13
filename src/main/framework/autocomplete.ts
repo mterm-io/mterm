@@ -26,7 +26,6 @@ export interface SuggestionEntry {
   cursor: number
 }
 export interface Suggestion {
-  prompt?: SuggestionEntry
   list: SuggestionEntry[]
 }
 export function suggestion(
@@ -276,7 +275,6 @@ export class Autocomplete {
   async complete(prompt: string, cursor: number, runtime: Runtime): Promise<Suggestion> {
     if (prompt.trim().length === 0) {
       return {
-        prompt: undefined,
         list: []
       }
     }
@@ -310,37 +308,22 @@ export class Autocomplete {
     const list: SuggestionEntry[] = []
 
     const suggestion: Suggestion = {
-      prompt: undefined,
       list
     }
 
-    // historical executions always take presidency
-    if (historyMatches.length !== 0) {
-      suggestion.prompt = historyToSuggestion(historyMatches[0])
-    } else if (userCommandMatches.length !== 0) {
-      suggestion.prompt = userCommandToSuggestion(userCommandMatches[0])
-    } else if (programMatches.length !== 0) {
-      suggestion.prompt = partsToSuggestion(programMatches[0])
-    } else if (pathMatches.length !== 0) {
-      suggestion.prompt = pathMatches[0]
-    } else if (systemCommandMatches.length !== 0) {
-      suggestion.prompt = systemsCommandToSuggestion(systemCommandMatches[0])
-    }
-
-    // establish duplicates
     function addSuggestion(entry: SuggestionEntry): void {
       const foundExisting = list.find((o) => o.prompt === entry.prompt)
-      if (foundExisting || entry.prompt === suggestion?.prompt?.prompt) {
+      if (foundExisting || entry.prompt.trim() === runtime.prompt.trim()) {
         // already suggested
         return
       }
       list.push(entry)
     }
 
-    programMatches.forEach((entry) => addSuggestion(partsToSuggestion(entry)))
     historyMatches.forEach((entry) => addSuggestion(historyToSuggestion(entry)))
-    systemCommandMatches.forEach((entry) => addSuggestion(systemsCommandToSuggestion(entry)))
     userCommandMatches.forEach((entry) => addSuggestion(userCommandToSuggestion(entry)))
+    programMatches.forEach((entry) => addSuggestion(partsToSuggestion(entry)))
+    systemCommandMatches.forEach((entry) => addSuggestion(systemsCommandToSuggestion(entry)))
     pathMatches.forEach((entry) => addSuggestion(entry))
 
     return suggestion

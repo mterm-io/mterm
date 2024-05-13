@@ -3,13 +3,14 @@ import { Suggestion, SuggestionEntryType } from './autocomplete'
 
 type RunnerACProps = {
   suggestion: Suggestion
+  selection: number
 }
 export default function RunnerAC({ suggestion, selection }: RunnerACProps): ReactElement {
-  if (!suggestion || !suggestion.prompt) {
+  if (!suggestion || !suggestion.list.length) {
     return <></>
   }
 
-  const itemLength = suggestion.list.length + 1
+  const itemLength = suggestion.list.length
 
   const width = 600
   const maxItemsVisible = 5
@@ -40,21 +41,9 @@ export default function RunnerAC({ suggestion, selection }: RunnerACProps): Reac
 
   return (
     <div className="runner-ac" style={style}>
-      <div
-        className={`runner-ac-option runner-ac-option-${getLabel(suggestion.prompt.type)}`}
-        style={{ height: `${entryHeight}px` }}
-      >
-        <div className="runner-ac-prompt">
-          <div className="runner-ac-prompt-text">{suggestion.prompt.prompt}</div>
-        </div>
-        <div className="runner-ac-badge">
-          <div className="runner-ac-badge-text runner-ac-badge-text-tab">TAB</div>
-          <div className="runner-ac-badge-text">{getLabel(suggestion.prompt.type)}</div>
-        </div>
-      </div>
       {suggestion.list.map((item, index) => (
         <div
-          className={`runner-ac-option runner-ac-option-${getLabel(item.type)}`}
+          className={`runner-ac-option runner-ac-option-${getLabel(item.type)} ${index === selection ? 'runner-ac-option-selected' : 'runner-ac-option-not-selected'}`}
           key={index}
           style={{ height: `${entryHeight}px` }}
         >
@@ -62,6 +51,9 @@ export default function RunnerAC({ suggestion, selection }: RunnerACProps): Reac
             <div className="runner-ac-prompt-text">{item.prompt}</div>
           </div>
           <div className="runner-ac-badge">
+            {index === selection ? (
+              <div className="runner-ac-badge-text runner-ac-badge-text-tab">TAB</div>
+            ) : undefined}
             <div className="runner-ac-badge-text">{getLabel(item.type)}</div>
           </div>
         </div>
