@@ -3,6 +3,7 @@ import { readdir } from 'fs-extra'
 import { isAbsolute, join, parse } from 'path'
 import { Runtime } from './runtime'
 import { HistoricalExecution } from './history'
+import { SystemCommand, systemCommands } from './runtime-executor'
 
 export interface PathParts {
   path: string
@@ -14,7 +15,9 @@ export interface PathParts {
 export enum SuggestionEntryType {
   HISTORY,
   PATH,
-  PROGRAM
+  PROGRAM,
+  COMMAND_SYSTEM,
+  COMMAND_USER
 }
 export interface SuggestionEntry {
   type: SuggestionEntryType
@@ -61,6 +64,14 @@ export function partsToSuggestion(parts: PathParts): SuggestionEntry {
   return suggestion(SuggestionEntryType.PROGRAM, parts.name, parts)
 }
 
+export function systemsCommandToSuggestion(command: SystemCommand): SuggestionEntry {
+  return suggestion(SuggestionEntryType.COMMAND_SYSTEM, command.command, toParts(command.command))
+}
+
+export function userCommandToSuggestion(command: string): SuggestionEntry {
+  return suggestion(SuggestionEntryType.COMMAND_USER, command, toParts(command))
+}
+
 function removeQuotesIfSurrounded(input: string): string {
   if (input.length >= 2 && input.startsWith('"') && input.endsWith('"')) {
     return input.slice(1, -1)
@@ -74,7 +85,7 @@ async function getPathMatches(
   args: string[],
   focusedBlock: number,
   runtime: Runtime
-) {
+): Promise<SuggestionEntry[]> {
   const argToExpand = args[focusedBlock]
   const { dir, base } = parse(argToExpand)
 
@@ -106,6 +117,7 @@ async function getPathMatches(
         type: SuggestionEntryType.PATH,
         prompt,
         cursor: computedCursor,
+        duplicate: false,
         parts: {
           ext,
           name,
@@ -276,6 +288,14 @@ export class Autocomplete {
       ...this.workspace.history.newExecution.filter((history) => history.prompt.startsWith(prompt))
     )
 
+    const systemCommandMatches = systemCommands.filter(
+      (o) => o.command.startsWith(prompt) || o.alias?.find((o) => o.startsWith(prompt))
+    )
+
+    const userCommandMatches = Object.keys(this.workspace.commands.lib).filter((o) =>
+      o.startsWith(prompt)
+    )
+
     const programMatches = this.programList.filter(
       (program) => program.name.startsWith(prompt) || program.path.startsWith(prompt)
     )
@@ -289,10 +309,6 @@ export class Autocomplete {
 
     const list: SuggestionEntry[] = []
 
-    list.push(...programMatches.map(partsToSuggestion))
-    list.push(...historyMatches.map(historyToSuggestion))
-    list.push(...pathMatches)
-
     const suggestion: Suggestion = {
       prompt: undefined,
       list
@@ -301,11 +317,31 @@ export class Autocomplete {
     // historical executions always take presidency
     if (historyMatches.length !== 0) {
       suggestion.prompt = historyToSuggestion(historyMatches[0])
+    } else if (userCommandMatches.length !== 0) {
+      suggestion.prompt = userCommandToSuggestion(userCommandMatches[0])
     } else if (programMatches.length !== 0) {
       suggestion.prompt = partsToSuggestion(programMatches[0])
     } else if (pathMatches.length !== 0) {
       suggestion.prompt = pathMatches[0]
+    } else if (systemCommandMatches.length !== 0) {
+      suggestion.prompt = systemsCommandToSuggestion(systemCommandMatches[0])
     }
+
+    // establish duplicates
+    function addSuggestion(entry: SuggestionEntry): void {
+      const foundExisting = list.find((o) => o.prompt === entry.prompt)
+      if (foundExisting || entry.prompt === suggestion?.prompt?.prompt) {
+        // already suggested
+        return
+      }
+      list.push(entry)
+    }
+
+    programMatches.forEach((entry) => addSuggestion(partsToSuggestion(entry)))
+    historyMatches.forEach((entry) => addSuggestion(historyToSuggestion(entry)))
+    systemCommandMatches.forEach((entry) => addSuggestion(systemsCommandToSuggestion(entry)))
+    userCommandMatches.forEach((entry) => addSuggestion(userCommandToSuggestion(entry)))
+    pathMatches.forEach((entry) => addSuggestion(entry))
 
     return suggestion
   }
