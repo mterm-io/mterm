@@ -4,7 +4,7 @@ import { Suggestion, SuggestionEntryType } from './autocomplete'
 type RunnerACProps = {
   suggestion: Suggestion
 }
-export default function RunnerAC({ suggestion }: RunnerACProps): ReactElement {
+export default function RunnerAC({ suggestion, selection }: RunnerACProps): ReactElement {
   if (!suggestion || !suggestion.prompt) {
     return <></>
   }
@@ -41,7 +41,7 @@ export default function RunnerAC({ suggestion }: RunnerACProps): ReactElement {
   return (
     <div className="runner-ac" style={style}>
       <div
-        className={`runner-ac-option  runner-ac-option-${getLabel(suggestion.prompt.type)}`}
+        className={`runner-ac-option runner-ac-option-${getLabel(suggestion.prompt.type)}`}
         style={{ height: `${entryHeight}px` }}
       >
         <div className="runner-ac-prompt">

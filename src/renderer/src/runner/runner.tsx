@@ -61,6 +61,10 @@ export default function Runner(): ReactElement {
     )
 
     applyHistoryIndex(-1)
+    setSuggestion({
+      list: []
+    })
+
     await reloadRuntimesFromBackend()
 
     // renderer -> "backend"
@@ -80,6 +84,7 @@ export default function Runner(): ReactElement {
 
     await reloadRuntimesFromBackend()
   }
+
   const handlePromptChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
     if (historyIndex !== -1) {
@@ -88,8 +93,9 @@ export default function Runner(): ReactElement {
 
     setPrompt(value)
 
-    const cursor = inputRef?.current?.selectionEnd
     window.electron.ipcRenderer.send('runtime.prompt', value)
+
+    const cursor = inputRef?.current?.selectionEnd
     window.electron.ipcRenderer.invoke('runtime.complete', value, cursor ?? -1).then((r) => {
       setSuggestion(r)
     })
@@ -151,9 +157,48 @@ export default function Runner(): ReactElement {
       }
     }
 
+    if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+      let cursor = inputRef?.current?.selectionEnd ?? -1
+
+      console.log(cursor, runtime?.prompt.length)
+
+      // the selectionEnd hasn't updated yet. add and go
+      if (e.code === 'ArrowLeft') {
+        cursor--
+      } else if (e.code === 'ArrowRight') {
+        cursor++
+      }
+
+      if (cursor <= 0) {
+        cursor = 0
+      } else if (cursor >= (runtime?.prompt?.length ?? 0)) {
+        cursor = runtime?.prompt?.length ?? 0
+      }
+
+      window.electron.ipcRenderer
+        .invoke('runtime.complete', runtime?.prompt, cursor ?? -1)
+        .then((r) => {
+          setSuggestion(r)
+        })
+    }
+
+    if (e.code === 'Tab') {
+      e.preventDefault()
+      e.stopPropagation()
+
+      const suggestionEntry = suggestion.prompt
+      if (suggestionEntry) {
+        setPrompt(suggestionEntry.prompt)
+        window.electron.ipcRenderer.send('runtime.prompt', suggestionEntry.prompt)
+      }
+    }
+
     if (e.code === 'ArrowUp') {
       if (runtime && historyIndex < runtime.history.length - 1) {
         applyHistoryIndex(historyIndex + 1)
+        setSuggestion({
+          list: []
+        })
       } else {
         window.electron.ipcRenderer
           .invoke('history.try-scroll-next', runtime?.id)
