@@ -377,10 +377,15 @@ export function attach({ app, workspace }: BootstrapContext): void {
     return workspace.store.vault
   })
 
+  ipcMain.handle('runtime.complete', async (_, prompt: string, cursorIndex: number) => {
+    return await workspace.autocomplete.complete(prompt, cursorIndex, workspace.runtime)
+  })
+
   ipcMain.on('system.exit', () => app.quit())
   ipcMain.on('runtime.prompt', (_, value: string) => {
     workspace.runtime.prompt = value
   })
+
   ipcMain.on('runtime.index', (_, value: number) => {
     workspace.runtimeIndex = value
   })

@@ -6,12 +6,18 @@ import { vscodeDark } from '@uiw/codemirror-theme-vscode'
 import { color } from '@uiw/codemirror-extensions-color'
 import { hyperLink } from '@uiw/codemirror-extensions-hyper-link'
 import { javascript } from '@codemirror/lang-javascript'
+import RunnerAC from './runner-ac'
+import { Suggestion } from './autocomplete'
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
   const [pendingTitles, setPendingTitles] = useState<object>({})
   const [historyIndex, setHistoryIndex] = useState<number>(-1)
   const [commanderMode, setCommanderMode] = useState<boolean>(false)
   const [editMode, setEditMode] = useState<boolean>(false)
+  const [suggestion, setSuggestion] = useState<Suggestion>({
+    prompt: undefined,
+    list: []
+  })
   const inputRef = useRef<HTMLInputElement>(null)
   const historyRefs = useRef<Array<RefObject<HTMLDivElement>>>([])
 
@@ -82,7 +88,11 @@ export default function Runner(): ReactElement {
 
     setPrompt(value)
 
+    const cursor = inputRef?.current?.selectionEnd
     window.electron.ipcRenderer.send('runtime.prompt', value)
+    window.electron.ipcRenderer.invoke('runtime.complete', value, cursor ?? -1).then((r) => {
+      setSuggestion(r)
+    })
   }
 
   const handleTitleChange = (id: string, event: ChangeEvent<HTMLInputElement>): void => {
@@ -407,6 +417,7 @@ export default function Runner(): ReactElement {
                 onKeyDown={handleKeyDown}
                 value={historicalExecution ? historicalExecution.prompt : runtime.prompt}
               />
+              <RunnerAC suggestion={suggestion} />
             </div>
           </div>
           <div className={`runner-result ${result.code !== 0 ? '' : ''}`}>{output}</div>
