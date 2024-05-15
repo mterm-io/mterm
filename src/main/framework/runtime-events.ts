@@ -25,6 +25,7 @@ import { HistoricalExecution } from './history'
 import { writeFile } from 'fs-extra'
 import { ExecuteContext } from './execute-context'
 import { ResultStream } from './result-stream'
+import { transform } from './transformers'
 
 export function attach({ app, workspace }: BootstrapContext): void {
   const eventListForCommand = (command: Command): ResultContentEvent[] => {
@@ -202,6 +203,10 @@ export function attach({ app, workspace }: BootstrapContext): void {
     )
   })
 
+  ipcMain.handle('runner.theme', async (_, profile): Promise<string> => {
+    return workspace.theme.get(profile)
+  })
+
   ipcMain.handle('runtime.kill', async (_, commandId, runtimeId): Promise<boolean> => {
     const runtime = workspace.runtimes.find((r) => r.id === runtimeId)
     if (!runtime) {
@@ -372,10 +377,15 @@ export function attach({ app, workspace }: BootstrapContext): void {
     return workspace.store.vault
   })
 
+  ipcMain.handle('runtime.complete', async (_, prompt: string, cursorIndex: number) => {
+    return await workspace.autocomplete.complete(prompt, cursorIndex, workspace.runtime)
+  })
+
   ipcMain.on('system.exit', () => app.quit())
   ipcMain.on('runtime.prompt', (_, value: string) => {
     workspace.runtime.prompt = value
   })
+
   ipcMain.on('runtime.index', (_, value: number) => {
     workspace.runtimeIndex = value
   })
@@ -455,6 +465,9 @@ export function attach({ app, workspace }: BootstrapContext): void {
       }
     )
 
+    // run transformers
+    context.prompt.value = await transform(context)
+
     // attach context to command
     command.context = context
 
@@ -470,9 +483,6 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
     // the "finish"
     if (finalize) {
-      command.complete = true
-      command.error = result.code !== 0
-
       context.finish(result.code)
     }
 

@@ -38,6 +38,30 @@ export interface EditFileViewModel {
   content: string
 }
 
+export class Prompt {
+  private _value: string = ''
+  public parts: string[] = []
+  public args: string[] = []
+  public cmd: string = ''
+  constructor(value: string = '') {
+    this.value = value
+  }
+
+  set value(value: string) {
+    this._value = value
+    this.parts = value.split(' ')
+
+    const [cmd, ...args] = this.parts
+
+    this.cmd = cmd
+    this.args = args
+  }
+
+  get value(): string {
+    return this._value
+  }
+}
+
 export interface EditFile extends EditFileViewModel {
   callback: (text: string) => Promise<void> | void
 }

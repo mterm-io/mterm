@@ -6,7 +6,7 @@ import { Workspace } from './framework/workspace'
 
 import { DEFAULT_SETTINGS, DEFAULT_WORKSPACE } from '../constants'
 import { ErrorModal } from './window/windows/error-modal'
-import { boostrap } from './bootstrap'
+import { bootstrap } from './bootstrap'
 import { join } from 'path'
 
 const workspace = new Workspace(DEFAULT_WORKSPACE, DEFAULT_SETTINGS)
@@ -34,17 +34,18 @@ const platform = new PlatformWindow(
   false
 )
 
-const errorModal = new ErrorModal(
+export const errorModal = new ErrorModal(
   icon,
   {
     width: 600,
-    height: 600
+    height: 600,
+    alwaysOnTop: true
   },
   'error',
   false
 )
 
-boostrap({
+bootstrap({
   icon,
   workspace,
   windows: [runner, platform, errorModal],

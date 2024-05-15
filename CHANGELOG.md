@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.33-beta](https://github.com/mterm-io/mterm/compare/v1.0.32-beta...v1.0.33-beta) (2024-05-10)
+
+
+### Bug Fixes
+
+* add `:cmd` and `commands` to real time edit command file ([24c5e84](https://github.com/mterm-io/mterm/commit/24c5e84d5278357e6b1eab82729953a8e3cf2e11)), closes [#100](https://github.com/mterm-io/mterm/issues/100)
+* added `:restart` command and made `:cmd` error handling better ([3c2ef2d](https://github.com/mterm-io/mterm/commit/3c2ef2d41c98cc062a7aa4e30b5165ef9ea93959)), closes [#103](https://github.com/mterm-io/mterm/issues/103)
+* commander cleanup ([4d3f199](https://github.com/mterm-io/mterm/commit/4d3f1991b7795550b4643cc58e9806b743f29840))
+* content api for frontend events from backend, ui updates and reset command ([#101](https://github.com/mterm-io/mterm/issues/101)) ([d8fbce5](https://github.com/mterm-io/mterm/commit/d8fbce56a8cff22e9e163eb282e8313dda350b63))
+* custom commands now push to the history stack ([940b5d2](https://github.com/mterm-io/mterm/commit/940b5d23ac852371a4b5867318e0bc5466c5f826))
+* developers rejoice! hmr for backend ([6349046](https://github.com/mterm-io/mterm/commit/6349046f6c51b2cfd917bf18610d25ba998b87b3))
+* edit to use new prompt value ([235575d](https://github.com/mterm-io/mterm/commit/235575dd8f48131d69030604ef26ecc7d8ef0c91))
+* history scroll ([#111](https://github.com/mterm-io/mterm/issues/111)) ([f38a80f](https://github.com/mterm-io/mterm/commit/f38a80f0d8d7a6edb80d46f0f353beab9770fcfb)), closes [#12](https://github.com/mterm-io/mterm/issues/12)
+* prompt transformers and operators 🥇 ([533c5be](https://github.com/mterm-io/mterm/commit/533c5be18ecc4bc00c2c907e3ce4c9ba2db27e5b))
+
 ## [1.0.32-beta](https://github.com/mterm-io/mterm/compare/v1.0.31-beta...v1.0.32-beta) (2024-05-07)
 
 

@@ -11,6 +11,8 @@ import { DEFAULT_FOLDER, DEFAULT_HISTORY_ENABLED, DEFAULT_HISTORY_MAX_ITEMS } fr
 import { Commands } from './commands'
 import { Store } from './store'
 import { History } from './history'
+import { Theme } from './theme'
+import { Autocomplete } from './autocomplete'
 
 export function resolveFolderPathForMTERM(folder: string): string {
   folder = folder.replace('~', homedir())
@@ -25,6 +27,8 @@ export class Workspace {
   public history: History
   public settings: Settings
   public commands: Commands
+  public autocomplete: Autocomplete
+  public theme: Theme
   public isAppQuiting: boolean = false
   public windows: MTermWindow[] = []
   public runtimes: Runtime[] = []
@@ -42,6 +46,8 @@ export class Workspace {
     this.settings = new Settings(join(this.folder, 'settings.json'), defaultSettings)
     this.history = new History(join(this.folder, '.history'))
     this.store = new Store(join(this.folder, '.mterm-store'))
+    this.theme = new Theme(this, join(app.getAppPath(), './resources/theme.css'))
+    this.autocomplete = new Autocomplete(this)
   }
 
   get runtime(): Runtime {
@@ -88,6 +94,11 @@ export class Workspace {
     }
 
     await this.settings.load()
+    await this.theme.load()
+
+    // we ignore the result of this (catch error ofc)
+    // let this run in the background
+    this.autocomplete.solve().catch((error) => console.error(error))
 
     /**
      * Load an initial index
@@ -170,6 +181,15 @@ export class Workspace {
 
       await this.history.write(maxHistory)
     }
+  }
+
+  resolve(path: string): string {
+    let location = resolve(this.folder, path)
+    if (path.startsWith('~')) {
+      location = resolveFolderPathForMTERM(path)
+    }
+
+    return location
   }
 
   /**

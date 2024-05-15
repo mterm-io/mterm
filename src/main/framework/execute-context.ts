@@ -1,10 +1,10 @@
 import { Workspace } from './workspace'
-import { Command, ResultContentEvent, ResultStreamEvent, Runtime } from './runtime'
+import { Command, Prompt, ResultContentEvent, ResultStreamEvent, Runtime } from './runtime'
 import { WebContents } from 'electron'
 import { readFile } from 'fs-extra'
 import short from 'short-uuid'
 import { ResultStream } from './result-stream'
-
+import { process } from './transformers'
 export interface RuntimeContentHandle {
   id: string
   update(html: string): void
@@ -20,7 +20,6 @@ export type RuntimeContentEventCallback = (event: RuntimeContentEvent) => Promis
 export class ExecuteContext {
   public readonly start: number = Date.now()
   public readonly id: string = short.generate()
-
   public readonly events: ResultContentEvent[] = []
   private readonly eventHandlers = new Map<string, RuntimeContentEventCallback>()
 
@@ -35,9 +34,37 @@ export class ExecuteContext {
       enabled: boolean
       results: boolean
       max: number
-    }
+    },
+    public prompt: Prompt = new Prompt(command.prompt)
   ) {}
 
+  copyForPrompt(prompt: string): ExecuteContext {
+    const context = new ExecuteContext(
+      this.platform,
+      this.sender,
+      this.workspace,
+      this.runtime,
+      {
+        ...this.command,
+        result: {
+          code: 0,
+          stream: [],
+          edit: undefined
+        }
+      },
+      this.profile,
+      this.history,
+      new Prompt(prompt)
+    )
+
+    context.command.context = context
+
+    return context
+  }
+
+  async resolve(text: string): Promise<string> {
+    return await process(this, text)
+  }
   out(text: string, error: boolean = false): ResultStream | null {
     const isFinished = this.command.aborted || this.command.complete
     if (isFinished) {

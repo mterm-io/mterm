@@ -18,7 +18,7 @@ export interface BootstrapContext {
   icon: string
   errorModal: ErrorModal
 }
-export async function boostrap(context: BootstrapContext): Promise<void> {
+export async function bootstrap(context: BootstrapContext): Promise<void> {
   const { app, workspace } = context
 
   await app.whenReady()

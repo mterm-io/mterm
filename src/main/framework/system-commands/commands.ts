@@ -1,4 +1,5 @@
 import { ExecuteContext } from '../execute-context'
+import { errorModal } from '../../index'
 
 export default {
   command: ':commands',
@@ -15,7 +16,12 @@ export default {
       await context.edit(context.workspace.commands.commandFileLocation, async () => {
         context.out('Saved command file!\n')
 
-        await context.workspace.commands.load(context.workspace.settings)
+        try {
+          await context.workspace.commands.load(context.workspace.settings)
+        } catch (e) {
+          console.log(e)
+          await errorModal.showError(e)
+        }
 
         context.out('Commands reloaded\n')
       })
