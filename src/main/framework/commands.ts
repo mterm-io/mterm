@@ -7,6 +7,8 @@ import * as tryRequire from 'try-require'
 import { compile } from '../vendor/webpack'
 import { Settings } from './settings'
 import { ExecuteContext } from './execute-context'
+import { CommandUtils } from './command-utils'
+import { shell } from 'electron'
 export class Commands {
   public lib: object = {}
   public commandFileLocation: string = ''
@@ -41,6 +43,8 @@ export class Commands {
     const scoped = {
       ...state,
       context,
+      util: new CommandUtils(),
+      shell,
       vault: {
         async unlock(password: string): Promise<object> {
           return context.workspace.store.open(password)

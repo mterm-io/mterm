@@ -1,4 +1,3 @@
-
 <h1 align="left">mterm</h1>
 <h5 align="left">An electron terminal written with TypeScript, and rendered with React.</h5>
 <h5 align="left">Join us on discord @ <a href=https://discord.gg/mterm">discord.gg/mterm</a></h5>
@@ -16,6 +15,7 @@
 this means commands such as `ls`, `cd` or program commands such as `node -v` or `yarn install` will work out of the box as long as the host machine supports these commands. you can configure the desired interpreter [below](#configure)
 
 ### Why
+
 - by no means does mterm replace your sh, or pwsh but we think abstractions such as [secrets](#secrets), and [commands](#commands) can supplement your development routines
   - in other words, instead of building a utility for a dev task in a shell script for local use, use typescript
 - mterm comes with tabs but also within the scope of a tab; each command is ran in the background - this means you can use your keyboard to hop around execution stacks
@@ -35,6 +35,7 @@ Finally, hit tab to finish the completion -
 ### Command Mode
 
 By default, **mterm** opens in command mode (you can change this in [settings](#settings)). A couple of notes about command mode -
+
 - This window is always on top
 - This window follows to any desktop
 - The font and theme is larger to account for large size
@@ -42,11 +43,13 @@ By default, **mterm** opens in command mode (you can change this in [settings](#
 This is a nice way to focus on execution details but it can be annoying if multiple windows are in use.
 
 Hide mterm with the default toggle hotkey -
+
 ```bash
 ~ + CommandOrControl
 ```
 
 Disable command mode and go to normal terminal window mode with -
+
 ```bash
 ~ + Shift + CommandOrControl
 ```
@@ -58,16 +61,19 @@ Or change the behaviour of all of this with [settings](#settings).
 mterm creates the `mterm` folder on a host machine on first launch a the user's home directory
 
 for windows -
+
 ```bash
 C:/Users/<YOUR_NAME>/mterm
 ```
 
 for mac -
+
 ```bash
 /Users/<YOUR_NAME>/mterm
 ```
 
 for everything else -
+
 ```bash
 /home/<YOUR_NAME>/mterm
 ```
@@ -133,13 +139,12 @@ here is an example `~/mterm/settings.json` -
     - screen: `PRIMARY | number`, use the primary monitor or use the desired screen #
     - x, y, w, h: `SCREEN:ratio | number` use a ratio of the screen size (for centering etc) or use a static number
 
-
 ### System
 
 mterm provided a few system commands to help control the terminal and settings. mterm settings will always start with `:` (a colon) unless the intention is to override a system command. for example, because `clear` needs to be handled in a special way for mterm windows + tabs, it is overriden in mterm.
 
 | Command                      | Alias  | Purpose                                                                                |
-|------------------------------|--------|----------------------------------------------------------------------------------------|
+| ---------------------------- | ------ | -------------------------------------------------------------------------------------- |
 | `clear`                      | `cls`  | Clear the current terminal output                                                      |
 | `cd`                         |        | Navigate the file tree on the host machine                                             |
 | `:exit`                      | `exit` | Exit the current tab, or mterm if only 1 tab is open                                   |
@@ -162,13 +167,14 @@ mterm provided a few system commands to help control the terminal and settings. 
 Need your own command? MTERM includes `~/mterm/commands.ts` from your home directory - with any exported functions as available commands.
 
 Here an example -
+
 ```typescript
 import * as os from 'node:os'
 
 export function hello(name: string = os.userInfo().username): string {
   return `Hi, ${name}`
 }
-````
+```
 
 Now run `hello X` from mterm -
 
@@ -193,8 +199,20 @@ export async function query(): Promise<{
 
 <img src="https://github.com/mterm-io/mterm/assets/7341502/df8e74d4-896c-4964-861d-bad3ced17c80" alt="drawing" width="500"/>
 
-
 > Note the return type is optional, just added above to highlight the typescript engine provided
+
+### Utilities
+
+Shell (https://www.electronjs.org/docs/latest/api/shell) is provided within the command context, use shell like this:
+
+to open folder or file:
+`await this.shell.openPath(path)`
+
+to open URL:
+`await this.shell.openExternal(path)`
+
+to open editor
+`await shell.openPath(`${editorCommand} ${filePath}`)`
 
 ### Transformers
 Sometimes we need to change variables, execution results or perform an operation on strings.
@@ -372,14 +390,13 @@ The mterm vault is an `AES-256` encrypted store on your local machine. During se
 
 Every time `mterm` is launched, the password is required to use these values provided. You can find vault values by using `this.vault.get` in commands -
 
-````typescript
+```typescript
 export function who() {
   const name = this.vault.get('NAME')
 
   return `name: ${name}`
 }
-
-````
+```
 
 ![image](https://github.com/mterm-io/mterm/assets/7341502/76b26a62-33ea-4883-b07c-677f99ab3355)
 
@@ -390,7 +407,6 @@ mterm provides an editor with `:edit <FILE>` or `edit <FILE>` commands -
 ![image](https://github.com/mterm-io/mterm/assets/7341502/25db8038-7a86-419c-a5d7-777b97025ec7)
 
 hit `control + s` within the file editor to save this
-
 
 ### Other Notes
 
@@ -424,11 +440,13 @@ git clone git@github.com:mterm-io/mterm.git
 ```
 
 install deps -
+
 ```bash
 yarn
 ```
 
 run locally -
+
 ```bash
 $ yarn dev
 ```
