@@ -20,16 +20,18 @@ export default function ErrorRuntimePage(): ReactElement {
     )
   }
 
-  const errorMessage: string = info
+  let errorMessage: string = info
+
+  errorMessage = errorMessage.split('[tsl]').join('\n').split('TS').join('\n  -> TS')
 
   return (
     <div id="error-page">
-      <h1>Oops!</h1>
+      <h1>Woa!</h1>
       <p>Sorry, an unexpected error has occurred.</p>
       <button onClick={exit}>Exit</button>
       <button onClick={workspace}>Workspace</button>
       <hr />
-      <pre>{errorMessage}</pre>
+      <pre dangerouslySetInnerHTML={{ __html: errorMessage }}></pre>
     </div>
   )
 }

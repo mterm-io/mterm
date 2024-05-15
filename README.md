@@ -8,6 +8,7 @@
 
 ![image](https://github.com/mterm-io/mterm/assets/7341502/6eb47f43-1ab5-41c5-9c0e-5eb61ce575bf)
 ![image](https://github.com/mterm-io/mterm/assets/7341502/27bcad62-6891-4b49-80b5-e5a17e0562ab)
+![image](https://github.com/mterm-io/mterm/assets/7341502/ab7b3a97-98c0-4dda-aa39-af3d6a33d0f7)
 
 **mterm** is a cross-platform command-line terminal that proxies the underlying command-line interpreters, such as [powershell](https://learn.microsoft.com/en-us/powershell/), [sh](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html) or [wsl](https://ubuntu.com/desktop/wsl). commands are executed in the background and results streamed to the foreground.
 
@@ -23,6 +24,13 @@ this means commands such as `ls`, `cd` or program commands such as `node -v` or 
 ### Install
 
 Head over to the [release page](https://github.com/mterm-io/mterm/releases/latest) to find the binary for your system type. mterm is evergreen and updates are automatically installed on your system as hey get released. Run `:v` to see your current mterm version.
+
+### Autocomplete
+
+Start typing, mterm will pick up your available: programs, [system commands](#system), [custom commands](#commands) and history
+
+Finally, hit tab to finish the completion -
+![image](./docs/assets/autocomplete.gif)
 
 ### Command Mode
 
@@ -74,7 +82,8 @@ in this folder, there are a couple of important files to help configure mterm -
 
 - `commands.ts`, used to attach commands to the terminal. see [commands](#commands)
 - `package.json`, an npm package declaration for use by [commands](#commands)
-- `settings`, general runtime settings [settings](#settings)
+- `theme.css`, default theme used by the terminal, change this path/file with the `theme` property for profiles
+- `settings.json`, general runtime settings [settings](#settings)
 
 ### Settings
 
@@ -147,6 +156,7 @@ mterm provided a few system commands to help control the terminal and settings. 
 | `:vault`                     |        | Open the secret management tool, the mterm vault                                       |
 | `:version`                   | `:v`   | Print the current mterm version                                                        |
 | `:workspace`                 |        | Open the mterm workspace folder on disk: `~/mterm`                                     |
+| `:theme`                     | `:css` | Edit the terminal theme real time                                                      |
 | `:settings`                  |        | Open the mterm settings gui to manage `~/mterm/settings.json`                          |
 | `:settings edit`             |        | Open the `~/mterm/settings.json` in the terminal editor with hot reloading             |
 | `:settings reload`           |        | Reload `~/mterm/settings.json` and all ui etc associated with the settings             |
@@ -191,7 +201,7 @@ export async function query(): Promise<{
 
 > Note the return type is optional, just added above to highlight the typescript engine provided
 
-Utilities
+### Utilities
 
 Shell (https://www.electronjs.org/docs/latest/api/shell) is provided within the command context, use shell like this:
 
@@ -203,6 +213,164 @@ to open URL:
 
 to open editor
 `await shell.openPath(`${editorCommand} ${filePath}`)`
+
+### Transformers
+Sometimes we need to change variables, execution results or perform an operation on strings.
+
+MTERM helps solve this by providing `transformers` as terminal operators. These transformers abstract away somewhat tedious actions in the terminal, they also provide common utilities within the scope of a prompt
+
+<img src="https://github.com/mterm-io/mterm/assets/7341502/d7a0cb6c-6c75-4183-9596-8b1295789d64" alt="drawing" width="250"/>
+
+For the prompt of
+```bash
+":snake(this is some text)"
+```
+
+We get the result
+```bash
+this_is_some_text
+```
+
+`snake` is a mterm transformer that takes a string and converts it to [snake case](https://en.wikipedia.org/wiki/Snake_case)
+
+
+Transformers can be used anywhere including from within transformers -
+
+```bash
+":upper(hmm) :lower(WOW) :snake(:lower(HMM WOW))"
+```
+
+Prints out -
+```bash
+HMM wow hmm_wow
+```
+
+#### Transformer Arguments
+
+Some transformers accept arguments. Arguments for transformers are seperated by `:` colon characters
+
+Here is the split transformer on a string -
+
+```bash
+":split(1,2,3,4:1:,)"
+```
+- `1,2,3,4` is the first argument, the split text
+- `1` is the index to return (a [split operation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/split) is an array, so return a value from this array)
+- `,` the final argument is the [delimiter](https://en.wikipedia.org/wiki/Delimiter)
+
+> one way to view this operation is `"1,2,3,4".split(',')[1]`
+
+Note you can use `"` quotes to wrap transformer arguments if there is a colon within the argument
+
+#### Transformers Provided
+
+Here are the provided transformers for use -
+
+##### echo
+> print out the argument, proxies the argument to the `echo` on the terminal
+
+`:echo` examples -
+```bash
+:echo(HELLO) -> "HELLO"
+:echo(:upper(hello)) -> "HELLO"
+```
+
+##### get
+> gets the argument from the [vault](#secrets), if not available gets the argument from the [environment variables](https://en.wikipedia.org/wiki/Environment_variable) from the host machine, if not available returns the fallback
+
+`:get` examples -
+```bash
+# e.g: Basic find
+#
+# assuming:
+## there is a env variable called PATH=PATH_FROM_SYSTEM
+:get(PATH) -> "PATH_FROM_SYSTEM"
+
+# e.g: Fallback keys
+#
+# assuming:
+## there is NOT a env variable called NOT_FOUND_A
+## there is NOT a env variable called NOT_FOUND_B
+## there is a env variable called FOUND_C=VALUE_OF_C
+:get(NOT_FOUND_A,NOT_FOUND_B,FOUND_C) -> "VALUE_OF_C"
+
+# e.g: Fallback variable
+#
+# assuming:
+## there is NOT a env variable called NOT_FOUND_A
+## there is a env variable called FOUND_C=VALUE_OF_C
+:get(NOT_FOUND_A:im the fallback) -> "im the fallback"
+:get(FOUND_C:im the fallback) -> "VALUE_OF_C"
+```
+
+##### lower
+> transforms the argument to lowercase
+
+`:lower` examples -
+```bash
+":lower(HELLO)" -> "hello"
+:echo(:lower(HELLO)) -> "hello"
+```
+
+##### run
+> runs the argument against the terminal and proxies the result
+
+`:run` examples -
+```bash
+
+# e.g: Run command
+#
+# assuming:
+# there is a `hello` function in `commands.ts`
+# the `hello` function is declared as const hello = (arg = 'fallback') => `Hello, ${arg}!`
+":run(hello)" -> "Hello, fallback!"
+":run(hello argument)" -> "Hello, argument!"
+
+# e.g: Run command within transformer
+#
+# assuming:
+# there is a `hello` function in `commands.ts`
+# the `hello` function is declared as const hello = (arg = 'fallback') => `Hello, ${arg}!`
+":lower(:run(hello))" -> "hello, fallback!"
+":lower(:run(hello)) :upper(:run(hello))" -> "hello, fallback! HELLO, FALLBACK!"
+```
+
+##### snake
+> transforms the argument to snakecase
+
+`:snake` examples -
+```bash
+":snake(HELLO WORLD)" -> "hello_world"
+```
+
+##### title
+> transforms the argument to [titlecase](https://en.wikipedia.org/wiki/Title_case)
+
+`:title` examples -
+```bash
+":title(hello world)" -> "Hello World"
+":title(hello_world)" -> "Hello World"
+```
+
+##### split
+> splits the provided argument, accepts the index or uses `0`, accepts the [delimiter](https://en.wikipedia.org/wiki/Delimiter) or uses `,`
+
+`:split` examples -
+```bash
+":split(hello,world)" -> "hello"
+":split(hello,world:1)" -> "world"
+":split(hello@world:1:@)" -> "world"
+
+:echo(":split(":get(xx,PATH)":0:;)") -> "FIRST_RESULT_IN_PATH"
+```
+
+##### upper
+> transforms the argument to uppercase
+
+`:title` examples -
+```bash
+":uppercase(hello world)" -> "HELLO WORLD"
+```
 
 ### Secrets
 
