@@ -20,9 +20,8 @@ export default function Runner(): ReactElement {
   const [suggestionSelection, setSuggestionSelection] = useState<number>(0)
 
   const inputRef = useRef<HTMLInputElement>(null)
-  const historyRefs = useRef<Array<RefObject<HTMLDivElement>>>([])
-
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
+  const historyRefs = useRef<Array<RefObject<HTMLDivElement>>>([])
 
   const [isMultiLine, setIsMultiLine] = useState<boolean>(false)
   const [multiLineArgs, setMultiLineArgs] = useState<string>('')
@@ -62,7 +61,7 @@ export default function Runner(): ReactElement {
     const command: Command = await window.electron.ipcRenderer.invoke(
       'runtime.prepareExecute',
       runtime.id,
-      historicalExecution ? historicalExecution.prompt : runtime.prompt,
+      runtime.prompt,
       'default'
     )
 
@@ -159,49 +158,66 @@ export default function Runner(): ReactElement {
     applyHistoryIndex(historyIndex)
   }
 
-  const normalizeMultilineArgs = (): string => {
-    return multiLineArgs
-      ? ' ' +
-          multiLineArgs
-            .split('\n')
-            .map((line) => line.trim())
-            .join(' ')
-      : ''
+  const handleLineBreak = (e): void => {
+    const cursorPosition = e.target?.selectionStart
+    if (e.target === inputRef.current) {
+      if (!isMultiLine) setIsMultiLine(true)
+      e.preventDefault()
+      setMultiLineArgs(
+        runtime?.prompt.slice(cursorPosition, runtime.prompt.length) +
+          (multiLineArgs ? '\n' + multiLineArgs : '')
+      )
+      if (runtime) runtime.prompt = runtime.prompt.slice(0, cursorPosition)
+      textAreaRef.current?.focus()
+    }
   }
 
   const handleKeyDown = (e): void => {
-    if (e.key === 'Enter' && e.shiftKey && !isMultiLine) {
-      e.preventDefault()
-      setIsMultiLine(true)
+    if (e.key === 'Enter' && e.shiftKey) {
+      handleLineBreak(e)
     }
     if (e.code === 'Backslash' || e.code === 'Backquote') {
       e.preventDefault()
-      isMultiLine ? setIsMultiLine(false) : setIsMultiLine(true)
+      setIsMultiLine(!isMultiLine)
     }
-    if (e.code === 'Backspace' && isMultiLine && !multiLineArgs) {
-      e.preventDefault()
-      setIsMultiLine(false)
+    if (e.code === 'Backspace' && isMultiLine) {
+      if (e.target === textAreaRef.current && e.target.selectionStart === 0) {
+        e.preventDefault()
+        const multiLineSplit = multiLineArgs.trim().split('\n')
+        const _firstLine = runtime?.prompt.trim()
+        if (runtime) runtime.prompt = _firstLine + (_firstLine ? ' ' : '') + multiLineSplit.shift()
+        setMultiLineArgs(multiLineSplit.join('\n'))
+
+        if (multiLineSplit.length < 1) {
+          setIsMultiLine(false)
+        }
+
+        inputRef.current?.focus()
+      }
     }
     if (e.key === 'Enter' && !e.shiftKey) {
-      runtime ? (runtime.prompt += normalizeMultilineArgs()) : ''
+      if (!runtime) return
+      runtime.prompt =
+        runtime.prompt.trim() +
+        (isMultiLine && multiLineArgs ? '\n' + multiLineArgs : multiLineArgs)
       execute(runtime).catch((error) => console.error(error))
       setMultiLineArgs('')
       setIsMultiLine(false)
     }
     if (e.code === 'ArrowDown') {
-      if (runtime && historyIndex > -1) {
-        applyHistoryIndex(historyIndex - 1)
-      } else if (historyIndex === -1) {
+      if (historyIndex === -1) {
         if (suggestionSelection < suggestion.list.length - 1) {
           setSuggestionSelection(suggestionSelection + 1)
         }
+      } else if (isMultiLine && !e.ctrlKey) {
+        textAreaRef.current?.focus()
+      } else if (runtime && historyIndex > -1) {
+        applyHistoryIndex(historyIndex - 1)
       }
     }
 
     if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
       let cursor = inputRef?.current?.selectionEnd ?? -1
-
-      console.log(cursor, runtime?.prompt.length)
 
       // the selectionEnd hasn't updated yet. add and go
       if (e.code === 'ArrowLeft') {
@@ -237,6 +253,10 @@ export default function Runner(): ReactElement {
     if (e.code === 'ArrowUp') {
       if (suggestionSelection > 0) {
         setSuggestionSelection(suggestionSelection - 1)
+      } else if (isMultiLine && !e.ctrlKey) {
+        if (e.target?.selectionStart === 0) {
+          inputRef.current?.focus()
+        }
       } else if (runtime && historyIndex < runtime.history.length - 1) {
         applyHistoryIndex(historyIndex + 1)
         setSuggestion({
@@ -315,20 +335,6 @@ export default function Runner(): ReactElement {
   }
 
   useEffect(() => {
-    if (!isMultiLine) {
-      historicalExecution
-        ? (historicalExecution.prompt += normalizeMultilineArgs())
-        : runtime
-          ? (runtime.prompt += normalizeMultilineArgs())
-          : ''
-      setMultiLineArgs('')
-      inputRef.current?.focus()
-      return
-    }
-    textAreaRef.current?.focus()
-  }, [isMultiLine])
-
-  useEffect(() => {
     const runtime = runtimeList.find((r) => r.target)
     if (!runtime) {
       return
@@ -394,6 +400,37 @@ export default function Runner(): ReactElement {
 
     return () => {}
   }, [runtimeList])
+
+  useEffect(() => {
+    if (isMultiLine) {
+      textAreaRef.current?.focus()
+      return
+    }
+
+    if (runtime) runtime.prompt = runtime.prompt.trim() + (multiLineArgs ? ' ' : '') + multiLineArgs
+    setMultiLineArgs('')
+    inputRef.current?.focus()
+  }, [isMultiLine])
+
+  useEffect(() => {
+    if (!historicalExecution || !historicalExecution.prompt) {
+      return
+    }
+
+    const splitPoint = historicalExecution?.prompt.indexOf('\n')
+    if (!splitPoint || splitPoint === -1) {
+      setIsMultiLine(false)
+      setMultiLineArgs('')
+      if (runtime) runtime.prompt = historicalExecution.prompt
+      return
+    }
+
+    setIsMultiLine(true)
+    if (runtime) runtime.prompt = historicalExecution.prompt.substring(0, splitPoint)
+    setMultiLineArgs(
+      historicalExecution.prompt.substring(splitPoint + 1, historicalExecution.prompt.length)
+    )
+  }, [historicalExecution?.prompt])
 
   if (!runtime) {
     return <p>Loading</p>
@@ -517,7 +554,7 @@ export default function Runner(): ReactElement {
                   className={`runner-input-field ${isMultiLine ? 'multi-line' : ''}`}
                   onChange={handlePromptChange}
                   onKeyDown={handleKeyDown}
-                  value={historicalExecution ? historicalExecution.prompt : runtime.prompt}
+                  value={runtime.prompt}
                 />
               </div>
 
