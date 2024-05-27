@@ -14,6 +14,7 @@ export class Extensions {
     ExtensionHook,
     Array<ExtensionHookResolution>
   >()
+  public extensionList: string[] = []
   constructor(private workspace: Workspace) {}
 
   async run(hook: ExtensionHook): Promise<string> {
@@ -32,6 +33,9 @@ export class Extensions {
   }
 
   async load(): Promise<void> {
+    this.extensionList = []
+    this.extensionHooks.clear()
+
     const start = Date.now()
     const packageJson = join(this.workspace.folder, 'package.json')
     const isPackageJsonExists = await pathExists(packageJson)
@@ -51,6 +55,7 @@ export class Extensions {
 
     const folder = this.workspace.folder
     const ext = this.extensionHooks
+    const list = this.extensionList
     async function scan(packageName: string): Promise<void> {
       log(`Scanning package: ${packageName}..`)
 
@@ -67,6 +72,8 @@ export class Extensions {
       const hooks = Object.keys(ExtensionHook)
 
       log(`Mapping hooks for ${packageName} = ${hooks}`)
+
+      list.push(packageName)
 
       for (const hook of hooks) {
         const hookKey = hook as ExtensionHook

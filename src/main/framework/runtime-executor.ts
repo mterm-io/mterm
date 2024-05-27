@@ -18,6 +18,7 @@ import Reset from './system-commands/reset'
 import Commands from './system-commands/commands'
 import Restart from './system-commands/restart'
 import Theme from './system-commands/theme'
+import Ext from './system-commands/ext'
 
 export interface SystemCommand {
   command: string
@@ -40,7 +41,8 @@ export const systemCommands: Array<SystemCommand> = [
   Reset,
   Commands,
   Restart,
-  Theme
+  Theme,
+  Ext
 ]
 export async function execute(context: ExecuteContext): Promise<void | boolean> {
   // check for system commands
