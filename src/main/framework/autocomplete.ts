@@ -4,7 +4,7 @@ import { isAbsolute, join, parse } from 'path'
 import { Runtime } from './runtime'
 import { HistoricalExecution } from './history'
 import { SystemCommand, systemCommands } from './runtime-executor'
-import { Commands } from "./commands";
+import { Commands } from './commands'
 
 export interface PathParts {
   path: string
@@ -292,8 +292,8 @@ export class Autocomplete {
       (o) => o.command.startsWith(prompt) || o.alias?.find((o) => o.startsWith(prompt))
     )
 
-    const userCommandMatches = Object.keys(this.workspace.commands.lib).filter((o) =>
-      o.startsWith(prompt) || o.startsWith(Commands.toCommandName(prompt))
+    const userCommandMatches = Object.keys(this.workspace.commands.lib).filter(
+      (o) => o.startsWith(prompt) || o.startsWith(Commands.toCommandName(prompt))
     )
 
     const programMatches = this.programList.filter(
