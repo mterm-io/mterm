@@ -38,6 +38,9 @@ mterm is customizable in a few ways -
   - quick change the settings with `:settings edit`
 - change the [profile](#configure) of the terminal to a desired interpreter
   - quick change the profile with `:settings set defaultProfile wsl` (change wsl with the desired profile)
+ 
+
+https://github.com/mterm-io/mterm/assets/7341502/c920853f-1f27-4ef9-ae72-945f1663e36d
 
 ### Autocomplete
 
