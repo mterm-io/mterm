@@ -9,6 +9,7 @@ import { Settings } from './settings'
 import { ExecuteContext } from './execute-context'
 import { CommandUtils } from './command-utils'
 import { shell } from 'electron'
+import { snakeCase } from "lodash";
 export class Commands {
   public lib: object = {}
   public commandFileLocation: string = ''
@@ -28,6 +29,10 @@ export class Commands {
 
   has(key: string): boolean {
     return !!this.lib[key]
+  }
+
+  static toCommandName(command: string = ''): string {
+    return snakeCase(command).toLowerCase().trim()
   }
 
   async run(context: ExecuteContext, key: string, ...args: string[]): Promise<unknown> {
@@ -115,5 +120,13 @@ export class Commands {
     this.lib = {}
 
     runInNewContext(`${jsFile}`, this)
+
+    const libTranslated = {}
+
+    Object.keys(this.lib).forEach((key) => {
+      libTranslated[Commands.toCommandName(key)] = this.lib[key]
+    })
+
+    this.lib = libTranslated
   }
 }
