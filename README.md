@@ -30,6 +30,8 @@ Head over to the [release page](https://github.com/mterm-io/mterm/releases/lates
 mterm is customizable in a few ways -
 - add your own [commands](#commands) to the terminal
   - quick add a command with `:cmd command_name` and edit this
+- add extensions to the terminal
+  - quick add an extension with `ext add mterm-red`, see [extensions](./docs/extensions.md) for more info
 - change the [theme](#theme) of the terminal
   - quick change the theme with `:theme` or `:css`
 - change the [settings](#settings) of the terminal
