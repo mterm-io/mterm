@@ -1,4 +1,4 @@
-import { mkdirs, pathExists, readFile, readJson, writeFile, writeJson } from 'fs-extra'
+import { mkdirs, pathExists, readFile, readJson, writeFile, writeJson, remove } from 'fs-extra'
 import { tmpdir } from 'node:os'
 import { join } from 'path'
 import short from 'short-uuid'
@@ -9,7 +9,7 @@ import { Settings } from './settings'
 import { ExecuteContext } from './execute-context'
 import { CommandUtils } from './command-utils'
 import { shell } from 'electron'
-import { snakeCase } from "lodash";
+import { snakeCase } from 'lodash'
 export class Commands {
   public lib: object = {}
   public commandFileLocation: string = ''
@@ -128,5 +128,50 @@ export class Commands {
     })
 
     this.lib = libTranslated
+  }
+
+  getCommandFileLocation(cmd: string): string {
+    return join(this.workingDirectory, 'commands', `${Commands.toCommandName(cmd)}.ts`)
+  }
+
+  async addCommand(cmd: string, cmdScript: string = ''): Promise<void> {
+    cmd = Commands.toCommandName(cmd)
+
+    const commandFolder = join(this.workingDirectory, 'commands')
+    const commandFolderExists = await pathExists(commandFolder)
+    if (!commandFolderExists) {
+      await mkdirs(commandFolder)
+    }
+
+    const scriptFileBuffer = await readFile(this.commandFileLocation)
+    const scriptFile = scriptFileBuffer.toString()
+    const exportText = `export { ${cmd} } from './commands/${cmd}'`
+    const script = `${scriptFile}\n${exportText}`
+
+    const commandFile = join(commandFolder, `${cmd}.ts`)
+    const commandFileContents = `export function ${cmd}() {\n\t// your code here\n\t${cmdScript}\n}\n`
+
+    await writeFile(commandFile, commandFileContents)
+    await writeFile(this.commandFileLocation, script)
+  }
+
+  async removeCommand(cmd: string): Promise<void> {
+    cmd = Commands.toCommandName(cmd)
+
+    const commandFolder = join(this.workingDirectory, 'commands')
+    const commandFolderExists = await pathExists(commandFolder)
+    if (commandFolderExists) {
+      const commandFile = join(commandFolder, `${cmd}.ts`)
+      const commandFileExists = await pathExists(commandFile)
+      if (commandFileExists) {
+        await remove(cmd)
+      }
+    }
+
+    const scriptFileBuffer = await readFile(this.commandFileLocation)
+    const scriptFile = scriptFileBuffer.toString()
+    const script = scriptFile.replaceAll(`\nexport { ${cmd} } from './commands/${cmd}'`, '')
+
+    await writeFile(this.commandFileLocation, script)
   }
 }
