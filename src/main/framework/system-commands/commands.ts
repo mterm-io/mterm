@@ -2,6 +2,37 @@ import { ExecuteContext } from '../execute-context'
 import { errorModal } from '../../index'
 import { Commands } from '../commands'
 
+export async function addCommand(context: ExecuteContext, cmd: string): Promise<void> {
+  if (!cmd) {
+    context.out('Provide a command name to add\n\nExample: :cmd add restart_explorer\n\n', true)
+    context.finish(1)
+    return
+  }
+
+  if (context.workspace.commands.has(cmd)) {
+    context.out('Command already exists\n', true)
+    context.finish(1)
+    return
+  }
+
+  context.out(`Adding command: ${cmd}\n`)
+
+  console.log('Adding command:', cmd)
+
+  await context.workspace.commands.addCommand(cmd, `return 'Running ${cmd}!'`)
+
+  context.out('Command added\n')
+
+  await context.workspace.commands.load(context.workspace.settings)
+
+  context.out('Command reloaded\n')
+
+  await context.edit(context.workspace.commands.getCommandFileLocation(cmd), async () => {
+    context.out(`${cmd} reloaded\n`)
+    await context.workspace.commands.load(context.workspace.settings)
+  })
+}
+
 export default {
   command: ':commands',
   alias: [':commands', ':cmd', ':c'],
@@ -28,34 +59,14 @@ export default {
       })
     } else if (task === 'add') {
       const cmd = Commands.toCommandName(context.prompt.args[1] || '')
-      if (!cmd) {
-        context.out('Provide a command name to add\n\nExample: :cmd add restart_explorer\n\n', true)
-        context.finish(1)
-        return
-      }
 
-      if (context.workspace.commands.has(cmd)) {
-        context.out('Command already exists\n', true)
-        context.finish(1)
-        return
-      }
+      await addCommand(context, cmd)
+    } else if (task === 'remove') {
+      const cmd = Commands.toCommandName(context.prompt.args[1] || '')
 
-      context.out(`Adding command: ${cmd}\n`)
+      await context.workspace.commands.removeCommand(cmd)
 
-      console.log('Adding command:', cmd)
-
-      await context.workspace.commands.addCommand(cmd, `return 'Running ${cmd}!'`)
-
-      context.out('Command added\n')
-
-      await context.workspace.commands.load(context.workspace.settings)
-
-      context.out('Command reloaded\n')
-
-      await context.edit(context.workspace.commands.getCommandFileLocation(cmd), async () => {
-        context.out(`${cmd} reloaded\n`)
-        await context.workspace.commands.load(context.workspace.settings)
-      })
+      context.out('Command removed\n')
     }
   }
 }
