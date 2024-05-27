@@ -4,7 +4,9 @@ import { WebContents } from 'electron'
 import { readFile } from 'fs-extra'
 import short from 'short-uuid'
 import { ResultStream } from './result-stream'
+
 import { process } from './transformers'
+import { spawn } from 'node:child_process'
 export interface RuntimeContentHandle {
   id: string
   update(html: string): void
@@ -60,6 +62,34 @@ export class ExecuteContext {
     context.command.context = context
 
     return context
+  }
+
+  async runTask(env, folder: string, spawnTask: string, hide: boolean = true): Promise<void> {
+    const [platformProgram, ...platformProgramArgs] = this.platform.split(' ')
+
+    const argsClean = platformProgramArgs.map((arg: string) => `${arg.replace('$ARGS', spawnTask)}`)
+
+    const childSpawn = spawn(platformProgram, argsClean, {
+      cwd: folder,
+      env
+    })
+
+    childSpawn.stdout.on('data', (data) => {
+      if (!hide) {
+        this.out(data.toString())
+      }
+    })
+    childSpawn.stderr.on('data', (data) => this.out(data, true))
+
+    return new Promise((resolve, reject) => {
+      childSpawn.on('exit', (code) => {
+        if (code !== 0) {
+          reject()
+        } else {
+          resolve()
+        }
+      })
+    })
   }
 
   async resolve(text: string): Promise<string> {
