@@ -8,6 +8,7 @@
 
 ### mterm-ext-red
 
+> source: https://github.com/mterm-io/mterm-ext-red
 ```bash
 ext add mterm-red
 ```
