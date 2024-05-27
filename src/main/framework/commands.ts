@@ -28,7 +28,7 @@ export class Commands {
   fetch = global.fetch
 
   has(key: string): boolean {
-    return !!this.lib[key]
+    return !!this.lib[key] || !!this.lib[Commands.toCommandName(key)]
   }
 
   static toCommandName(command: string = ''): string {
@@ -37,7 +37,7 @@ export class Commands {
 
   async run(context: ExecuteContext, key: string, ...args: string[]): Promise<unknown> {
     let state = this.state[key]
-    const cmd = this.lib[key]
+    const cmd = this.lib[key] || this.lib[Commands.toCommandName(key)]
 
     if (!state) {
       state = {}
