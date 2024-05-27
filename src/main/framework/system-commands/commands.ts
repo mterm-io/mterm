@@ -67,6 +67,17 @@ export default {
       await context.workspace.commands.removeCommand(cmd)
 
       context.out('Command removed\n')
+    } else if (task.trim()) {
+      const cmd = Commands.toCommandName(task || '')
+      if (context.workspace.commands.has(cmd)) {
+        context.out(`Editing command: ${cmd}\n`)
+        await context.edit(context.workspace.commands.getCommandFileLocation(cmd), async () => {
+          context.out(`${cmd} reloaded\n`)
+          await context.workspace.commands.load(context.workspace.settings)
+        })
+      } else {
+        await addCommand(context, cmd)
+      }
     }
   }
 }
