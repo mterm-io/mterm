@@ -206,7 +206,11 @@ export function attach({ app, workspace }: BootstrapContext): void {
 
   ipcMain.handle('runner.theme', async (_, profile): Promise<string> => {
     const theme = workspace.theme.get(profile)
-    const extensionTheme = await workspace.extensions.run(ExtensionHook.RUNNER_THEME_CSS)
+    const extensionTheme = await workspace.extensions.run<string>(
+      ExtensionHook.RUNNER_THEME_CSS,
+      '',
+      workspace
+    )
     return `${extensionTheme}${theme}`
   })
 

@@ -7,29 +7,33 @@ export enum ExtensionHook {
   RUNNER_THEME_CSS = 'RUNNER_THEME_CSS'
 }
 
-export type ExtensionHookCallback = (workspace?: Workspace) => string
-export type ExtensionHookResolution = string | ExtensionHookCallback
+export type ExtensionHookCallback<T> = (...args) => T
+export type ExtensionHookResolution<T> = string | ExtensionHookCallback<T>
 export class Extensions {
-  public extensionHooks: Map<ExtensionHook, Array<ExtensionHookResolution>> = new Map<
+  public extensionHooks: Map<ExtensionHook, Array<ExtensionHookResolution<object>>> = new Map<
     ExtensionHook,
-    Array<ExtensionHookResolution>
+    Array<ExtensionHookResolution<object>>
   >()
   public extensionList: string[] = []
   constructor(private workspace: Workspace) {}
 
-  async run(hook: ExtensionHook): Promise<string> {
+  async run<T>(hook: ExtensionHook, ifNullThen: T, ...args): Promise<T | undefined> {
     const resolutions = this.extensionHooks.get(hook) || []
 
-    let result = ''
+    let stringResult = ''
+    let result: T | undefined = undefined
     for (const resolution of resolutions) {
       if (typeof resolution === 'string') {
-        result += resolution
+        stringResult = stringResult || ''
+        stringResult += resolution
+
+        result = stringResult as unknown as T
       } else {
-        result += resolution(this.workspace)
+        result = resolution(...args) as T
       }
     }
 
-    return result
+    return result || ifNullThen
   }
 
   async load(): Promise<void> {
@@ -77,9 +81,9 @@ export class Extensions {
 
       for (const hook of hooks) {
         const hookKey = hook as ExtensionHook
-        let resolutions: ExtensionHookResolution[] = []
+        let resolutions: ExtensionHookResolution<object>[] = []
         if (ext.has(ExtensionHook[hookKey])) {
-          resolutions = ext.get(ExtensionHook[hookKey]) as ExtensionHookResolution[]
+          resolutions = ext.get(ExtensionHook[hookKey]) as ExtensionHookResolution<object>[]
         }
 
         resolutions.push(mtermExt[hookKey])
