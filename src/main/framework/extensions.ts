@@ -4,16 +4,21 @@ import { pathExists, readJson } from 'fs-extra'
 import { log } from '../logger'
 
 export enum ExtensionHook {
-  RUNNER_THEME_CSS = 'RUNNER_THEME_CSS'
+  RUNNER_THEME_CSS = 'RUNNER_THEME_CSS',
+  EXT_POST_INSTALL = 'EXT_POST_INSTALL'
 }
 
 export type ExtensionHookCallback<T> = (...args) => T
 export type ExtensionHookResolution<T> = string | ExtensionHookCallback<T>
+
+export interface ExtensionHookResolutionContainer<T> {
+  packageName: string
+  resolution: ExtensionHookResolution<T>
+  hook: ExtensionHook
+}
 export class Extensions {
-  public extensionHooks: Map<ExtensionHook, Array<ExtensionHookResolution<object>>> = new Map<
-    ExtensionHook,
-    Array<ExtensionHookResolution<object>>
-  >()
+  public extensionHooks: Map<ExtensionHook, Array<ExtensionHookResolutionContainer<object>>> =
+    new Map<ExtensionHook, Array<ExtensionHookResolutionContainer<object>>>()
   public extensionList: string[] = []
   constructor(private workspace: Workspace) {}
 
@@ -22,18 +27,43 @@ export class Extensions {
 
     let stringResult = ''
     let result: T | undefined = undefined
-    for (const resolution of resolutions) {
+    for (const container of resolutions) {
+      const resolution = container.resolution
       if (typeof resolution === 'string') {
         stringResult = stringResult || ''
         stringResult += resolution
 
         result = stringResult as unknown as T
       } else {
-        result = resolution(...args) as T
+        const maybeResult = resolution(...args) as T
+
+        if (typeof maybeResult === 'string') {
+          stringResult = stringResult || ''
+          stringResult += resolution
+
+          result = stringResult as unknown as T
+        }
       }
     }
 
     return result || ifNullThen
+  }
+
+  async execute(hook: ExtensionHook, ...args): Promise<void> {
+    await this.executeFor(hook, '*', ...args)
+  }
+
+  async executeFor(hook: ExtensionHook, extName: string, ...args): Promise<void> {
+    const resolutions = (this.extensionHooks.get(hook) || []).filter(
+      (r) => extName === '*' || r['packageName'] === extName
+    )
+
+    for (const container of resolutions) {
+      const resolution = container.resolution
+      if (typeof resolution === 'function') {
+        await resolution(...args)
+      }
+    }
   }
 
   async load(): Promise<void> {
@@ -81,12 +111,20 @@ export class Extensions {
 
       for (const hook of hooks) {
         const hookKey = hook as ExtensionHook
-        let resolutions: ExtensionHookResolution<object>[] = []
+        let resolutions: ExtensionHookResolutionContainer<object>[] = []
         if (ext.has(ExtensionHook[hookKey])) {
-          resolutions = ext.get(ExtensionHook[hookKey]) as ExtensionHookResolution<object>[]
+          resolutions = ext.get(
+            ExtensionHook[hookKey]
+          ) as ExtensionHookResolutionContainer<object>[]
         }
 
-        resolutions.push(mtermExt[hookKey])
+        const extHook = mtermExt[hookKey]
+
+        resolutions.push({
+          packageName,
+          resolution: extHook,
+          hook: hookKey
+        })
 
         ext.set(hookKey, resolutions)
       }
