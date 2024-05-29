@@ -25,6 +25,23 @@ this means commands such as `ls`, `cd` or program commands such as `node -v` or 
 
 Head over to the [release page](https://github.com/mterm-io/mterm/releases/latest) to find the binary for your system type. mterm is evergreen and updates are automatically installed on your system as hey get released. Run `:v` to see your current mterm version.
 
+### Customize
+
+mterm is customizable in a few ways -
+- add your own [commands](#commands) to the terminal
+  - quick add a command with `:cmd command_name` and edit this
+- add extensions to the terminal
+  - quick add an extension with `ext add mterm-red`, see [extensions](./docs/extensions.md) for more info
+- change the [theme](#theme) of the terminal
+  - quick change the theme with `:theme` or `:css`
+- change the [settings](#settings) of the terminal
+  - quick change the settings with `:settings edit`
+- change the [profile](#configure) of the terminal to a desired interpreter
+  - quick change the profile with `:settings set defaultProfile wsl` (change wsl with the desired profile)
+ 
+
+https://github.com/mterm-io/mterm/assets/7341502/c920853f-1f27-4ef9-ae72-945f1663e36d
+
 ### Autocomplete
 
 Start typing, mterm will pick up your available: programs, [system commands](#system), [custom commands](#commands) and history
@@ -143,24 +160,26 @@ here is an example `~/mterm/settings.json` -
 
 mterm provided a few system commands to help control the terminal and settings. mterm settings will always start with `:` (a colon) unless the intention is to override a system command. for example, because `clear` needs to be handled in a special way for mterm windows + tabs, it is overriden in mterm.
 
-| Command                      | Alias  | Purpose                                                                                |
-| ---------------------------- | ------ | -------------------------------------------------------------------------------------- |
-| `clear`                      | `cls`  | Clear the current terminal output                                                      |
-| `cd`                         |        | Navigate the file tree on the host machine                                             |
-| `:exit`                      | `exit` | Exit the current tab, or mterm if only 1 tab is open                                   |
-| `:edit`                      | `edit` | Open the in-terminal editor with the file provided. Hit `Ctrl+S` to save in the editor |
-| `:history`                   |        | Print out terminal history for debugging in a JSON format                              |
-| `:reload`                    |        | Reload settings, the ui, and commands without restarting                               |
-| `:tab`                       |        | Open a new tab                                                                         |
-| `:test`                      |        | Sample command that executes after 10 seconds. Helpful for debugging                   |
-| `:vault`                     |        | Open the secret management tool, the mterm vault                                       |
-| `:version`                   | `:v`   | Print the current mterm version                                                        |
-| `:workspace`                 |        | Open the mterm workspace folder on disk: `~/mterm`                                     |
-| `:theme`                     | `:css` | Edit the terminal theme real time                                                      |
-| `:settings`                  |        | Open the mterm settings gui to manage `~/mterm/settings.json`                          |
-| `:settings edit`             |        | Open the `~/mterm/settings.json` in the terminal editor with hot reloading             |
-| `:settings reload`           |        | Reload `~/mterm/settings.json` and all ui etc associated with the settings             |
-| `:settings {get\|set} {key}` |        | Set the setting key matching the path in `~/mterm/settings.json` and reload            |
+| Command                      | Alias       | Purpose                                                                                |
+|------------------------------|-------------|----------------------------------------------------------------------------------------|
+| `clear`                      | `cls`       | Clear the current terminal output                                                      |
+| `cd`                         |             | Navigate the file tree on the host machine                                             |
+| `:exit`                      | `exit`      | Exit the current tab, or mterm if only 1 tab is open                                   |
+| `:edit`                      | `edit`      | Open the in-terminal editor with the file provided. Hit `Ctrl+S` to save in the editor |
+| `:history`                   |             | Print out terminal history for debugging in a JSON format                              |
+| `:reload`                    |             | Reload settings, the ui, and commands without restarting                               |
+| `:tab`                       |             | Open a new tab                                                                         |
+| `:test`                      |             | Sample command that executes after 10 seconds. Helpful for debugging                   |
+| `:vault`                     |             | Open the secret management tool, the mterm vault                                       |
+| `:version`                   | `:v`        | Print the current mterm version                                                        |
+| `:workspace`                 |             | Open the mterm workspace folder on disk: `~/mterm`                                     |
+| `:theme`                     | `:css`      | Edit the terminal theme real time                                                      |
+| `:cmd`                       | `:commands` | Edit the command file                                                                  |
+| `:cmd {cmd_name}`            |             | Edit the command file for the cmd_name, creates if this doesn't exist                  |
+| `:settings`                  |             | Open the mterm settings gui to manage `~/mterm/settings.json`                          |
+| `:settings edit`             |             | Open the `~/mterm/settings.json` in the terminal editor with hot reloading             |
+| `:settings reload`           |             | Reload `~/mterm/settings.json` and all ui etc associated with the settings             |
+| `:settings {get\|set} {key}` |             | Set the setting key matching the path in `~/mterm/settings.json` and reload            |
 
 ### Commands
 
@@ -182,6 +201,30 @@ Now run `hello X` from mterm -
 
 > In this case, no argument was provided so the `os.userInfo().username` was the fallback. `Hello, DR` is the result!
 
+Note: commands are in snake case always when running. `helloWorld` will be `hello_world` when running in mterm. however, mterm will still resolve `helloWorld` as `hello_world` when running - it's just important to note this when dealing with name collisions. every command is stored in snake case.
+
+#### add a command
+
+add a command to and edit this command -
+
+```bash
+:cmd command_name
+```
+![image](https://github.com/mterm-io/mterm/assets/7341502/619706da-fe9e-4a97-8786-ce294492d8af)
+
+`command_name` is now available to mterm (or `commandName` or `COMMAND_NAME` - note all names are resolved to `snake_case`)
+
+#### editing a command
+
+in the same fasion you add a command, edit a command with the same syntax -
+```bash
+:cmd command_name
+```
+
+this editor will save with `Ctrl+S` and reload the command every time you save.
+
+
+#### other notes on commands
 Try fetching data!
 
 ```typescript

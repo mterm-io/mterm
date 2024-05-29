@@ -13,6 +13,7 @@ import { Store } from './store'
 import { History } from './history'
 import { Theme } from './theme'
 import { Autocomplete } from './autocomplete'
+import { Extensions } from './extensions'
 
 export function resolveFolderPathForMTERM(folder: string): string {
   folder = folder.replace('~', homedir())
@@ -28,6 +29,7 @@ export class Workspace {
   public settings: Settings
   public commands: Commands
   public autocomplete: Autocomplete
+  public extensions: Extensions
   public theme: Theme
   public isAppQuiting: boolean = false
   public windows: MTermWindow[] = []
@@ -47,6 +49,7 @@ export class Workspace {
     this.history = new History(join(this.folder, '.history'))
     this.store = new Store(join(this.folder, '.mterm-store'))
     this.theme = new Theme(this, join(app.getAppPath(), './resources/theme.css'))
+    this.extensions = new Extensions(this)
     this.autocomplete = new Autocomplete(this)
   }
 
@@ -95,6 +98,7 @@ export class Workspace {
 
     await this.settings.load()
     await this.theme.load()
+    await this.extensions.load()
 
     // we ignore the result of this (catch error ofc)
     // let this run in the background

@@ -26,6 +26,7 @@ import { writeFile } from 'fs-extra'
 import { ExecuteContext } from './execute-context'
 import { ResultStream } from './result-stream'
 import { transform } from './transformers'
+import { ExtensionHook } from './extensions'
 
 export function attach({ app, workspace }: BootstrapContext): void {
   const eventListForCommand = (command: Command): ResultContentEvent[] => {
@@ -204,7 +205,9 @@ export function attach({ app, workspace }: BootstrapContext): void {
   })
 
   ipcMain.handle('runner.theme', async (_, profile): Promise<string> => {
-    return workspace.theme.get(profile)
+    const theme = workspace.theme.get(profile)
+    const extensionTheme = await workspace.extensions.run(ExtensionHook.RUNNER_THEME_CSS)
+    return `${extensionTheme}${theme}`
   })
 
   ipcMain.handle('runtime.kill', async (_, commandId, runtimeId): Promise<boolean> => {
