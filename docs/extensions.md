@@ -6,7 +6,7 @@
   - poof, red terminal
 - [mterm-ext-google](#mterm-ext-google)
   - open the google search from the terminal
-- want to make your own? check out the [mterm-ext-template](#todo) and make a pull request to add it to this list
+- want to make your own? check out the [mterm-ext-template](https://github.com/mterm-io/mterm-ext-template) and make a pull request to add it to this list
   - note ANY extenstion that is published to npmjs.org is already available to be installed with `ext add <extension-name>`
 
 ### mterm-ext-red
