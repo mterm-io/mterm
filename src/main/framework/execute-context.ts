@@ -133,6 +133,7 @@ export class ExecuteContext {
     const R = this.out(container(html), false)
     const sender = this.sender
     const eventHandlers = this.eventHandlers
+
     return {
       id,
       update(newHTML: string): void {

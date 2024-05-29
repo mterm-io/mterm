@@ -60,6 +60,7 @@ export class Commands {
           if (!context.workspace.store.unlocked) {
             throw 'Vault is locked, unlock before using secrets. Open with :vault'
           }
+
           return context.workspace.store.get(key, orElse)
         }
       }

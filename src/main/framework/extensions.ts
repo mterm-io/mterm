@@ -36,6 +36,11 @@ export class Extensions {
     let result: T | undefined = undefined
     for (const container of resolutions) {
       const resolution = container.resolution
+
+      if (resolution === undefined) {
+        continue
+      }
+
       if (typeof resolution === 'string') {
         stringResult = stringResult || ''
         stringResult += resolution
