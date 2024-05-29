@@ -50,11 +50,12 @@ export class Prompt {
 
   set value(value: string) {
     this._value = value
-    this.parts = value
-      .split('\n')
-      .map((line) => line.trim())
-      .join(' ')
-      .split(' ')
+    this.parts = splitArgs(
+      value
+        .split('\n')
+        .map((line) => line.trim())
+        .join(' ')
+    )
 
     const [cmd, ...args] = this.parts
 
