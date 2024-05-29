@@ -4,9 +4,14 @@ import { Suggestion, SuggestionEntryType } from './autocomplete'
 type RunnerACProps = {
   suggestion: Suggestion
   selection: number
+  isMultiLine: boolean
 }
-export default function RunnerAC({ suggestion, selection }: RunnerACProps): ReactElement {
-  if (!suggestion || !suggestion.list.length) {
+export default function RunnerAC({
+  suggestion,
+  selection,
+  isMultiLine
+}: RunnerACProps): ReactElement {
+  if (!suggestion || !suggestion.list.length || isMultiLine) {
     return <></>
   }
 
@@ -15,13 +20,13 @@ export default function RunnerAC({ suggestion, selection }: RunnerACProps): Reac
   const width = 600
   const maxItemsVisible = 5
   const entryHeight = 30
-  const inputOffset = 50
+  const inputOffset = isMultiLine ? 60 : 53
   const topOffset = Math.min(maxItemsVisible, itemLength) * entryHeight
 
   const style = {
     height: `${topOffset}px`,
     width: `${width}px`,
-    top: `${inputOffset}px`
+    top: `${inputOffset}%`
   }
 
   function getLabel(type: SuggestionEntryType): string {

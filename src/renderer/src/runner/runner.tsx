@@ -99,9 +99,17 @@ export default function Runner(): ReactElement {
     window.electron.ipcRenderer.send('runtime.prompt', prompt)
 
     const cursor = inputRef?.current?.selectionEnd
+
     window.electron.ipcRenderer.invoke('runtime.complete', prompt, cursor ?? -1).then((r) => {
       setSuggestion(r)
       setSuggestionSelection(0)
+    })
+  }
+
+  const onMultiLineChange = (_: string, e: ChangeEvent<HTMLTextAreaElement>): void => {
+    setMultiLineArgs(e.target.value)
+    setSuggestion({
+      list: []
     })
   }
   const handlePromptChange = (
@@ -172,6 +180,9 @@ export default function Runner(): ReactElement {
       )
       if (runtime) setPrompt(runtime.prompt.slice(0, cursorPosition))
       textAreaRef.current?.focus()
+      setSuggestion({
+        list: []
+      })
     }
   }
 
@@ -590,14 +601,18 @@ export default function Runner(): ReactElement {
                   ref={textAreaRef}
                   placeholder=">>"
                   className={`runner-textarea-field ${isMultiLine ? 'multi-line' : ''}`}
-                  onChange={(e) => setMultiLineArgs(e.target.value)}
+                  onChange={(e) => onMultiLineChange(runtime?.prompt || '', e)}
                   onKeyDown={handleKeyDown}
                   value={multiLineArgs}
                 />
               ) : (
                 ''
               )}
-              <RunnerAC suggestion={suggestion} selection={suggestionSelection} />
+              <RunnerAC
+                suggestion={suggestion}
+                selection={suggestionSelection}
+                isMultiLine={isMultiLine}
+              />
             </div>
           </div>
           <div className={`runner-result ${result.code !== 0 ? '' : ''}`}>{output}</div>
