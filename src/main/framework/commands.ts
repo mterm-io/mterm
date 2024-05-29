@@ -11,6 +11,7 @@ import { CommandUtils } from './command-utils'
 import { shell } from 'electron'
 import { snakeCase } from 'lodash'
 export class Commands {
+  public libManual: Map<string, boolean> = new Map<string, boolean>()
   public lib: object = {}
   public commandFileLocation: string = ''
   public state: Map<string, object> = new Map<string, object>()
@@ -117,7 +118,11 @@ export class Commands {
 
     const jsFile: Buffer = await readFile(join(temp, 'commands.js'))
 
-    this.lib = {}
+    Object.keys(this.lib).forEach((key) => {
+      if (!this.libManual.get(key)) {
+        delete this.lib[key]
+      }
+    })
 
     runInNewContext(`${jsFile}`, this)
 
@@ -173,5 +178,24 @@ export class Commands {
     const script = scriptFile.replaceAll(`\nexport { ${cmd} } from './commands/${cmd}'`, '')
 
     await writeFile(this.commandFileLocation, script)
+  }
+
+  add(command: string, exec: () => void): void {
+    const nameNormalized = Commands.toCommandName(command)
+
+    this.lib[nameNormalized] = exec
+
+    console.log(exec)
+
+    this.libManual.set(nameNormalized, true)
+  }
+
+  delete(command: string): void {
+    const nameNormalized = Commands.toCommandName(command)
+
+    delete this.lib[nameNormalized]
+
+    this.libManual.delete(nameNormalized)
+    this.state.delete(nameNormalized)
   }
 }

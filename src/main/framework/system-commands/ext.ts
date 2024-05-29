@@ -11,7 +11,7 @@ ${context.workspace.extensions.extensionList.length > 0 ? '-' : ''}` +
     context.finish(0)
     return
   }
-  if (task === 'load') {
+  if (task === 'load' || task === 'reload') {
     await context.workspace.extensions.load()
     context.out('Extensions loaded\n')
     context.finish(0)
