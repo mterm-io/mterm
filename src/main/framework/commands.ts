@@ -202,6 +202,7 @@ export class Commands {
 /**
  * Splits a string into an array of substrings based on spaces, preserving spaces within quoted strings.
  * Supports both single and double quotes, and handles escaped quotes within quoted text.
+ * The outer quotes, single or double, are removed from the returned substrings.
  *
  * @param {string} input - The input string to be split into arguments.
  * @returns {string[]} An array of substrings representing the split arguments.
@@ -210,13 +211,13 @@ export class Commands {
  * const input = 'echo "Hello, world!" | grep "Hello \\"Hello"" \'Single Quoted\' \'Escaped\\\'Single\' "Double \\"Quoted\\""';
  * const result = splitArgs(input);
  * console.log(result);
- * // Output: ["echo", ""Hello, world!"", "|", "grep", ""Hello "Hello""", "'Single Quoted'", "'Escaped'Single'", ""Double "Quoted""]
+ * // Output: ["echo", "Hello, world!", "|", "grep", "Hello "Hello"", "Single Quoted", "Escaped'Single", "Double "Quoted""]
  *
  * @example
  * const input = 'google "hello \\" world"';
  * const result = splitArgs(input);
  * console.log(result);
- * // Output: ["google", ""hello " world""]
+ * // Output: ["google", "hello " world"]
  */
 export function splitArgs(input: string): string[] {
   const regex = /[^\s'"]+|'([^'\\]*(?:\\.[^'\\]*)*)'|"([^"\\]*(?:\\.[^"\\]*)*)"/gi
@@ -225,9 +226,9 @@ export function splitArgs(input: string): string[] {
 
   while ((match = regex.exec(input)) !== null) {
     if (match[1] !== undefined) {
-      matches.push(`'${match[1].replace(/\\(.)/g, '$1')}'`)
+      matches.push(match[1].replace(/\\(.)/g, '$1'))
     } else if (match[2] !== undefined) {
-      matches.push(`"${match[2].replace(/\\(.)/g, '$1')}"`)
+      matches.push(match[2].replace(/\\(.)/g, '$1'))
     } else {
       matches.push(match[0])
     }
