@@ -3,7 +3,9 @@
 > Please make a pull request to add your extension to this list
 
 - [mterm-ext-red](#mterm-ext-red)
+  - poof, red terminal
 - [mterm-ext-google](#mterm-ext-google)
+  - open the google search from the terminal
 - more coming soon!
 
 
