@@ -27,24 +27,65 @@ body {
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-columns: auto;
+  /* grid-template-columns: 100px; */
   grid-template-rows: auto;
   justify-items: center;
   align-items: center;
 }
 
 .runner-input {
-  width: 100%
+  height: 100%;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  max-height: 100%;
+  align-content: stretch;
+  justify-content: space-around;
+  flex-direction: column;
+}
+
+.multiline-input-container {
+  display:flex;
+  align-items:flex-end;
+  height: 50%;
+}
+
+.runner-input-field,
+.runner-textarea-field {
+  font-size: 20px;
+  background: transparent;
+  border: 0;
+  font-family: "Roboto Mono", monospace;
+  flex-grow: 1;
 }
 
 .runner-input-field {
   height: 50px;
   text-align: center;
   width: 100%;
-  font-size: 20px;
-  background: transparent;
-  border: 0;
+  overflow-x: auto;
+  white-space: nowrap;
   font-family: "Roboto Mono", monospace
+}
+
+.runner-textarea-field {
+  max-width:100%;
+  text-align: left;
+  padding-left: 20px;
+  flex: 1 1 auto;
+  overflow: auto;
+  resize: none;
+}
+
+.runner-textarea-field:focus {
+  border: 0;
+  font-family: "Roboto Mono", monospace;
+  outline: none;
+  color: white;
+}
+
+.multi-line {
+  text-align: left !important;
 }
 
 .runner-input-field {
@@ -275,13 +316,13 @@ body {
   grid-template-columns: 15px auto;
 }
 
-.runner-result::-webkit-scrollbar {
+.multi-line::-webkit-scrollbar, .runner-result::-webkit-scrollbar {
   width: 15px;
 }
-.runner-result::-webkit-scrollbar-corner {
+.multi-line::-webkit-scrollbar-corner, .runner-result::-webkit-scrollbar-corner {
   background: rgba(0,0,0,0);
 }
-.runner-result::-webkit-scrollbar-thumb {
+.multi-line::-webkit-scrollbar-thumb, .runner-result::-webkit-scrollbar-thumb {
   background-color: #294794;
   border-radius: 6px;
   border: 4px solid rgba(0,0,0,0);
