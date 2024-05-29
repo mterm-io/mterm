@@ -195,7 +195,7 @@ export class ExecuteContext {
     this.sender.send('runtime.commandEvent')
   }
 
-  finish(code: number): void {
+  finish(code: number = 0): void {
     if (this.command.aborted || this.command.complete) {
       return
     }

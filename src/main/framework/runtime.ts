@@ -4,6 +4,7 @@ import { ChildProcessWithoutNullStreams } from 'node:child_process'
 import { resolve } from 'path'
 import { ResultStream } from './result-stream'
 import { ExecuteContext } from './execute-context'
+import { splitArgs } from './commands'
 
 export interface Result {
   code: number
@@ -56,6 +57,8 @@ export class Prompt {
       .split(' ')
 
     const [cmd, ...args] = this.parts
+
+    console.log(args)
 
     this.cmd = cmd
     this.args = args
