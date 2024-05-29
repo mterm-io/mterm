@@ -70,6 +70,9 @@ export default function Runner(): ReactElement {
       list: []
     })
 
+    setMultiLineArgs('')
+    setIsMultiLine(false)
+
     await reloadRuntimesFromBackend()
 
     // renderer -> "backend"
@@ -167,7 +170,7 @@ export default function Runner(): ReactElement {
         runtime?.prompt.slice(cursorPosition, runtime.prompt.length) +
           (multiLineArgs ? '\n' + multiLineArgs : '')
       )
-      if (runtime) runtime.prompt = runtime.prompt.slice(0, cursorPosition)
+      if (runtime) setPrompt(runtime.prompt.slice(0, cursorPosition))
       textAreaRef.current?.focus()
     }
   }
@@ -176,7 +179,7 @@ export default function Runner(): ReactElement {
     if (e.key === 'Enter' && e.shiftKey) {
       handleLineBreak(e)
     }
-    if (e.code === 'Backslash' || e.code === 'Backquote') {
+    if ((e.code === 'Backslash' || e.code === 'Backquote') && !e.shiftKey) {
       e.preventDefault()
       setIsMultiLine(!isMultiLine)
     }
@@ -185,7 +188,7 @@ export default function Runner(): ReactElement {
         e.preventDefault()
         const multiLineSplit = multiLineArgs.trim().split('\n')
         const _firstLine = runtime?.prompt.trim()
-        if (runtime) runtime.prompt = _firstLine + (_firstLine ? ' ' : '') + multiLineSplit.shift()
+        setPrompt(_firstLine + (_firstLine ? ' ' : '') + multiLineSplit.shift())
         setMultiLineArgs(multiLineSplit.join('\n'))
 
         if (multiLineSplit.length < 1) {
@@ -197,21 +200,33 @@ export default function Runner(): ReactElement {
     }
     if (e.key === 'Enter' && !e.shiftKey) {
       if (!runtime) return
-      runtime.prompt =
-        runtime.prompt.trim() +
-        (isMultiLine && multiLineArgs ? '\n' + multiLineArgs : multiLineArgs)
-      execute(runtime).catch((error) => console.error(error))
-      setMultiLineArgs('')
-      setIsMultiLine(false)
+      execute({
+        ...runtime,
+        prompt:
+          runtime.prompt.trim() +
+          (isMultiLine && multiLineArgs ? '\n' + multiLineArgs : multiLineArgs)
+      }).catch((error) => console.error(error))
     }
     if (e.code === 'ArrowDown') {
       if (historyIndex === -1) {
         if (suggestionSelection < suggestion.list.length - 1) {
           setSuggestionSelection(suggestionSelection + 1)
+        } else if (isMultiLine && !e.ctrlKey && e.target === inputRef.current) {
+          const linebreakIndex = multiLineArgs.indexOf('\n')
+          const cursorPosition = e.target?.selectionStart
+          window.electron.ipcRenderer.invoke('runtime.complete', runtime?.prompt, 0).then(() => {
+            textAreaRef.current?.focus()
+            cursorPosition < linebreakIndex || linebreakIndex === -1
+              ? textAreaRef.current?.setSelectionRange(cursorPosition, cursorPosition)
+              : textAreaRef.current?.setSelectionRange(linebreakIndex, linebreakIndex)
+          })
         }
-      } else if (isMultiLine && !e.ctrlKey) {
-        textAreaRef.current?.focus()
       } else if (runtime && historyIndex > -1) {
+        if (historyIndex === 0) {
+          setPrompt('')
+          setIsMultiLine(false)
+          setMultiLineArgs('')
+        }
         applyHistoryIndex(historyIndex - 1)
       }
     }
@@ -250,12 +265,24 @@ export default function Runner(): ReactElement {
       }
     }
 
+    if (e.code === 'Escape') {
+      //exit suggestions
+      setSuggestion({
+        list: []
+      })
+    }
+
     if (e.code === 'ArrowUp') {
       if (suggestionSelection > 0) {
         setSuggestionSelection(suggestionSelection - 1)
       } else if (isMultiLine && !e.ctrlKey) {
-        if (e.target?.selectionStart === 0) {
-          inputRef.current?.focus()
+        const linebreakIndex = multiLineArgs.indexOf('\n')
+        const cursorPosition = e.target?.selectionStart
+        if (linebreakIndex < 0 || cursorPosition <= linebreakIndex) {
+          window.electron.ipcRenderer.invoke('runtime.complete', runtime?.prompt, 0).then(() => {
+            inputRef.current?.focus()
+            inputRef.current?.setSelectionRange(cursorPosition, cursorPosition)
+          })
         }
       } else if (runtime && historyIndex < runtime.history.length - 1) {
         applyHistoryIndex(historyIndex + 1)
@@ -407,7 +434,7 @@ export default function Runner(): ReactElement {
       return
     }
 
-    if (runtime) runtime.prompt = runtime.prompt.trim() + (multiLineArgs ? ' ' : '') + multiLineArgs
+    if (runtime) setPrompt(runtime.prompt.trim() + (multiLineArgs ? ' ' : '') + multiLineArgs)
     setMultiLineArgs('')
     inputRef.current?.focus()
   }, [isMultiLine])
@@ -421,16 +448,16 @@ export default function Runner(): ReactElement {
     if (!splitPoint || splitPoint === -1) {
       setIsMultiLine(false)
       setMultiLineArgs('')
-      if (runtime) runtime.prompt = historicalExecution.prompt
+      setPrompt(historicalExecution.prompt)
       return
     }
 
     setIsMultiLine(true)
-    if (runtime) runtime.prompt = historicalExecution.prompt.substring(0, splitPoint)
+    setPrompt(historicalExecution.prompt.substring(0, splitPoint))
     setMultiLineArgs(
       historicalExecution.prompt.substring(splitPoint + 1, historicalExecution.prompt.length)
     )
-  }, [historicalExecution?.prompt])
+  }, [historicalExecution])
 
   if (!runtime) {
     return <p>Loading</p>
