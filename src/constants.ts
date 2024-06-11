@@ -27,12 +27,12 @@ export const DEFAULT_PROFILES: Record<string, Profile> =
 export const DEFAULT_FOLDER = '$CWD'
 export const DEFAULT_HISTORY_ENABLED = true
 
-export const DEFAULT_HISTORY_MAX_ITEMS = 100
+export const DEFAULT_HISTORY_MAX_ITEMS = 1000
 export const DEFAULT_HISTORY_SAVE_RESULT = true
 export const DEFAULT_SETTING_RUNNER_SHORTCUT = '`+CommandOrControl'
 export const DEFAULT_SETTING_RESULTCOLWIDTH = '50%'
 export const DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT = '`+Shift+CommandOrControl'
-export const DEFAULT_SETTING_IS_COMMANDER_MODE = true
+export const DEFAULT_SETTING_IS_COMMANDER_MODE = false
 export const DEFAULT_SETTING_COMMANDER_MODE_BOUNDS = {
   screen: 0,
   x: 0,
@@ -45,7 +45,7 @@ export const DEFAULT_SETTING_RUNNER_BOUNDS = {
   screen: 'PRIMARY',
   x: 'SCREEN:-.5',
   y: 'SCREEN:-.5',
-  w: 720,
+  w: 820,
   h: 500
 }
 

@@ -58,7 +58,7 @@ describe('constants', () => {
   })
 
   it('should have the correct DEFAULT_HISTORY_MAX_ITEMS', () => {
-    expect(DEFAULT_HISTORY_MAX_ITEMS).toBe(100)
+    expect(DEFAULT_HISTORY_MAX_ITEMS).toBe(1000)
   })
 
   it('should have the correct DEFAULT_HISTORY_SAVE_RESULT', () => {
@@ -74,7 +74,7 @@ describe('constants', () => {
   })
 
   it('should have the correct DEFAULT_SETTING_IS_COMMANDER_MODE', () => {
-    expect(DEFAULT_SETTING_IS_COMMANDER_MODE).toBe(true)
+    expect(DEFAULT_SETTING_IS_COMMANDER_MODE).toBe(false)
   })
 
   it('should have the correct DEFAULT_SETTING_COMMANDER_MODE_BOUNDS', () => {
@@ -92,7 +92,7 @@ describe('constants', () => {
       screen: 'PRIMARY',
       x: 'SCREEN:-.5',
       y: 'SCREEN:-.5',
-      w: 720,
+      w: 820,
       h: 500
     })
   })

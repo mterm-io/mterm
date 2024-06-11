@@ -1,4 +1,3 @@
-
 <h1 align="left">mterm</h1>
 <h5 align="left">An electron terminal written with TypeScript, and rendered with React.</h5>
 <h5 align="left">Join us on discord @ <a href=https://discord.gg/mterm">discord.gg/mterm</a></h5>
@@ -16,6 +15,7 @@
 this means commands such as `ls`, `cd` or program commands such as `node -v` or `yarn install` will work out of the box as long as the host machine supports these commands. you can configure the desired interpreter [below](#configure)
 
 ### Why
+
 - by no means does mterm replace your sh, or pwsh but we think abstractions such as [secrets](#secrets), and [commands](#commands) can supplement your development routines
   - in other words, instead of building a utility for a dev task in a shell script for local use, use typescript
 - mterm comes with tabs but also within the scope of a tab; each command is ran in the background - this means you can use your keyboard to hop around execution stacks
@@ -24,6 +24,23 @@ this means commands such as `ls`, `cd` or program commands such as `node -v` or 
 ### Install
 
 Head over to the [release page](https://github.com/mterm-io/mterm/releases/latest) to find the binary for your system type. mterm is evergreen and updates are automatically installed on your system as hey get released. Run `:v` to see your current mterm version.
+
+### Customize
+
+mterm is customizable in a few ways -
+- add your own [commands](#commands) to the terminal
+  - quick add a command with `:cmd command_name` and edit this
+- add extensions to the terminal
+  - quick add an extension with `ext add mterm-red`, see [extensions](./docs/extensions.md) for more info
+- change the [theme](#theme) of the terminal
+  - quick change the theme with `:theme` or `:css`
+- change the [settings](#settings) of the terminal
+  - quick change the settings with `:settings edit`
+- change the [profile](#configure) of the terminal to a desired interpreter
+  - quick change the profile with `:settings set defaultProfile wsl` (change wsl with the desired profile)
+ 
+
+https://github.com/mterm-io/mterm/assets/7341502/c920853f-1f27-4ef9-ae72-945f1663e36d
 
 ### Autocomplete
 
@@ -35,6 +52,7 @@ Finally, hit tab to finish the completion -
 ### Command Mode
 
 By default, **mterm** opens in command mode (you can change this in [settings](#settings)). A couple of notes about command mode -
+
 - This window is always on top
 - This window follows to any desktop
 - The font and theme is larger to account for large size
@@ -42,11 +60,13 @@ By default, **mterm** opens in command mode (you can change this in [settings](#
 This is a nice way to focus on execution details but it can be annoying if multiple windows are in use.
 
 Hide mterm with the default toggle hotkey -
+
 ```bash
 ~ + CommandOrControl
 ```
 
 Disable command mode and go to normal terminal window mode with -
+
 ```bash
 ~ + Shift + CommandOrControl
 ```
@@ -58,16 +78,19 @@ Or change the behaviour of all of this with [settings](#settings).
 mterm creates the `mterm` folder on a host machine on first launch a the user's home directory
 
 for windows -
+
 ```bash
 C:/Users/<YOUR_NAME>/mterm
 ```
 
 for mac -
+
 ```bash
 /Users/<YOUR_NAME>/mterm
 ```
 
 for everything else -
+
 ```bash
 /home/<YOUR_NAME>/mterm
 ```
@@ -133,42 +156,44 @@ here is an example `~/mterm/settings.json` -
     - screen: `PRIMARY | number`, use the primary monitor or use the desired screen #
     - x, y, w, h: `SCREEN:ratio | number` use a ratio of the screen size (for centering etc) or use a static number
 
-
 ### System
 
 mterm provided a few system commands to help control the terminal and settings. mterm settings will always start with `:` (a colon) unless the intention is to override a system command. for example, because `clear` needs to be handled in a special way for mterm windows + tabs, it is overriden in mterm.
 
-| Command                      | Alias  | Purpose                                                                                |
-|------------------------------|--------|----------------------------------------------------------------------------------------|
-| `clear`                      | `cls`  | Clear the current terminal output                                                      |
-| `cd`                         |        | Navigate the file tree on the host machine                                             |
-| `:exit`                      | `exit` | Exit the current tab, or mterm if only 1 tab is open                                   |
-| `:edit`                      | `edit` | Open the in-terminal editor with the file provided. Hit `Ctrl+S` to save in the editor |
-| `:history`                   |        | Print out terminal history for debugging in a JSON format                              |
-| `:reload`                    |        | Reload settings, the ui, and commands without restarting                               |
-| `:tab`                       |        | Open a new tab                                                                         |
-| `:test`                      |        | Sample command that executes after 10 seconds. Helpful for debugging                   |
-| `:vault`                     |        | Open the secret management tool, the mterm vault                                       |
-| `:version`                   | `:v`   | Print the current mterm version                                                        |
-| `:workspace`                 |        | Open the mterm workspace folder on disk: `~/mterm`                                     |
-| `:theme`                     | `:css` | Edit the terminal theme real time                                                      |
-| `:settings`                  |        | Open the mterm settings gui to manage `~/mterm/settings.json`                          |
-| `:settings edit`             |        | Open the `~/mterm/settings.json` in the terminal editor with hot reloading             |
-| `:settings reload`           |        | Reload `~/mterm/settings.json` and all ui etc associated with the settings             |
-| `:settings {get\|set} {key}` |        | Set the setting key matching the path in `~/mterm/settings.json` and reload            |
+| Command                      | Alias       | Purpose                                                                                |
+|------------------------------|-------------|----------------------------------------------------------------------------------------|
+| `clear`                      | `cls`       | Clear the current terminal output                                                      |
+| `cd`                         |             | Navigate the file tree on the host machine                                             |
+| `:exit`                      | `exit`      | Exit the current tab, or mterm if only 1 tab is open                                   |
+| `:edit`                      | `edit`      | Open the in-terminal editor with the file provided. Hit `Ctrl+S` to save in the editor |
+| `:history`                   |             | Print out terminal history for debugging in a JSON format                              |
+| `:reload`                    |             | Reload settings, the ui, and commands without restarting                               |
+| `:tab`                       |             | Open a new tab                                                                         |
+| `:test`                      |             | Sample command that executes after 10 seconds. Helpful for debugging                   |
+| `:vault`                     |             | Open the secret management tool, the mterm vault                                       |
+| `:version`                   | `:v`        | Print the current mterm version                                                        |
+| `:workspace`                 |             | Open the mterm workspace folder on disk: `~/mterm`                                     |
+| `:theme`                     | `:css`      | Edit the terminal theme real time                                                      |
+| `:cmd`                       | `:commands` | Edit the command file                                                                  |
+| `:cmd {cmd_name}`            |             | Edit the command file for the cmd_name, creates if this doesn't exist                  |
+| `:settings`                  |             | Open the mterm settings gui to manage `~/mterm/settings.json`                          |
+| `:settings edit`             |             | Open the `~/mterm/settings.json` in the terminal editor with hot reloading             |
+| `:settings reload`           |             | Reload `~/mterm/settings.json` and all ui etc associated with the settings             |
+| `:settings {get\|set} {key}` |             | Set the setting key matching the path in `~/mterm/settings.json` and reload            |
 
 ### Commands
 
 Need your own command? MTERM includes `~/mterm/commands.ts` from your home directory - with any exported functions as available commands.
 
 Here an example -
+
 ```typescript
 import * as os from 'node:os'
 
 export function hello(name: string = os.userInfo().username): string {
   return `Hi, ${name}`
 }
-````
+```
 
 Now run `hello X` from mterm -
 
@@ -176,6 +201,30 @@ Now run `hello X` from mterm -
 
 > In this case, no argument was provided so the `os.userInfo().username` was the fallback. `Hello, DR` is the result!
 
+Note: commands are in snake case always when running. `helloWorld` will be `hello_world` when running in mterm. however, mterm will still resolve `helloWorld` as `hello_world` when running - it's just important to note this when dealing with name collisions. every command is stored in snake case.
+
+#### add a command
+
+add a command to and edit this command -
+
+```bash
+:cmd command_name
+```
+![image](https://github.com/mterm-io/mterm/assets/7341502/619706da-fe9e-4a97-8786-ce294492d8af)
+
+`command_name` is now available to mterm (or `commandName` or `COMMAND_NAME` - note all names are resolved to `snake_case`)
+
+#### editing a command
+
+in the same fasion you add a command, edit a command with the same syntax -
+```bash
+:cmd command_name
+```
+
+this editor will save with `Ctrl+S` and reload the command every time you save.
+
+
+#### other notes on commands
 Try fetching data!
 
 ```typescript
@@ -193,8 +242,20 @@ export async function query(): Promise<{
 
 <img src="https://github.com/mterm-io/mterm/assets/7341502/df8e74d4-896c-4964-861d-bad3ced17c80" alt="drawing" width="500"/>
 
-
 > Note the return type is optional, just added above to highlight the typescript engine provided
+
+### Utilities
+
+Shell (https://www.electronjs.org/docs/latest/api/shell) is provided within the command context, use shell like this:
+
+to open folder or file:
+`await this.shell.openPath(path)`
+
+to open URL:
+`await this.shell.openExternal(path)`
+
+to open editor
+`await shell.openPath(`${editorCommand} ${filePath}`)`
 
 ### Transformers
 Sometimes we need to change variables, execution results or perform an operation on strings.
@@ -372,14 +433,13 @@ The mterm vault is an `AES-256` encrypted store on your local machine. During se
 
 Every time `mterm` is launched, the password is required to use these values provided. You can find vault values by using `this.vault.get` in commands -
 
-````typescript
+```typescript
 export function who() {
   const name = this.vault.get('NAME')
 
   return `name: ${name}`
 }
-
-````
+```
 
 ![image](https://github.com/mterm-io/mterm/assets/7341502/76b26a62-33ea-4883-b07c-677f99ab3355)
 
@@ -390,7 +450,6 @@ mterm provides an editor with `:edit <FILE>` or `edit <FILE>` commands -
 ![image](https://github.com/mterm-io/mterm/assets/7341502/25db8038-7a86-419c-a5d7-777b97025ec7)
 
 hit `control + s` within the file editor to save this
-
 
 ### Other Notes
 
@@ -424,11 +483,13 @@ git clone git@github.com:mterm-io/mterm.git
 ```
 
 install deps -
+
 ```bash
 yarn
 ```
 
 run locally -
+
 ```bash
 $ yarn dev
 ```

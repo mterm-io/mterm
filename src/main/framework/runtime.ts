@@ -49,7 +49,11 @@ export class Prompt {
 
   set value(value: string) {
     this._value = value
-    this.parts = value.split(' ')
+    this.parts = value
+      .split('\n')
+      .map((line) => line.trim())
+      .join(' ')
+      .split(' ')
 
     const [cmd, ...args] = this.parts
 
