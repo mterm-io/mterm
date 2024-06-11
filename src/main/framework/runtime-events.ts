@@ -19,7 +19,8 @@ import {
   DEFAULT_HISTORY_SAVE_RESULT,
   DEFAULT_PROFILE,
   DEFAULT_PROFILES,
-  DEFAULT_SETTING_IS_COMMANDER_MODE
+  DEFAULT_SETTING_IS_COMMANDER_MODE,
+  DEFAULT_SETTING_RESULTCOLWIDTH
 } from '../../constants'
 import { HistoricalExecution } from './history'
 import { writeFile } from 'fs-extra'
@@ -201,6 +202,11 @@ export function attach({ app, workspace }: BootstrapContext): void {
       'runner.commanderMode',
       DEFAULT_SETTING_IS_COMMANDER_MODE
     )
+  })
+
+  // TODO: this doesnt do anything
+  ipcMain.handle('runner.resultColWidth', async (): Promise<string> => {
+    return workspace.settings.get<string>('runner.resultColWidth', DEFAULT_SETTING_RESULTCOLWIDTH)
   })
 
   ipcMain.handle('runner.theme', async (_, profile): Promise<string> => {
