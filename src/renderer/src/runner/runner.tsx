@@ -8,6 +8,7 @@ import { hyperLink } from '@uiw/codemirror-extensions-hyper-link'
 import { javascript } from '@codemirror/lang-javascript'
 import RunnerAC from './runner-ac'
 import { Suggestion } from './autocomplete'
+
 export default function Runner(): ReactElement {
   const [runtimeList, setRuntimes] = useState<Runtime[]>([])
   const [pendingTitles, setPendingTitles] = useState<object>({})
@@ -18,6 +19,7 @@ export default function Runner(): ReactElement {
     list: []
   })
   const [suggestionSelection, setSuggestionSelection] = useState<number>(0)
+  const [resultColWidth, setResultColWidth] = useState<string>('50%')
 
   const inputRef = useRef<HTMLInputElement>(null)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
@@ -28,10 +30,11 @@ export default function Runner(): ReactElement {
 
   const reloadRuntimesFromBackend = async (): Promise<void> => {
     const isCommanderMode = await window.electron.ipcRenderer.invoke('runner.isCommanderMode')
+    const getResultColWidth = await window.electron.ipcRenderer.invoke('runner.resultColWidth')
     const runtimesFetch: Runtime[] = await window.electron.ipcRenderer.invoke('runtimes')
-
     setRuntimes(runtimesFetch)
     setCommanderMode(isCommanderMode)
+    setResultColWidth(getResultColWidth)
   }
 
   window.electron.ipcRenderer.removeAllListeners('runtime.commandEvent')
@@ -366,6 +369,7 @@ export default function Runner(): ReactElement {
   }
   const onEditFileKeyDown = (runtimeId: string, commandId: string, e): void => {
     if (e.code === 'KeyS' && e.ctrlKey) {
+      // this happens when we save settings.json
       window.electron.ipcRenderer.invoke('runtime.save-edit', runtimeId, commandId).then(() => {
         return reloadRuntimesFromBackend()
       })
@@ -582,7 +586,7 @@ export default function Runner(): ReactElement {
             +
           </div>
         </div>
-        <div className="runner-main">
+        <div className="runner-main" style={{ gridTemplateColumns: `1fr ${resultColWidth}` }}>
           <div className="runner-input-container">
             <div className="runner-input">
               <div className={isMultiLine ? 'multiline-input-container' : ''}>
