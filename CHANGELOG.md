@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.34-beta](https://github.com/mterm-io/mterm/compare/v1.0.33-beta...v1.0.34-beta) (2024-07-07)
+
+
+### Bug Fixes
+
+* add realtime editing and theme overrides ([#116](https://github.com/mterm-io/mterm/issues/116)), resolves [#114](https://github.com/mterm-io/mterm/issues/114) ([e968b41](https://github.com/mterm-io/mterm/commit/e968b41b357036559f7e3103ebb05ee5628993a0))
+* add shell commands to utilities ([#121](https://github.com/mterm-io/mterm/issues/121)) ([6b3cb38](https://github.com/mterm-io/mterm/commit/6b3cb3880101c73257b130b4d2aac28a259bac5d)), closes [#107](https://github.com/mterm-io/mterm/issues/107)
+* autocomplete 🐇🐇 ([#120](https://github.com/mterm-io/mterm/issues/120)), resolves [#104](https://github.com/mterm-io/mterm/issues/104) ([27435c4](https://github.com/mterm-io/mterm/commit/27435c4263333888e0f168551a1522edce49ea25))
+* ext patterns improvement ([05057b5](https://github.com/mterm-io/mterm/commit/05057b54c9f4d4d39d3608d81de07485e0c49305))
+* resolves [#118](https://github.com/mterm-io/mterm/issues/118) - add command add, remove and scafolding ([#125](https://github.com/mterm-io/mterm/issues/125)) ([a9cecb0](https://github.com/mterm-io/mterm/commit/a9cecb0d329a19de90cec05b91247ccb53b56a82))
+* resolves [#123](https://github.com/mterm-io/mterm/issues/123), resolves [#119](https://github.com/mterm-io/mterm/issues/119) - extension pattern 🕺 💯  ([#127](https://github.com/mterm-io/mterm/issues/127)) ([22f8591](https://github.com/mterm-io/mterm/commit/22f85915797945159c661723c0935d5090e84073))
+* set results col width in settings, solves [#98](https://github.com/mterm-io/mterm/issues/98) ([#128](https://github.com/mterm-io/mterm/issues/128)) ([f54c0db](https://github.com/mterm-io/mterm/commit/f54c0db1a4e3b19f9980ba73739711349e59b9a1))
+* update default settings: resolves [#108](https://github.com/mterm-io/mterm/issues/108) ([f2a9f76](https://github.com/mterm-io/mterm/commit/f2a9f76c8c0726bf374a2d1960d591623d4c82f5))
+
 ## [1.0.33-beta](https://github.com/mterm-io/mterm/compare/v1.0.32-beta...v1.0.33-beta) (2024-05-10)
 
 
