@@ -12,7 +12,8 @@ import {
   DEFAULT_SETTING_IS_COMMANDER_MODE,
   DEFAULT_SETTING_COMMANDER_MODE_BOUNDS,
   DEFAULT_SETTING_RUNNER_BOUNDS,
-  DEFAULT_SETTINGS
+  DEFAULT_SETTINGS,
+  DEFAULT_SETTING_RESULTCOLWIDTH
 } from './constants'
 
 describe('constants', () => {
@@ -111,7 +112,8 @@ describe('constants', () => {
         bounds: DEFAULT_SETTING_RUNNER_BOUNDS,
         commanderModeShortcut: DEFAULT_SETTING_COMMANDER_MODE_TOGGLE_SHORTCUT,
         commanderMode: DEFAULT_SETTING_IS_COMMANDER_MODE,
-        commanderModeBounds: DEFAULT_SETTING_COMMANDER_MODE_BOUNDS
+        commanderModeBounds: DEFAULT_SETTING_COMMANDER_MODE_BOUNDS,
+        resultColWidth: DEFAULT_SETTING_RESULTCOLWIDTH
       }
     })
   })
