@@ -1,4 +1,5 @@
 import { ExecuteContext } from '../execute-context'
+import { ExtensionHook } from '../extensions'
 
 async function ext(context: ExecuteContext, task?: string): Promise<void> {
   if (!task) {
@@ -10,7 +11,7 @@ ${context.workspace.extensions.extensionList.length > 0 ? '-' : ''}` +
     context.finish(0)
     return
   }
-  if (task === 'load') {
+  if (task === 'load' || task === 'reload') {
     await context.workspace.extensions.load()
     context.out('Extensions loaded\n')
     context.finish(0)
@@ -31,7 +32,9 @@ ${context.workspace.extensions.extensionList.length > 0 ? '-' : ''}` +
 
     await context.workspace.extensions.load()
 
-    context.out('Done\n')
+    await context.workspace.extensions.executeFor(ExtensionHook.EXT_POST_INSTALL, extName, context)
+
+    // context.out('Done\n')
   } else if (task === 'remove' || task === 'rm' || task === 'delete') {
     const extName = (context.prompt.args[1] || '').trim()
     if (!extName) {

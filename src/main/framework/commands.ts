@@ -10,7 +10,9 @@ import { ExecuteContext } from './execute-context'
 import { CommandUtils } from './command-utils'
 import { shell } from 'electron'
 import { snakeCase } from 'lodash'
+
 export class Commands {
+  public libManual: Map<string, boolean> = new Map<string, boolean>()
   public lib: object = {}
   public commandFileLocation: string = ''
   public state: Map<string, object> = new Map<string, object>()
@@ -58,6 +60,7 @@ export class Commands {
           if (!context.workspace.store.unlocked) {
             throw 'Vault is locked, unlock before using secrets. Open with :vault'
           }
+
           return context.workspace.store.get(key, orElse)
         }
       }
@@ -117,7 +120,11 @@ export class Commands {
 
     const jsFile: Buffer = await readFile(join(temp, 'commands.js'))
 
-    this.lib = {}
+    Object.keys(this.lib).forEach((key) => {
+      if (!this.libManual.get(key)) {
+        delete this.lib[key]
+      }
+    })
 
     runInNewContext(`${jsFile}`, this)
 
@@ -174,4 +181,59 @@ export class Commands {
 
     await writeFile(this.commandFileLocation, script)
   }
+
+  add(command: string, exec: () => void): void {
+    const nameNormalized = Commands.toCommandName(command)
+
+    this.lib[nameNormalized] = exec
+
+    this.libManual.set(nameNormalized, true)
+  }
+
+  delete(command: string): void {
+    const nameNormalized = Commands.toCommandName(command)
+
+    delete this.lib[nameNormalized]
+
+    this.libManual.delete(nameNormalized)
+    this.state.delete(nameNormalized)
+  }
+}
+
+/**
+ * Splits a string into an array of substrings based on spaces, preserving spaces within quoted strings.
+ * Supports both single and double quotes, and handles escaped quotes within quoted text.
+ * The outer quotes, single or double, are removed from the returned substrings.
+ *
+ * @param {string} input - The input string to be split into arguments.
+ * @returns {string[]} An array of substrings representing the split arguments.
+ *
+ * @example
+ * const input = 'echo "Hello, world!" | grep "Hello \\"Hello"" \'Single Quoted\' \'Escaped\\\'Single\' "Double \\"Quoted\\""';
+ * const result = splitArgs(input);
+ * console.log(result);
+ * // Output: ["echo", "Hello, world!", "|", "grep", "Hello "Hello"", "Single Quoted", "Escaped'Single", "Double "Quoted""]
+ *
+ * @example
+ * const input = 'google "hello \\" world"';
+ * const result = splitArgs(input);
+ * console.log(result);
+ * // Output: ["google", "hello " world"]
+ */
+export function splitArgs(input: string): string[] {
+  const regex = /[^\s'"]+|'([^'\\]*(?:\\.[^'\\]*)*)'|"([^"\\]*(?:\\.[^"\\]*)*)"/gi
+  const matches: string[] = []
+  let match: RegExpExecArray | null
+
+  while ((match = regex.exec(input)) !== null) {
+    if (match[1] !== undefined) {
+      matches.push(match[1].replace(/\\(.)/g, '$1'))
+    } else if (match[2] !== undefined) {
+      matches.push(match[2].replace(/\\(.)/g, '$1'))
+    } else {
+      matches.push(match[0])
+    }
+  }
+
+  return matches
 }

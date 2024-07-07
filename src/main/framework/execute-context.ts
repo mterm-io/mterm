@@ -133,6 +133,7 @@ export class ExecuteContext {
     const R = this.out(container(html), false)
     const sender = this.sender
     const eventHandlers = this.eventHandlers
+
     return {
       id,
       update(newHTML: string): void {
@@ -195,7 +196,7 @@ export class ExecuteContext {
     this.sender.send('runtime.commandEvent')
   }
 
-  finish(code: number): void {
+  finish(code: number = 0): void {
     if (this.command.aborted || this.command.complete) {
       return
     }
